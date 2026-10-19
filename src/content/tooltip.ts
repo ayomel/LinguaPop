@@ -1,4 +1,10 @@
 import { dictionaryEntries, type DictionaryEntry } from "../data/dictionary.ts";
+import {
+  getLearningStatuses,
+  setLearningStatus,
+  type LearningStatus,
+  type LearningStatusStorage,
+} from "../learning/statuses.ts";
 
 const replacementSelector = '[data-linguapop-replacement="true"]';
 
@@ -9,6 +15,10 @@ export interface TranslationTooltipController {
 export interface TooltipSpeechOptions {
   speechSynthesis?: SpeechSynthesis | null;
   createUtterance?: (text: string) => SpeechSynthesisUtterance;
+}
+
+export interface TooltipLearningOptions {
+  storage?: LearningStatusStorage;
 }
 
 function getReplacement(target: EventTarget | null): HTMLElement | undefined {
@@ -22,6 +32,7 @@ export function initializeTranslationTooltip(
   document: Document = window.document,
   entries: readonly DictionaryEntry[] = dictionaryEntries,
   speechOptions: TooltipSpeechOptions = {},
+  learningOptions: TooltipLearningOptions = {},
 ): TranslationTooltipController {
   const speechSynthesis =
     speechOptions.speechSynthesis === undefined
@@ -31,6 +42,9 @@ export function initializeTranslationTooltip(
     speechOptions.createUtterance ?? ((text: string) => new SpeechSynthesisUtterance(text));
   let host: HTMLDivElement | undefined;
   let currentTrigger: HTMLElement | undefined;
+  const learningStorage =
+    learningOptions.storage ??
+    (typeof chrome === "undefined" ? undefined : chrome.storage.local);
 
   const close = (restoreFocus = false): void => {
     if (host) {
@@ -96,6 +110,9 @@ export function initializeTranslationTooltip(
         cursor: pointer;
       }
       button:focus-visible { outline: 3px solid #7eb69f; outline-offset: 2px; }
+      .learning-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      .learning-actions button { margin-top: 4px; }
+      .learning-actions button[aria-pressed="true"] { background: #176b52; color: #fff; }
     `;
     const card = document.createElement("section");
     card.className = "card";
@@ -158,6 +175,57 @@ export function initializeTranslationTooltip(
     }
     card.append(speechButton, speechStatus);
 
+    const learningHeading = document.createElement("p");
+    learningHeading.className = "label";
+    learningHeading.textContent = "Your learning status";
+    const learningActions = document.createElement("div");
+    learningActions.className = "learning-actions";
+    const statusButtons = new Map<LearningStatus, HTMLButtonElement>();
+    for (const [status, label] of [
+      ["learned", "Learned"],
+      ["practicing", "Practicing"],
+    ] as const) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      button.dataset.learningStatus = status;
+      button.setAttribute("aria-pressed", "false");
+      button.disabled = !learningStorage;
+      statusButtons.set(status, button);
+      learningActions.append(button);
+    }
+    const learningStatusMessage = document.createElement("p");
+    learningStatusMessage.setAttribute("role", "status");
+    learningStatusMessage.setAttribute("aria-live", "polite");
+    learningStatusMessage.dataset.learningStatusMessage = "true";
+    if (!learningStorage) {
+      learningStatusMessage.textContent = "Learning status is not available in this context.";
+    }
+
+    const updateStatusButtons = (status: LearningStatus | undefined): void => {
+      for (const [buttonStatus, button] of statusButtons) {
+        button.setAttribute("aria-pressed", String(buttonStatus === status));
+      }
+    };
+
+    for (const [status, button] of statusButtons) {
+      button.addEventListener("click", async () => {
+        if (!learningStorage) return;
+        for (const candidate of statusButtons.values()) candidate.disabled = true;
+        learningStatusMessage.textContent = "Saving learning status…";
+        try {
+          await setLearningStatus(entry.id, status, learningStorage);
+          updateStatusButtons(status);
+          learningStatusMessage.textContent = `Marked as ${status}.`;
+        } catch {
+          learningStatusMessage.textContent = "Could not save learning status. Try again.";
+        } finally {
+          for (const candidate of statusButtons.values()) candidate.disabled = false;
+        }
+      });
+    }
+    card.append(learningHeading, learningActions, learningStatusMessage);
+
     const closeButton = document.createElement("button");
     closeButton.type = "button";
     closeButton.textContent = "Close translation";
@@ -169,6 +237,21 @@ export function initializeTranslationTooltip(
     host = tooltipHost;
     currentTrigger = trigger;
     closeButton.focus();
+
+    if (learningStorage) {
+      void getLearningStatuses(learningStorage)
+        .then((statuses) => {
+          if (host !== tooltipHost) return;
+          const status = statuses[entry.id];
+          updateStatusButtons(status);
+          learningStatusMessage.textContent = status ? `Currently ${status}.` : "Not marked yet.";
+        })
+        .catch(() => {
+          if (host === tooltipHost) {
+            learningStatusMessage.textContent = "Could not load learning status.";
+          }
+        });
+    }
   };
 
   const onClick = (event: MouseEvent): void => {
