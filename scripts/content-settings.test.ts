@@ -263,3 +263,95 @@ test("a site override for another hostname does not disable the current site", a
   controller.dispose();
   window.close();
 });
+
+test("new eligible subtrees are processed without rescanning the page body", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const scannedRoots: Node[] = [];
+  const createTreeWalker = window.document.createTreeWalker.bind(window.document);
+  Object.defineProperty(window.document, "createTreeWalker", {
+    configurable: true,
+    value(root: Node, ...args: [number?, NodeFilter | NodeFilterInit?]) {
+      scannedRoots.push(root);
+      return createTreeWalker(root, ...args);
+    },
+  });
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+  const bodyScansAfterInitial = scannedRoots.filter((root) => root === window.document.body).length;
+
+  const added = window.document.createElement("section");
+  added.innerHTML = `<p>${Array.from({ length: 20 }, () => "Apple").join(" ")}</p><button>${Array.from({ length: 20 }, () => "Apple").join(" ")}</button><span data-linguapop-ui>Apple</span>`;
+  window.document.body.append(added);
+  await settleStorageChange();
+
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 2);
+  assert.equal(added.querySelectorAll("button [data-linguapop-replacement]").length, 0);
+  assert.equal(added.querySelectorAll('[data-linguapop-ui] [data-linguapop-replacement]').length, 0);
+  assert.equal(scannedRoots.filter((root) => root === window.document.body).length, bodyScansAfterInitial);
+  assert.ok(scannedRoots.includes(added));
+
+  controller.dispose();
+  window.close();
+});
+
+test("directly added text nodes are processed once without observer loops", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const scannedRoots: Node[] = [];
+  const createTreeWalker = window.document.createTreeWalker.bind(window.document);
+  Object.defineProperty(window.document, "createTreeWalker", {
+    configurable: true,
+    value(root: Node, ...args: [number?, NodeFilter | NodeFilterInit?]) {
+      scannedRoots.push(root);
+      return createTreeWalker(root, ...args);
+    },
+  });
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+
+  const paragraph = window.document.querySelector("p")!;
+  const addedText = window.document.createTextNode(` ${Array.from({ length: 20 }, () => "Apple").join(" ")}`);
+  paragraph.append(addedText);
+  await settleStorageChange();
+  await settleStorageChange();
+
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 2);
+  assert.equal(scannedRoots.filter((root) => root === window.document.body).length, 1);
+
+  controller.dispose();
+  window.close();
+});
+
+test("disabled sites do not replace content added after the initial page load", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  storage.values = { enabled: true, replacementPercentage: 5, siteOverrides: { "example.test": false } };
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+
+  const added = window.document.createElement("p");
+  added.textContent = Array.from({ length: 20 }, () => "Apple").join(" ");
+  window.document.body.append(added);
+  await settleStorageChange();
+
+  assert.equal(added.querySelectorAll("[data-linguapop-replacement]").length, 0);
+  assert.equal(added.textContent?.match(/Apple/g)?.length, 20);
+  controller.dispose();
+  window.close();
+});
