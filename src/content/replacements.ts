@@ -10,6 +10,7 @@ export interface ReplacementOptions {
   percentage?: number;
   entries?: readonly DictionaryEntry[];
   difficulty?: Difficulty;
+  onReplacement?: (entry: DictionaryEntry) => void;
 }
 
 interface Candidate {
@@ -217,6 +218,7 @@ export function applyWordReplacements(
 
   for (const [node, matches] of selectedByNode) {
     replaceNodeMatches(node, matches, percentage, difficulty);
+    for (const match of matches) options.onReplacement?.(match.entry);
   }
 
   return selected.length;

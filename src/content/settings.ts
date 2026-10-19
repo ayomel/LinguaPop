@@ -1,5 +1,6 @@
 import { applyWordReplacements, restoreWordReplacements } from "./replacements.ts";
 import { isWithinLinguaPopOwnedElement } from "./dom.ts";
+import { recordWordEncounters } from "../learning/encounters.ts";
 import {
   didSiteOverrideChange,
   isSiteEnabled,
@@ -27,6 +28,10 @@ export function startContentSettings(
   const hostname = ownerDocument?.defaultView?.location.hostname ?? "";
   const MutationObserverConstructor = ownerDocument?.defaultView?.MutationObserver;
   let observer: MutationObserver | undefined;
+
+  const trackReplacements = (entryIds: string[]): void => {
+    if (entryIds.length > 0) void recordWordEncounters(entryIds, storage).catch(() => undefined);
+  };
 
   const observe = (): void => {
     observer?.observe(root, { childList: true, subtree: true });
@@ -60,14 +65,17 @@ export function startContentSettings(
     if (!isSiteEnabled(settings, hostname)) return;
 
     pauseObserver(() => {
+      const encounteredIds: string[] = [];
       for (const node of topLevelNodes) {
         if (node.nodeType !== 1 && node.nodeType !== 3) continue;
         if (!root.contains(node) || isWithinLinguaPopOwnedElement(node)) continue;
         applyWordReplacements(node as Element | Text, {
           percentage: settings.replacementPercentage,
           difficulty: settings.difficulty,
+          onReplacement: (entry) => encounteredIds.push(entry.id),
         });
       }
+      trackReplacements(encounteredIds);
     });
   };
 
@@ -104,10 +112,13 @@ export function startContentSettings(
       pendingNodes.clear();
       pauseObserver(() => {
         if (isSiteEnabled(settings, hostname)) {
+          const encounteredIds: string[] = [];
           applyWordReplacements(root, {
             percentage: settings.replacementPercentage,
             difficulty: settings.difficulty,
+            onReplacement: (entry) => encounteredIds.push(entry.id),
           });
+          trackReplacements(encounteredIds);
         } else {
           restoreWordReplacements(root);
         }
