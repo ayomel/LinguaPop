@@ -1,0 +1,196 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { Window } from "happy-dom";
+import { applyWordReplacements } from "../src/content/replacements.ts";
+import { startContentSettings } from "../src/content/settings.ts";
+import type { SettingsStorage } from "../src/settings.ts";
+
+class FakeStorage {
+  values: Record<string, unknown> = {};
+  reads = 0;
+
+  async get(defaults: Record<string, unknown>) {
+    this.reads += 1;
+    return { ...defaults, ...this.values };
+  }
+}
+
+class FakeStorageChanges {
+  listeners = new Set<(changes: Record<string, chrome.storage.StorageChange>, areaName: string) => void>();
+
+  addListener(listener: (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => void) {
+    this.listeners.add(listener);
+  }
+
+  removeListener(listener: (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => void) {
+    this.listeners.delete(listener);
+  }
+
+  emit(changes: Record<string, chrome.storage.StorageChange>, areaName = "local") {
+    for (const listener of this.listeners) listener(changes, areaName);
+  }
+}
+
+function createPage() {
+  const window = new Window({ url: "https://example.test/article" });
+  window.document.body.innerHTML = `<p>${Array.from({ length: 20 }, () => "Apple").join(" ")}</p>`;
+  return window;
+}
+
+async function settleStorageChange() {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+test("content settings restore prior replacements when the saved state is off", async () => {
+  const window = createPage();
+  const { document } = window;
+  applyWordReplacements(document.body, { percentage: 30 });
+  assert.equal(document.querySelectorAll("[data-linguapop-replacement]").length, 6);
+
+  const storage = new FakeStorage();
+  storage.values = { enabled: false, replacementPercentage: 30 };
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+
+  assert.equal(document.querySelectorAll("[data-linguapop-replacement]").length, 0);
+  assert.equal(document.body.textContent?.match(/Apple/g)?.length, 20);
+  controller.dispose();
+  window.close();
+});
+
+test("content settings use the default on state and update open pages from local changes", async () => {
+  const window = createPage();
+  const { document } = window;
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+
+  assert.equal(document.querySelectorAll("[data-linguapop-replacement]").length, 1);
+
+  storage.values = { enabled: false };
+  changes.emit({ enabled: { oldValue: true, newValue: false } });
+  await settleStorageChange();
+  assert.equal(document.querySelectorAll("[data-linguapop-replacement]").length, 0);
+
+  storage.values = { enabled: true, replacementPercentage: 30 };
+  changes.emit({ enabled: { oldValue: false, newValue: true } });
+  await settleStorageChange();
+  assert.equal(document.querySelectorAll("[data-linguapop-replacement]").length, 6);
+
+  storage.values = { enabled: true, replacementPercentage: 10 };
+  changes.emit({ replacementPercentage: { oldValue: 30, newValue: 10 } });
+  await settleStorageChange();
+  assert.equal(document.querySelectorAll("[data-linguapop-replacement]").length, 2);
+
+  controller.dispose();
+  window.close();
+});
+
+test("content settings ignore unrelated keys and non-local storage changes", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+  const readsAfterInit = storage.reads;
+
+  changes.emit({ learnedWords: { oldValue: 2, newValue: 3 } });
+  changes.emit({ enabled: { oldValue: true, newValue: false } }, "sync");
+  await settleStorageChange();
+
+  assert.equal(storage.reads, readsAfterInit);
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 1);
+  controller.dispose();
+  window.close();
+});
+
+test("a late initial settings read cannot override a newer storage change", async () => {
+  const window = createPage();
+  const changes = new FakeStorageChanges();
+  const reads: Array<{ resolve: (value: Record<string, unknown>) => void }> = [];
+  const storage = {
+    get(defaults: Record<string, unknown>) {
+      assert.equal(changes.listeners.size, 1, "register storage listener before reading settings");
+      return new Promise<Record<string, unknown>>((resolve) => reads.push({ resolve: (value) => resolve({ ...defaults, ...value }) }));
+    },
+  };
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+
+  changes.emit({ enabled: { oldValue: true, newValue: false } });
+  reads[1].resolve({ enabled: false, replacementPercentage: 5 });
+  await settleStorageChange();
+  reads[0].resolve({ enabled: true, replacementPercentage: 5 });
+  await controller.ready;
+
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 0);
+  controller.dispose();
+  window.close();
+});
+
+test("content settings restore replacements if local settings cannot be read", async () => {
+  const window = createPage();
+  applyWordReplacements(window.document.body, { percentage: 30 });
+  const storage = { async get() { throw new Error("Storage is unavailable"); } };
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+
+  await controller.ready;
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 0);
+  assert.equal(window.document.body.textContent?.match(/Apple/g)?.length, 20);
+  controller.dispose();
+  window.close();
+});
+
+test("one global state change updates every open page", async () => {
+  const first = createPage();
+  const second = createPage();
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const controllers = [first, second].map((window) =>
+    startContentSettings(
+      window.document.body,
+      storage as unknown as SettingsStorage,
+      changes as unknown as typeof chrome.storage.onChanged,
+    ),
+  );
+  await Promise.all(controllers.map((controller) => controller.ready));
+
+  assert.deepEqual(
+    [first, second].map((window) => window.document.querySelectorAll("[data-linguapop-replacement]").length),
+    [1, 1],
+  );
+
+  storage.values = { enabled: false };
+  changes.emit({ enabled: { oldValue: true, newValue: false } });
+  await settleStorageChange();
+
+  assert.deepEqual(
+    [first, second].map((window) => window.document.querySelectorAll("[data-linguapop-replacement]").length),
+    [0, 0],
+  );
+  for (const controller of controllers) controller.dispose();
+  first.close();
+  second.close();
+});

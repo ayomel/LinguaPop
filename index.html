@@ -7,9 +7,27 @@
     <link rel="stylesheet" href="/src/popup.css" />
   </head>
   <body>
-    <main>
-      <h1>LinguaPop</h1>
-      <p>Spanish vocabulary for your everyday browsing.</p>
+    <main aria-labelledby="popup-title">
+      <h1 id="popup-title">LinguaPop</h1>
+      <p class="intro">Spanish vocabulary for your everyday browsing.</p>
+
+      <section class="setting" aria-label="Extension settings">
+        <div class="setting-copy">
+          <label for="enabled-toggle">Enable LinguaPop</label>
+          <p id="enabled-description">Replace some English words with Spanish as you browse.</p>
+        </div>
+        <input
+          id="enabled-toggle"
+          type="checkbox"
+          role="switch"
+          aria-describedby="enabled-description enabled-status"
+          disabled
+        />
+      </section>
+
+      <p id="enabled-status" class="status" role="status" aria-live="polite">Loading setting…</p>
+      <p id="settings-error" class="error" role="alert" hidden></p>
     </main>
+    <script type="module" src="/src/popup.ts"></script>
   </body>
 </html>
