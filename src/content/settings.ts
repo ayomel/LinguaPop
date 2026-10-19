@@ -65,6 +65,7 @@ export function startContentSettings(
         if (!root.contains(node) || isWithinLinguaPopOwnedElement(node)) continue;
         applyWordReplacements(node as Element | Text, {
           percentage: settings.replacementPercentage,
+          difficulty: settings.difficulty,
         });
       }
     });
@@ -103,7 +104,10 @@ export function startContentSettings(
       pendingNodes.clear();
       pauseObserver(() => {
         if (isSiteEnabled(settings, hostname)) {
-          applyWordReplacements(root, { percentage: settings.replacementPercentage });
+          applyWordReplacements(root, {
+            percentage: settings.replacementPercentage,
+            difficulty: settings.difficulty,
+          });
         } else {
           restoreWordReplacements(root);
         }
@@ -126,7 +130,10 @@ export function startContentSettings(
       didSiteOverrideChange(changes.siteOverrides.oldValue, changes.siteOverrides.newValue, hostname);
     if (
       areaName !== "local" ||
-      (!changes.enabled && !changes.replacementPercentage && !siteOverrideChanged)
+      (!changes.enabled &&
+        !changes.replacementPercentage &&
+        !changes.difficulty &&
+        !siteOverrideChanged)
     ) return;
     void synchronize();
   };

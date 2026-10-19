@@ -86,6 +86,46 @@ p {
   min-height: 1rem;
 }
 
+.difficulty-setting {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid #d9e5dc;
+}
+
+.difficulty-setting label {
+  color: #17211b;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+#vocabulary-difficulty {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #738078;
+  border-radius: 0.25rem;
+  color: #17211b;
+  background: #fff;
+  font: inherit;
+}
+
+#vocabulary-difficulty:focus-visible {
+  outline: 3px solid #7eb69f;
+  outline-offset: 2px;
+}
+
+#vocabulary-difficulty:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+#difficulty-description {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
 .percentage-setting {
   display: grid;
   gap: 0.5rem;

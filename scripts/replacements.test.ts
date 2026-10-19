@@ -121,3 +121,30 @@ test("replacement and restoration preserve nested markup, punctuation, and prote
   assert.equal(document.body.innerHTML, originalBody);
   window.close();
 });
+
+test("only the selected vocabulary difficulty is eligible and changing levels restores old matches", () => {
+  const entries = [
+    { id: "en-apple", english: "apple", spanish: "manzana", partOfSpeech: "noun" as const, difficulty: "beginner" as const },
+    { id: "en-language", english: "language", spanish: "idioma", partOfSpeech: "noun" as const, difficulty: "intermediate" as const },
+    { id: "en-discover", english: "discover", spanish: "descubrir", partOfSpeech: "verb" as const, difficulty: "advanced" as const },
+  ];
+  const window = createPage(
+    `<p>${Array.from({ length: 20 }, () => "Apple, language, discover.").join(" ")}</p>`,
+  );
+  const { document } = window;
+
+  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "beginner", entries }), 6);
+  assert.equal(document.querySelector("[data-linguapop-entry-id='en-apple']")?.textContent, "Manzana");
+  assert.equal(document.querySelector("[data-linguapop-entry-id='en-language']"), null);
+  assert.equal(document.querySelectorAll("[data-linguapop-entry-id='en-apple']").length, 6);
+
+  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "intermediate", entries }), 6);
+  assert.equal(document.querySelector("[data-linguapop-entry-id='en-apple']"), null);
+  assert.equal(document.querySelector("[data-linguapop-entry-id='en-language']")?.textContent, "idioma");
+  assert.equal(document.querySelectorAll("[data-linguapop-entry-id='en-language']").length, 6);
+
+  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "advanced", entries }), 6);
+  assert.equal(document.querySelector("[data-linguapop-entry-id='en-language']"), null);
+  assert.equal(document.querySelector("[data-linguapop-entry-id='en-discover']")?.textContent, "descubrir");
+  window.close();
+});
