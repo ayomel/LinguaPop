@@ -10,7 +10,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test",
+    "dictionary:check": "node scripts/validate-dictionary.mjs"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^3.0.0",
