@@ -1,0 +1,27 @@
+:root {
+  color: #17211b;
+  background: #f8fbf8;
+  font-family: system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  box-sizing: border-box;
+  margin: 0;
+  min-width: 16rem;
+  padding: 1rem;
+}
+
+h1 {
+  margin: 0;
+  color: #176b52;
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0.5rem 0 0;
+  color: #44534b;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
