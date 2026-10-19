@@ -18,11 +18,30 @@
         </div>
         <input
           id="enabled-toggle"
+          class="switch-control"
           type="checkbox"
           role="switch"
           aria-describedby="enabled-description enabled-status"
           disabled
         />
+      </section>
+
+      <section class="site-setting" aria-labelledby="site-setting-label">
+        <div class="site-setting-copy">
+          <label id="site-setting-label" for="site-enabled-toggle">
+            Enable LinguaPop on <span id="site-hostname">this website</span>
+          </label>
+          <p id="site-enabled-description">Turn replacements off for this website only.</p>
+        </div>
+        <input
+          id="site-enabled-toggle"
+          class="switch-control"
+          type="checkbox"
+          role="switch"
+          aria-describedby="site-enabled-description site-enabled-status"
+          disabled
+        />
+        <p id="site-enabled-status" class="site-status" role="status" aria-live="polite">Loading site setting…</p>
       </section>
 
       <section class="percentage-setting" aria-labelledby="replacement-percentage-label">

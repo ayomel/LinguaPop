@@ -194,3 +194,72 @@ test("one global state change updates every open page", async () => {
   first.close();
   second.close();
 });
+
+test("content settings honor a per-site disable and re-enable without duplicate replacements", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 1);
+
+  storage.values = { enabled: true, replacementPercentage: 5, siteOverrides: { "example.test": false } };
+  changes.emit({ siteOverrides: { oldValue: {}, newValue: { "example.test": false } } });
+  await settleStorageChange();
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 0);
+  assert.equal(window.document.body.textContent?.match(/Apple/g)?.length, 20);
+
+  storage.values.siteOverrides = { "example.test": true };
+  changes.emit({ siteOverrides: { oldValue: { "example.test": false }, newValue: { "example.test": true } } });
+  await settleStorageChange();
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 1);
+  assert.equal(window.document.body.textContent?.match(/Apple|Manzana/g)?.length, 20);
+
+  controller.dispose();
+  window.close();
+});
+
+test("global disable takes precedence over a site being enabled", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  storage.values = { enabled: false, replacementPercentage: 30, siteOverrides: { "example.test": true } };
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 0);
+  assert.equal(window.document.body.textContent?.match(/Apple/g)?.length, 20);
+  controller.dispose();
+  window.close();
+});
+
+test("a site override for another hostname does not disable the current site", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  storage.values = { enabled: true, replacementPercentage: 5, siteOverrides: { "other.test": false } };
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 1);
+  const readsAfterInit = storage.reads;
+  storage.values.siteOverrides = { "other.test": false, "third.test": false };
+  changes.emit({ siteOverrides: { oldValue: { "other.test": false }, newValue: { "other.test": false, "third.test": false } } });
+  await settleStorageChange();
+  assert.equal(storage.reads, readsAfterInit);
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 1);
+  controller.dispose();
+  window.close();
+});

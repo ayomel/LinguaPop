@@ -5,7 +5,7 @@ export default defineManifest({
   name: "LinguaPop",
   version: "0.1.0",
   description: "Learn Spanish while browsing the web.",
-  permissions: ["storage"],
+  permissions: ["storage", "activeTab"],
   action: {
     default_popup: "index.html",
     default_title: "LinguaPop",
