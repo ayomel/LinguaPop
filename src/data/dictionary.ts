@@ -8,6 +8,9 @@ export interface DictionaryEntry {
   english: string;
   spanish: string;
   pronunciation?: string;
+  exampleSpanish?: string;
+  exampleEnglish?: string;
+  grammarNote?: string;
   partOfSpeech: PartOfSpeech;
   difficulty: Difficulty;
 }
