@@ -55,6 +55,37 @@ p {
   font-size: 0.75rem;
 }
 
+.site-setting {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid #d9e5dc;
+}
+
+.site-setting-copy {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.site-setting-copy label {
+  color: #17211b;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.site-setting-copy p,
+.site-status {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.site-status {
+  grid-column: 1 / -1;
+  min-height: 1rem;
+}
+
 .percentage-setting {
   display: grid;
   gap: 0.5rem;
@@ -104,7 +135,7 @@ p {
   font-size: 0.75rem;
 }
 
-#enabled-toggle {
+.switch-control {
   position: relative;
   flex: 0 0 auto;
   width: 2.75rem;
@@ -118,7 +149,7 @@ p {
   transition: background-color 120ms ease;
 }
 
-#enabled-toggle::after {
+.switch-control::after {
   position: absolute;
   top: 0.125rem;
   left: 0.125rem;
@@ -131,21 +162,22 @@ p {
   transition: transform 120ms ease;
 }
 
-#enabled-toggle:checked {
+.switch-control:checked {
   border-color: #176b52;
   background: #176b52;
 }
 
-#enabled-toggle:checked::after {
+.switch-control:checked::after {
   transform: translateX(1.25rem);
 }
 
-#enabled-toggle:focus-visible {
+.switch-control:focus-visible {
   outline: 3px solid #7eb69f;
   outline-offset: 3px;
 }
 
-#enabled-toggle:disabled {
+#enabled-toggle:disabled,
+#site-enabled-toggle:disabled {
   cursor: wait;
   opacity: 0.65;
 }
@@ -163,8 +195,8 @@ p {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #enabled-toggle,
-  #enabled-toggle::after {
+  .switch-control,
+  .switch-control::after {
     transition: none;
   }
 }

@@ -26,6 +26,16 @@ async function createPopup() {
   return window;
 }
 
+const activeSite = {
+  async query() {
+    return [{ url: "https://www.example.test/article" }];
+  },
+};
+
+function initializeTestPopup(window: Window, storage: PopupStorage) {
+  return initializePopup(window.document, storage as unknown as SettingsStorage, activeSite);
+}
+
 async function settlePopupChange() {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
@@ -34,7 +44,7 @@ test("popup loads and persists the global toggle with an accessible status", asy
   const window = await createPopup();
   const storage = new PopupStorage();
   storage.values = { enabled: false, replacementPercentage: 20 };
-  const initialized = initializePopup(window.document, storage as unknown as SettingsStorage);
+  const initialized = initializeTestPopup(window, storage);
   const toggle = window.document.querySelector<HTMLInputElement>("#enabled-toggle")!;
 
   assert.equal(toggle.disabled, true);
@@ -58,7 +68,7 @@ test("popup loads and persists the global toggle with an accessible status", asy
   window.close();
 
   const reopened = await createPopup();
-  await initializePopup(reopened.document, storage as unknown as SettingsStorage);
+  await initializeTestPopup(reopened, storage);
   assert.equal(reopened.document.querySelector<HTMLInputElement>("#enabled-toggle")?.checked, true);
   assert.equal(reopened.document.querySelector("#enabled-status")?.textContent, "LinguaPop is on");
   reopened.close();
@@ -69,7 +79,7 @@ test("popup keeps the saved toggle state and shows an error when saving fails", 
   const storage = new PopupStorage();
   storage.values = { enabled: true };
   storage.failSet = true;
-  await initializePopup(window.document, storage as unknown as SettingsStorage);
+  await initializeTestPopup(window, storage);
   const toggle = window.document.querySelector<HTMLInputElement>("#enabled-toggle")!;
 
   toggle.checked = false;
@@ -92,7 +102,7 @@ test("popup reports a settings read error without enabling an unknown state", as
     async set() {},
   };
 
-  await initializePopup(window.document, storage as unknown as SettingsStorage);
+  await initializeTestPopup(window, storage);
 
   const toggle = window.document.querySelector<HTMLInputElement>("#enabled-toggle")!;
   assert.equal(toggle.disabled, true);
@@ -105,7 +115,7 @@ test("popup starts enabled when no saved setting exists", async () => {
   const window = await createPopup();
   const storage = new PopupStorage();
 
-  await initializePopup(window.document, storage as unknown as SettingsStorage);
+  await initializeTestPopup(window, storage);
 
   assert.equal(window.document.querySelector<HTMLInputElement>("#enabled-toggle")?.checked, true);
   assert.equal(window.document.querySelector("#enabled-status")?.textContent, "LinguaPop is on");
@@ -117,7 +127,7 @@ test("popup starts enabled when no saved setting exists", async () => {
 test("percentage slider uses integer bounds and persists the selected value", async () => {
   const window = await createPopup();
   const storage = new PopupStorage();
-  await initializePopup(window.document, storage as unknown as SettingsStorage);
+  await initializeTestPopup(window, storage);
 
   const slider = window.document.querySelector<HTMLInputElement>("#replacement-percentage")!;
   const value = window.document.querySelector<HTMLOutputElement>("#replacement-percentage-value")!;
@@ -141,7 +151,7 @@ test("percentage slider uses integer bounds and persists the selected value", as
   assert.equal(value.textContent, "30%");
 
   const reopened = await createPopup();
-  await initializePopup(reopened.document, storage as unknown as SettingsStorage);
+  await initializeTestPopup(reopened, storage);
   assert.equal(reopened.document.querySelector<HTMLInputElement>("#replacement-percentage")?.value, "30");
   reopened.close();
   window.close();
@@ -151,7 +161,7 @@ test("percentage slider restores its saved value and reports a storage error", a
   const window = await createPopup();
   const storage = new PopupStorage();
   storage.values = { enabled: true, replacementPercentage: 12 };
-  await initializePopup(window.document, storage as unknown as SettingsStorage);
+  await initializeTestPopup(window, storage);
   storage.failSet = true;
 
   const slider = window.document.querySelector<HTMLInputElement>("#replacement-percentage")!;
@@ -163,5 +173,72 @@ test("percentage slider restores its saved value and reports a storage error", a
   assert.equal(slider.value, "12");
   assert.equal(window.document.querySelector("#replacement-percentage-value")?.textContent, "12%");
   assert.equal(window.document.querySelector("#settings-error")?.hasAttribute("hidden"), false);
+  window.close();
+});
+
+test("popup loads and persists an isolated per-site setting by normalized hostname", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  storage.values = { enabled: true, replacementPercentage: 5, siteOverrides: { "www.example.test.": false } };
+  const tabs = { async query() { return [{ url: "https://WWW.EXAMPLE.TEST./article" }]; } };
+
+  await initializePopup(window.document, storage as unknown as SettingsStorage, tabs);
+
+  const toggle = window.document.querySelector<HTMLInputElement>("#site-enabled-toggle")!;
+  assert.equal(toggle.checked, false);
+  assert.equal(toggle.disabled, false);
+  assert.equal(window.document.querySelector("#site-hostname")?.textContent, "www.example.test");
+  assert.equal(window.document.querySelector("#site-enabled-status")?.textContent, "LinguaPop is off for this site.");
+
+  toggle.checked = true;
+  toggle.dispatchEvent(new window.Event("change"));
+  await settlePopupChange();
+
+  assert.deepEqual(storage.values.siteOverrides, { "www.example.test": true });
+  assert.equal(window.document.querySelector("#site-enabled-status")?.textContent, "LinguaPop is on for this site.");
+  window.close();
+});
+
+test("global off takes precedence while the per-site preference remains editable", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  storage.values = { enabled: false, replacementPercentage: 5, siteOverrides: { "example.test": true } };
+
+  await initializeTestPopup(window, storage);
+
+  const toggle = window.document.querySelector<HTMLInputElement>("#site-enabled-toggle")!;
+  assert.equal(toggle.checked, true);
+  assert.equal(window.document.querySelector("#site-enabled-status")?.textContent, "Saved for this site; global LinguaPop is off.");
+  window.close();
+});
+
+test("popup restores a site's prior setting and reports a save error", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  storage.values = { enabled: true, replacementPercentage: 5, siteOverrides: { "www.example.test": true } };
+  await initializeTestPopup(window, storage);
+  storage.failSet = true;
+
+  const toggle = window.document.querySelector<HTMLInputElement>("#site-enabled-toggle")!;
+  toggle.checked = false;
+  toggle.dispatchEvent(new window.Event("change"));
+  await settlePopupChange();
+
+  assert.equal(toggle.checked, true);
+  assert.equal(toggle.disabled, false);
+  assert.equal(window.document.querySelector("#site-enabled-status")?.textContent, "This site's setting could not be saved.");
+  assert.equal(window.document.querySelector("#settings-error")?.hasAttribute("hidden"), false);
+  window.close();
+});
+
+test("popup disables per-site controls for unsupported active tabs", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  const tabs = { async query() { return [{ url: "chrome://extensions" }]; } };
+
+  await initializePopup(window.document, storage as unknown as SettingsStorage, tabs);
+
+  assert.equal(window.document.querySelector<HTMLInputElement>("#site-enabled-toggle")?.disabled, true);
+  assert.equal(window.document.querySelector("#site-enabled-status")?.textContent, "Per-site settings are unavailable on this page.");
   window.close();
 });

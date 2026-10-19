@@ -1,5 +1,5 @@
 import { applyWordReplacements, restoreWordReplacements } from "./replacements.ts";
-import { readSettings, type SettingsStorage } from "../settings.ts";
+import { didSiteOverrideChange, isSiteEnabled, readSettings, type SettingsStorage } from "../settings.ts";
 
 export interface ContentSettingsController {
   ready: Promise<void>;
@@ -13,6 +13,8 @@ export function startContentSettings(
 ): ContentSettingsController {
   let version = 0;
   let disposed = false;
+  const ownerDocument = root.ownerDocument;
+  const hostname = ownerDocument?.defaultView?.location.hostname ?? "";
 
   const synchronize = async (): Promise<void> => {
     const requestVersion = ++version;
@@ -21,7 +23,7 @@ export function startContentSettings(
       const settings = await readSettings(storage);
       if (disposed || requestVersion !== version) return;
 
-      if (settings.enabled) {
+      if (isSiteEnabled(settings, hostname)) {
         applyWordReplacements(root, { percentage: settings.replacementPercentage });
       } else {
         restoreWordReplacements(root);
@@ -35,7 +37,13 @@ export function startContentSettings(
     changes: { [key: string]: chrome.storage.StorageChange },
     areaName: string,
   ): void => {
-    if (areaName !== "local" || (!changes.enabled && !changes.replacementPercentage)) return;
+    const siteOverrideChanged =
+      Boolean(changes.siteOverrides) &&
+      didSiteOverrideChange(changes.siteOverrides.oldValue, changes.siteOverrides.newValue, hostname);
+    if (
+      areaName !== "local" ||
+      (!changes.enabled && !changes.replacementPercentage && !siteOverrideChanged)
+    ) return;
     void synchronize();
   };
 
