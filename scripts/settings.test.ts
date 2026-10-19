@@ -69,10 +69,15 @@ test("the global toggle takes precedence over a site override", () => {
   assert.equal(isSiteEnabled({ enabled: true, replacementPercentage: 5, siteOverrides: {} }, "example.com"), true);
 });
 
-test("difficulty settings accept supported levels and default invalid values to beginner", async () => {
+test("difficulty settings accept all supported choices and default invalid values to beginner", async () => {
   const supported = await readSettings({
     async get() {
       return { difficulty: "advanced" };
+    },
+  });
+  const all = await readSettings({
+    async get() {
+      return { difficulty: "all" };
     },
   });
   const invalid = await readSettings({
@@ -82,5 +87,6 @@ test("difficulty settings accept supported levels and default invalid values to 
   });
 
   assert.equal(supported.difficulty, "advanced");
+  assert.equal(all.difficulty, "all");
   assert.equal(invalid.difficulty, "beginner");
 });

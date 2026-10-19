@@ -3,7 +3,7 @@ import {
   type LanguagePair,
   type LanguagePairEntry,
 } from "../data/language-pairs.ts";
-import type { Difficulty } from "../data/dictionary.ts";
+import type { VocabularyDifficulty } from "../data/dictionary.ts";
 import { getEligibleTextNodes } from "./dom.ts";
 
 const replacementSelector = '[data-linguapop-replacement="true"]';
@@ -14,7 +14,7 @@ type ReplacementRoot = Document | DocumentFragment | Element | Text;
 export interface ReplacementOptions {
   percentage?: number;
   pair?: LanguagePair;
-  difficulty?: Difficulty;
+  difficulty?: VocabularyDifficulty;
   onReplacement?: (entryId: string) => void;
 }
 
@@ -157,7 +157,7 @@ function replaceNodeMatches(
   matches: Candidate[],
   pair: LanguagePair,
   percentage: number,
-  difficulty: Difficulty | "all",
+  difficulty: VocabularyDifficulty,
 ): void {
   const document = node.ownerDocument;
   const fragment = document.createDocumentFragment();
@@ -220,9 +220,10 @@ export function applyWordReplacements(
   if (percentage === 0) return 0;
 
   const pair = options.pair ?? englishToSpanishPair;
-  const entries = options.difficulty
-    ? pair.entries.filter((entry) => entry.difficulty === options.difficulty)
-    : pair.entries;
+  const entries =
+    options.difficulty && options.difficulty !== "all"
+      ? pair.entries.filter((entry) => entry.difficulty === options.difficulty)
+      : pair.entries;
   const candidates = getCandidates(root, entries, pair.sourceLanguage.locale);
   const targetCount = Math.floor((candidates.length * percentage) / 100);
   const selected = candidates

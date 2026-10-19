@@ -150,3 +150,24 @@ test("only the selected vocabulary difficulty is eligible and changing levels re
   assert.equal(document.querySelector("[data-linguapop-entry-id='en-discover']")?.textContent, "descubrir");
   window.close();
 });
+
+test("all vocabulary difficulty includes words from every level", () => {
+  const entries = [
+    { id: "en-apple", english: "apple", spanish: "manzana", partOfSpeech: "noun" as const, difficulty: "beginner" as const },
+    { id: "en-language", english: "language", spanish: "idioma", partOfSpeech: "noun" as const, difficulty: "intermediate" as const },
+    { id: "en-discover", english: "discover", spanish: "descubrir", partOfSpeech: "verb" as const, difficulty: "advanced" as const },
+  ];
+  const window = createPage(
+    `<p>${Array.from({ length: 20 }, () => "Apple, language, discover.").join(" ")}</p>`,
+  );
+  const { document } = window;
+  const pair = createEnglishToSpanishPair(entries, []);
+
+  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "all", pair }), 18);
+  const replacedEntryCounts = entries.map(
+    (entry) => document.querySelectorAll(`[data-linguapop-entry-id='${entry.id}']`).length,
+  );
+  assert.equal(replacedEntryCounts.reduce((total, count) => total + count, 0), 18);
+  assert.ok(replacedEntryCounts.every((count) => count > 0));
+  window.close();
+});

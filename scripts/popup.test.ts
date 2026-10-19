@@ -250,6 +250,7 @@ test("popup exposes all difficulty levels and persists the selected level", asyn
 
   const select = window.document.querySelector<HTMLSelectElement>("#vocabulary-difficulty")!;
   assert.deepEqual(Array.from(select.options, (option) => option.value), [
+    "all",
     "beginner",
     "intermediate",
     "advanced",
@@ -264,6 +265,12 @@ test("popup exposes all difficulty levels and persists the selected level", asyn
   const reopened = await createPopup();
   await initializeTestPopup(reopened, storage);
   assert.equal(reopened.document.querySelector<HTMLSelectElement>("#vocabulary-difficulty")?.value, "advanced");
+
+  const reopenedSelect = reopened.document.querySelector<HTMLSelectElement>("#vocabulary-difficulty")!;
+  reopenedSelect.value = "all";
+  reopenedSelect.dispatchEvent(new reopened.Event("change"));
+  await settlePopupChange();
+  assert.equal(storage.values.difficulty, "all");
   reopened.close();
   window.close();
 });

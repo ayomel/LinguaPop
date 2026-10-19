@@ -1,16 +1,16 @@
-import type { Difficulty } from "./data/dictionary.ts";
+import type { VocabularyDifficulty } from "./data/dictionary.ts";
 
 export const DEFAULT_SETTINGS = {
   enabled: true,
   replacementPercentage: 5,
-  difficulty: "beginner" as Difficulty,
+  difficulty: "beginner" as VocabularyDifficulty,
   siteOverrides: {},
 } as const;
 
 export interface LinguaPopSettings {
   enabled: boolean;
   replacementPercentage: number;
-  difficulty: Difficulty;
+  difficulty: VocabularyDifficulty;
   siteOverrides: Record<string, boolean>;
 }
 
@@ -23,8 +23,13 @@ interface StoredSettings {
   siteOverrides?: unknown;
 }
 
-export function isDifficulty(value: unknown): value is Difficulty {
-  return value === "beginner" || value === "intermediate" || value === "advanced";
+export function isDifficulty(value: unknown): value is VocabularyDifficulty {
+  return (
+    value === "all" ||
+    value === "beginner" ||
+    value === "intermediate" ||
+    value === "advanced"
+  );
 }
 
 export function normalizeHostname(hostname: string): string {
