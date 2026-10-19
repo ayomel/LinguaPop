@@ -16,6 +16,18 @@ function click(window: Window, target: Element) {
   target.dispatchEvent(new window.MouseEvent("click", { bubbles: true, composed: true }));
 }
 
+class FakeStorage {
+  values: Record<string, unknown> = {};
+
+  async get(defaults: Record<string, unknown>) {
+    return { ...defaults, ...this.values };
+  }
+
+  async set(values: Record<string, unknown>) {
+    Object.assign(this.values, values);
+  }
+}
+
 test("clicking a replacement opens a translation inside an isolated shadow root", () => {
   const window = createPage();
   const entries = dictionaryEntries.map((entry) =>
@@ -61,7 +73,8 @@ test("close button dismisses the tooltip and restores focus", () => {
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
 
   click(window, replacement);
-  const closeButton = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot?.querySelector("button:last-child");
+  const closeButton = [...(window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot?.querySelectorAll("button") ?? [])]
+    .find((button) => button.textContent === "Close translation");
   assert.ok(closeButton);
   closeButton.click();
   assert.equal(window.document.querySelector("[data-linguapop-tooltip]"), null);
@@ -93,6 +106,64 @@ test("replacement words open the tooltip with Enter and Space", () => {
     assert.ok(window.document.querySelector("[data-linguapop-tooltip]"));
     window.document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   }
+
+  controller.dispose();
+  window.close();
+});
+
+test("tooltip loads and persists learned or practicing status by dictionary ID", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  const controller = initializeTranslationTooltip(window.document, dictionaryEntries, {}, {
+    storage: storage as never,
+  });
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
+
+  click(window, replacement);
+  const root = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
+  const learned = root.querySelector<HTMLButtonElement>('[data-learning-status="learned"]')!;
+  const practicing = root.querySelector<HTMLButtonElement>('[data-learning-status="practicing"]')!;
+  assert.equal(learned.getAttribute("aria-pressed"), "false");
+  practicing.click();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(practicing.getAttribute("aria-pressed"), "true");
+  assert.equal((storage.values.learningStatuses as Record<string, string>)["en-apple"], "practicing");
+
+  [...root.querySelectorAll<HTMLButtonElement>("button")]
+    .find((button) => button.textContent === "Close translation")!
+    .click();
+  click(window, replacement);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  const reopened = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
+  assert.equal(reopened.querySelector('[data-learning-status="practicing"]')?.getAttribute("aria-pressed"), "true");
+  const learnedAfterReopen = reopened.querySelector<HTMLButtonElement>('[data-learning-status="learned"]')!;
+  assert.equal(learnedAfterReopen.disabled, false);
+  learnedAfterReopen.click();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.match(reopened.querySelector('[data-learning-status-message="true"]')?.textContent ?? "", /marked as learned/i);
+  assert.equal((storage.values.learningStatuses as Record<string, string>)["en-apple"], "learned");
+
+  controller.dispose();
+  window.close();
+});
+
+test("tooltip reports status storage errors without marking the word", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  storage.set = async () => {
+    throw new Error("storage unavailable");
+  };
+  const controller = initializeTranslationTooltip(window.document, dictionaryEntries, {}, {
+    storage: storage as never,
+  });
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
+
+  click(window, replacement);
+  const root = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
+  root.querySelector<HTMLButtonElement>('[data-learning-status="learned"]')!.click();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(root.querySelector('[data-learning-status="learned"]')?.getAttribute("aria-pressed"), "false");
+  assert.match(root.querySelector('[data-learning-status-message="true"]')?.textContent ?? "", /could not save/i);
 
   controller.dispose();
   window.close();
