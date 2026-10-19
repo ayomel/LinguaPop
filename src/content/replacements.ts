@@ -4,7 +4,7 @@ import { getEligibleTextNodes } from "./dom.ts";
 const replacementSelector = '[data-linguapop-replacement="true"]';
 const maximumPercentage = 30;
 
-type ReplacementRoot = Document | DocumentFragment | Element;
+type ReplacementRoot = Document | DocumentFragment | Element | Text;
 
 export interface ReplacementOptions {
   percentage?: number;
@@ -46,9 +46,14 @@ function getPageKey(root: ReplacementRoot): string {
 }
 
 function getReplacementElements(root: ReplacementRoot): HTMLElement[] {
+  if (root.nodeType === 3) return [];
+
   const rootElement = root.nodeType === 1 ? (root as Element) : undefined;
   const matchesRoot = rootElement?.matches(replacementSelector) ? [rootElement as HTMLElement] : [];
-  return [...matchesRoot, ...root.querySelectorAll<HTMLElement>(replacementSelector)];
+  const descendants = (root as Document | DocumentFragment | Element).querySelectorAll<HTMLElement>(
+    replacementSelector,
+  );
+  return [...matchesRoot, ...descendants];
 }
 
 function createMatcher(entries: readonly DictionaryEntry[]) {

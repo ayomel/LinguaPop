@@ -73,10 +73,29 @@ function isExcludedTextNode(node: Node, root: Node): boolean {
   return false;
 }
 
+export function isWithinLinguaPopOwnedElement(node: Node): boolean {
+  let element = node.nodeType === 1 ? (node as Element) : node.parentElement;
+  while (element) {
+    if (
+      element.hasAttribute("data-linguapop-ui") ||
+      element.hasAttribute("data-linguapop-replacement")
+    ) {
+      return true;
+    }
+    element = element.parentElement;
+  }
+  return false;
+}
+
 /** Finds readable text without changing the page or its attributes. */
 export function getEligibleTextNodes(root: Node = document.body): Text[] {
   const ownerDocument = root.nodeType === 9 ? (root as Document) : root.ownerDocument;
   if (!ownerDocument) return [];
+
+  if (root.nodeType === 3) {
+    const textNode = root as Text;
+    return textNode.data.trim() && !isExcludedTextNode(textNode, ownerDocument) ? [textNode] : [];
+  }
 
   const nodeFilter = ownerDocument.defaultView?.NodeFilter;
   const walker = ownerDocument.createTreeWalker(
