@@ -7,6 +7,7 @@ export interface DictionaryEntry {
   id: string;
   english: string;
   spanish: string;
+  pronunciation?: string;
   partOfSpeech: PartOfSpeech;
   difficulty: Difficulty;
 }

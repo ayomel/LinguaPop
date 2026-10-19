@@ -148,6 +148,12 @@ function replaceNodeMatches(node: Text, matches: Candidate[], percentage: number
     replacement.setAttribute("data-linguapop-entry-id", match.entry.id);
     replacement.setAttribute("data-linguapop-percentage", String(percentage));
     replacement.setAttribute("data-linguapop-key", match.key);
+    replacement.setAttribute("role", "button");
+    replacement.setAttribute("tabindex", "0");
+    replacement.setAttribute(
+      "aria-label",
+      `Spanish word ${match.entry.spanish}. Show English translation for ${match.original}.`,
+    );
     replacement.textContent = preserveWordCase(match.original, match.entry.spanish);
     fragment.append(replacement);
     cursor = match.end;
