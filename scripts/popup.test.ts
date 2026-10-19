@@ -242,3 +242,45 @@ test("popup disables per-site controls for unsupported active tabs", async () =>
   assert.equal(window.document.querySelector("#site-enabled-status")?.textContent, "Per-site settings are unavailable on this page.");
   window.close();
 });
+
+test("popup exposes all difficulty levels and persists the selected level", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  await initializeTestPopup(window, storage);
+
+  const select = window.document.querySelector<HTMLSelectElement>("#vocabulary-difficulty")!;
+  assert.deepEqual(Array.from(select.options, (option) => option.value), [
+    "beginner",
+    "intermediate",
+    "advanced",
+  ]);
+  assert.equal(select.value, "beginner");
+
+  select.value = "advanced";
+  select.dispatchEvent(new window.Event("change"));
+  await settlePopupChange();
+  assert.equal(storage.values.difficulty, "advanced");
+
+  const reopened = await createPopup();
+  await initializeTestPopup(reopened, storage);
+  assert.equal(reopened.document.querySelector<HTMLSelectElement>("#vocabulary-difficulty")?.value, "advanced");
+  reopened.close();
+  window.close();
+});
+
+test("popup restores the saved difficulty when saving fails", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  await initializeTestPopup(window, storage);
+  storage.failSet = true;
+
+  const select = window.document.querySelector<HTMLSelectElement>("#vocabulary-difficulty")!;
+  select.value = "intermediate";
+  select.dispatchEvent(new window.Event("change"));
+  await settlePopupChange();
+
+  assert.equal(select.value, "beginner");
+  assert.equal(select.disabled, false);
+  assert.equal(window.document.querySelector("#settings-error")?.hasAttribute("hidden"), false);
+  window.close();
+});

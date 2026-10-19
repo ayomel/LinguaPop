@@ -1,4 +1,4 @@
-import { normalizeHostname, readSettings, type SettingsStorage } from "./settings.ts";
+import { isDifficulty, normalizeHostname, readSettings, type SettingsStorage } from "./settings.ts";
 
 interface ActiveTabProvider {
   query(queryInfo: { active: true; lastFocusedWindow: true }): Promise<Array<{ url?: string }>>;
@@ -13,6 +13,7 @@ export async function initializePopup(
   const siteToggle = root.querySelector<HTMLInputElement>("#site-enabled-toggle");
   const siteHostnameLabel = root.querySelector<HTMLElement>("#site-hostname");
   const siteStatus = root.querySelector<HTMLElement>("#site-enabled-status");
+  const difficulty = root.querySelector<HTMLSelectElement>("#vocabulary-difficulty");
   const percentage = root.querySelector<HTMLInputElement>("#replacement-percentage");
   const percentageValue = root.querySelector<HTMLOutputElement>("#replacement-percentage-value");
   const status = root.querySelector<HTMLElement>("#enabled-status");
@@ -23,6 +24,7 @@ export async function initializePopup(
     !siteToggle ||
     !siteHostnameLabel ||
     !siteStatus ||
+    !difficulty ||
     !percentage ||
     !percentageValue ||
     !status ||
@@ -33,6 +35,7 @@ export async function initializePopup(
 
   let currentEnabled = true;
   let savedPercentage = 5;
+  let savedDifficulty: "beginner" | "intermediate" | "advanced" = "beginner";
   let currentSiteEnabled = true;
   let hostname: string | undefined;
   let siteAvailable = false;
@@ -53,6 +56,7 @@ export async function initializePopup(
 
   toggle.disabled = true;
   siteToggle.disabled = true;
+  difficulty.disabled = true;
   percentage.disabled = true;
   status.textContent = "Loading setting…";
   siteStatus.textContent = "Loading site setting…";
@@ -62,11 +66,14 @@ export async function initializePopup(
     const settings = await readSettings(storage);
     currentEnabled = settings.enabled;
     savedPercentage = settings.replacementPercentage;
+    savedDifficulty = settings.difficulty;
     toggle.checked = currentEnabled;
     percentage.value = String(savedPercentage);
+    difficulty.value = savedDifficulty;
     renderPercentage();
     toggle.disabled = false;
     percentage.disabled = false;
+    difficulty.disabled = false;
     updateStatus();
 
     try {
@@ -169,6 +176,27 @@ export async function initializePopup(
       })
       .finally(() => {
         percentage.disabled = false;
+      });
+  });
+
+  difficulty.addEventListener("change", () => {
+    const requestedDifficulty = isDifficulty(difficulty.value) ? difficulty.value : savedDifficulty;
+    difficulty.value = requestedDifficulty;
+    difficulty.disabled = true;
+    error.hidden = true;
+
+    void storage
+      .set({ difficulty: requestedDifficulty })
+      .then(() => {
+        savedDifficulty = requestedDifficulty;
+      })
+      .catch(() => {
+        difficulty.value = savedDifficulty;
+        error.textContent = "Could not save the setting. Try again.";
+        error.hidden = false;
+      })
+      .finally(() => {
+        difficulty.disabled = false;
       });
   });
 }

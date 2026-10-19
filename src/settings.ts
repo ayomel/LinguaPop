@@ -1,12 +1,16 @@
+import type { Difficulty } from "./data/dictionary.ts";
+
 export const DEFAULT_SETTINGS = {
   enabled: true,
   replacementPercentage: 5,
+  difficulty: "beginner" as Difficulty,
   siteOverrides: {},
 } as const;
 
 export interface LinguaPopSettings {
   enabled: boolean;
   replacementPercentage: number;
+  difficulty: Difficulty;
   siteOverrides: Record<string, boolean>;
 }
 
@@ -15,7 +19,12 @@ export type SettingsStorage = Pick<chrome.storage.StorageArea, "get" | "set">;
 interface StoredSettings {
   enabled?: unknown;
   replacementPercentage?: unknown;
+  difficulty?: unknown;
   siteOverrides?: unknown;
+}
+
+export function isDifficulty(value: unknown): value is Difficulty {
+  return value === "beginner" || value === "intermediate" || value === "advanced";
 }
 
 export function normalizeHostname(hostname: string): string {
@@ -64,6 +73,7 @@ export async function readSettings(
       typeof percentage === "number" && Number.isFinite(percentage)
         ? Math.min(30, Math.max(0, percentage))
         : DEFAULT_SETTINGS.replacementPercentage,
+    difficulty: isDifficulty(stored.difficulty) ? stored.difficulty : DEFAULT_SETTINGS.difficulty,
     siteOverrides: readSiteOverrides(stored.siteOverrides),
   };
 }

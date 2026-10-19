@@ -355,3 +355,26 @@ test("disabled sites do not replace content added after the initial page load", 
   controller.dispose();
   window.close();
 });
+
+test("content settings update replacements when the selected difficulty changes", async () => {
+  const window = new Window({ url: "https://example.test/article" });
+  window.document.body.innerHTML = `<p>${Array.from({ length: 20 }, () => "language").join(" ")}</p>`;
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 0);
+
+  storage.values = { enabled: true, replacementPercentage: 5, difficulty: "intermediate" };
+  changes.emit({ difficulty: { oldValue: "beginner", newValue: "intermediate" } });
+  await settleStorageChange();
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 1);
+  assert.equal(window.document.querySelector("[data-linguapop-entry-id='en-language']")?.textContent, "idioma");
+
+  controller.dispose();
+  window.close();
+});

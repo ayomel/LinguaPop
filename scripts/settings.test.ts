@@ -14,11 +14,13 @@ test("a fresh install defaults to enabled with a five percent replacement rate",
   assert.deepEqual(await readSettings(storage), {
     enabled: true,
     replacementPercentage: 5,
+    difficulty: "beginner",
     siteOverrides: {},
   });
   assert.deepEqual(requestedDefaults, {
     enabled: true,
     replacementPercentage: 5,
+    difficulty: "beginner",
     siteOverrides: {},
   });
 });
@@ -33,6 +35,7 @@ test("settings use safe defaults when stored values have invalid types", async (
   assert.deepEqual(await readSettings(storage), {
     enabled: true,
     replacementPercentage: 5,
+    difficulty: "beginner",
     siteOverrides: {},
   });
 });
@@ -64,4 +67,20 @@ test("the global toggle takes precedence over a site override", () => {
   assert.equal(isSiteEnabled({ enabled: false, replacementPercentage: 5, siteOverrides: { "example.com": true } }, "example.com"), false);
   assert.equal(isSiteEnabled({ enabled: true, replacementPercentage: 5, siteOverrides: { "example.com": false } }, "example.com"), false);
   assert.equal(isSiteEnabled({ enabled: true, replacementPercentage: 5, siteOverrides: {} }, "example.com"), true);
+});
+
+test("difficulty settings accept supported levels and default invalid values to beginner", async () => {
+  const supported = await readSettings({
+    async get() {
+      return { difficulty: "advanced" };
+    },
+  });
+  const invalid = await readSettings({
+    async get() {
+      return { difficulty: "expert" };
+    },
+  });
+
+  assert.equal(supported.difficulty, "advanced");
+  assert.equal(invalid.difficulty, "beginner");
 });

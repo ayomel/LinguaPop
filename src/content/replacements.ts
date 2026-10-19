@@ -1,4 +1,4 @@
-import { dictionaryEntries, type DictionaryEntry } from "../data/dictionary.ts";
+import { dictionaryEntries, type DictionaryEntry, type Difficulty } from "../data/dictionary.ts";
 import { getEligibleTextNodes } from "./dom.ts";
 
 const replacementSelector = '[data-linguapop-replacement="true"]';
@@ -9,6 +9,7 @@ type ReplacementRoot = Document | DocumentFragment | Element | Text;
 export interface ReplacementOptions {
   percentage?: number;
   entries?: readonly DictionaryEntry[];
+  difficulty?: Difficulty;
 }
 
 interface Candidate {
@@ -139,7 +140,12 @@ function appendText(document: Document, fragment: DocumentFragment, value: strin
   if (value) fragment.append(document.createTextNode(value));
 }
 
-function replaceNodeMatches(node: Text, matches: Candidate[], percentage: number): void {
+function replaceNodeMatches(
+  node: Text,
+  matches: Candidate[],
+  percentage: number,
+  difficulty: Difficulty | "all",
+): void {
   const document = node.ownerDocument;
   const fragment = document.createDocumentFragment();
   let cursor = 0;
@@ -152,6 +158,7 @@ function replaceNodeMatches(node: Text, matches: Candidate[], percentage: number
     replacement.setAttribute("data-linguapop-original", match.original);
     replacement.setAttribute("data-linguapop-entry-id", match.entry.id);
     replacement.setAttribute("data-linguapop-percentage", String(percentage));
+    replacement.setAttribute("data-linguapop-difficulty", difficulty);
     replacement.setAttribute("data-linguapop-key", match.key);
     replacement.setAttribute("role", "button");
     replacement.setAttribute("tabindex", "0");
@@ -174,11 +181,16 @@ export function applyWordReplacements(
   options: ReplacementOptions = {},
 ): number {
   const percentage = clampPercentage(options.percentage);
+  const difficulty = options.difficulty ?? "all";
   const existing = getReplacementElements(root);
 
   if (
     existing.length > 0 &&
-    existing.every((element) => element.getAttribute("data-linguapop-percentage") === String(percentage))
+    existing.every(
+      (element) =>
+        element.getAttribute("data-linguapop-percentage") === String(percentage) &&
+        element.getAttribute("data-linguapop-difficulty") === difficulty,
+    )
   ) {
     return 0;
   }
@@ -186,7 +198,11 @@ export function applyWordReplacements(
   if (existing.length > 0) restoreWordReplacements(root);
   if (percentage === 0) return 0;
 
-  const candidates = getCandidates(root, options.entries ?? dictionaryEntries);
+  const entries = options.entries ?? dictionaryEntries;
+  const eligibleEntries = options.difficulty
+    ? entries.filter((entry) => entry.difficulty === options.difficulty)
+    : entries;
+  const candidates = getCandidates(root, eligibleEntries);
   const targetCount = Math.floor((candidates.length * percentage) / 100);
   const selected = candidates
     .sort((left, right) => left.rank - right.rank || (left.key < right.key ? -1 : left.key > right.key ? 1 : 0))
@@ -200,7 +216,7 @@ export function applyWordReplacements(
   }
 
   for (const [node, matches] of selectedByNode) {
-    replaceNodeMatches(node, matches, percentage);
+    replaceNodeMatches(node, matches, percentage, difficulty);
   }
 
   return selected.length;
