@@ -55,6 +55,55 @@ p {
   font-size: 0.75rem;
 }
 
+.percentage-setting {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid #d9e5dc;
+}
+
+.percentage-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.percentage-heading label {
+  color: #17211b;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+#replacement-percentage-value {
+  color: #176b52;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+#replacement-percentage {
+  width: 100%;
+  margin: 0.25rem 0;
+  accent-color: #176b52;
+  cursor: pointer;
+}
+
+#replacement-percentage:focus-visible {
+  outline: 3px solid #7eb69f;
+  outline-offset: 3px;
+}
+
+#replacement-percentage:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+#percentage-description {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
 #enabled-toggle {
   position: relative;
   flex: 0 0 auto;

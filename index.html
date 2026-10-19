@@ -25,6 +25,24 @@
         />
       </section>
 
+      <section class="percentage-setting" aria-labelledby="replacement-percentage-label">
+        <div class="percentage-heading">
+          <label id="replacement-percentage-label" for="replacement-percentage">Replacement percentage</label>
+          <output id="replacement-percentage-value" for="replacement-percentage">5%</output>
+        </div>
+        <input
+          id="replacement-percentage"
+          type="range"
+          min="0"
+          max="30"
+          step="1"
+          value="5"
+          aria-describedby="percentage-description"
+          disabled
+        />
+        <p id="percentage-description">Choose how many eligible English words to replace.</p>
+      </section>
+
       <p id="enabled-status" class="status" role="status" aria-live="polite">Loading setting…</p>
       <p id="settings-error" class="error" role="alert" hidden></p>
     </main>
