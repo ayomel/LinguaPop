@@ -5,7 +5,7 @@ LinguaPop is a Chrome extension for learning Spanish while browsing the web.
 ## Requirements
 
 - Node.js 20.19 or newer in the 20.x line, or 22.12 or newer
-- npm
+- pnpm
 - Google Chrome
 
 Vite's current release supports Node.js 20.19+ in the 20.x line and 22.12+.
@@ -13,14 +13,14 @@ Vite's current release supports Node.js 20.19+ in the 20.x line and 22.12+.
 ## Set up
 
 ```sh
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ## Build and load in Chrome
 
 ```sh
-npm run build
+pnpm build
 ```
 
 Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and select the `dist` directory.
