@@ -54,6 +54,7 @@ test("popup loads and persists the global toggle with an accessible status", asy
   assert.equal(storage.values.replacementPercentage, 20);
   assert.equal(window.document.querySelector("#enabled-status")?.textContent, "LinguaPop is on");
   assert.equal(window.document.querySelector("#settings-error")?.hasAttribute("hidden"), true);
+  assert.equal(window.document.querySelector<HTMLInputElement>("#replacement-percentage")?.value, "20");
   window.close();
 
   const reopened = await createPopup();
@@ -108,5 +109,59 @@ test("popup starts enabled when no saved setting exists", async () => {
 
   assert.equal(window.document.querySelector<HTMLInputElement>("#enabled-toggle")?.checked, true);
   assert.equal(window.document.querySelector("#enabled-status")?.textContent, "LinguaPop is on");
+  assert.equal(window.document.querySelector<HTMLInputElement>("#replacement-percentage")?.value, "5");
+  assert.equal(window.document.querySelector("#replacement-percentage-value")?.textContent, "5%");
+  window.close();
+});
+
+test("percentage slider uses integer bounds and persists the selected value", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  await initializePopup(window.document, storage as unknown as SettingsStorage);
+
+  const slider = window.document.querySelector<HTMLInputElement>("#replacement-percentage")!;
+  const value = window.document.querySelector<HTMLOutputElement>("#replacement-percentage-value")!;
+  assert.equal(slider.min, "0");
+  assert.equal(slider.max, "30");
+  assert.equal(slider.step, "1");
+  assert.equal(window.document.querySelector('label[for="replacement-percentage"]')?.textContent, "Replacement percentage");
+
+  slider.value = "0";
+  slider.dispatchEvent(new window.Event("input"));
+  assert.equal(value.textContent, "0%");
+  slider.dispatchEvent(new window.Event("change"));
+  await settlePopupChange();
+  assert.equal(storage.values.replacementPercentage, 0);
+
+  slider.value = "30";
+  slider.dispatchEvent(new window.Event("input"));
+  slider.dispatchEvent(new window.Event("change"));
+  await settlePopupChange();
+  assert.equal(storage.values.replacementPercentage, 30);
+  assert.equal(value.textContent, "30%");
+
+  const reopened = await createPopup();
+  await initializePopup(reopened.document, storage as unknown as SettingsStorage);
+  assert.equal(reopened.document.querySelector<HTMLInputElement>("#replacement-percentage")?.value, "30");
+  reopened.close();
+  window.close();
+});
+
+test("percentage slider restores its saved value and reports a storage error", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  storage.values = { enabled: true, replacementPercentage: 12 };
+  await initializePopup(window.document, storage as unknown as SettingsStorage);
+  storage.failSet = true;
+
+  const slider = window.document.querySelector<HTMLInputElement>("#replacement-percentage")!;
+  slider.value = "18";
+  slider.dispatchEvent(new window.Event("input"));
+  slider.dispatchEvent(new window.Event("change"));
+  await settlePopupChange();
+
+  assert.equal(slider.value, "12");
+  assert.equal(window.document.querySelector("#replacement-percentage-value")?.textContent, "12%");
+  assert.equal(window.document.querySelector("#settings-error")?.hasAttribute("hidden"), false);
   window.close();
 });
