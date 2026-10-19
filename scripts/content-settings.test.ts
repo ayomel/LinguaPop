@@ -3,15 +3,24 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import { applyWordReplacements } from "../src/content/replacements.ts";
 import { startContentSettings } from "../src/content/settings.ts";
+import type { WordEncounter } from "../src/learning/encounters.ts";
 import type { SettingsStorage } from "../src/settings.ts";
 
 class FakeStorage {
   values: Record<string, unknown> = {};
   reads = 0;
+  failEncounterWrites = false;
 
   async get(defaults: Record<string, unknown>) {
     this.reads += 1;
     return { ...defaults, ...this.values };
+  }
+
+  async set(values: Record<string, unknown>) {
+    if (this.failEncounterWrites && Object.hasOwn(values, "encounteredWords")) {
+      throw new Error("Progress storage is unavailable");
+    }
+    Object.assign(this.values, values);
   }
 }
 
@@ -109,6 +118,7 @@ test("content settings ignore unrelated keys and non-local storage changes", asy
   const readsAfterInit = storage.reads;
 
   changes.emit({ learnedWords: { oldValue: 2, newValue: 3 } });
+  changes.emit({ encounteredWords: { oldValue: {}, newValue: { "en-apple": {} } } });
   changes.emit({ enabled: { oldValue: true, newValue: false } }, "sync");
   await settleStorageChange();
 
@@ -375,6 +385,57 @@ test("content settings update replacements when the selected difficulty changes"
   assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 1);
   assert.equal(window.document.querySelector("[data-linguapop-entry-id='en-language']")?.textContent, "idioma");
 
+  controller.dispose();
+  window.close();
+});
+
+test("content settings track only words actually replaced and update local encounter records", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+  await settleStorageChange();
+
+  const encounteredWords = storage.values.encounteredWords as Record<string, WordEncounter>;
+  const firstEncounter = encounteredWords["en-apple"];
+  assert.ok(firstEncounter);
+  assert.equal(firstEncounter.encounterCount, 1);
+  assert.ok(firstEncounter.firstSeenAt <= firstEncounter.lastSeenAt);
+
+  const added = window.document.createElement("p");
+  added.textContent = Array.from({ length: 20 }, () => "Apple").join(" ");
+  window.document.body.append(added);
+  await settleStorageChange();
+
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 2);
+  const updatedEncounter = (storage.values.encounteredWords as Record<string, WordEncounter>)["en-apple"];
+  assert.equal(updatedEncounter.firstSeenAt, firstEncounter.firstSeenAt);
+  assert.equal(updatedEncounter.encounterCount, 2);
+
+  controller.dispose();
+  window.close();
+});
+
+test("progress storage errors do not prevent page replacements", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  storage.failEncounterWrites = true;
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+
+  await controller.ready;
+  await settleStorageChange();
+
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement]").length, 1);
   controller.dispose();
   window.close();
 });
