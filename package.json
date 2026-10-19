@@ -12,6 +12,7 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test",
+    "benchmark:replacements": "tsx scripts/benchmark-replacements.ts",
     "dictionary:check": "node scripts/validate-dictionary.mjs"
   },
   "devDependencies": {

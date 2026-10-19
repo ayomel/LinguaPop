@@ -85,3 +85,39 @@ test("zero percent makes no replacements and an explicit restore returns exact t
   assert.equal(document.body.innerHTML, markup);
   window.close();
 });
+
+test("replacement and restoration preserve nested markup, punctuation, and protected controls", () => {
+  const originalMarkup = `
+    <p>Read <em>${Array.from({ length: 20 }, () => "apple").join(", ")}</em>, then open a book.</p>
+    <button>water</button>
+    <div role="switch"><span>water</span></div>
+    <div tabindex="0"><span>apple</span></div>
+    <div contenteditable="plaintext-only"><span>apple</span></div>
+    <pre><code>book</code></pre>
+  `;
+  const window = createPage(originalMarkup);
+  const { document } = window;
+  const originalBody = document.body.innerHTML;
+
+  applyWordReplacements(document.body, { percentage: 30 });
+  const wrappers = document.querySelectorAll<HTMLElement>("[data-linguapop-replacement='true']");
+  assert.ok(wrappers.length > 0);
+  assert.ok(
+    Array.from(wrappers).every(
+      (wrapper) =>
+        wrapper.parentElement?.closest("button, [role='switch'], [tabindex], [contenteditable], pre") === null,
+    ),
+  );
+  assert.equal(document.querySelector("button")?.textContent, "water");
+  assert.equal(document.querySelector("[role='switch']")?.textContent, "water");
+  assert.equal(document.querySelector("[contenteditable]")?.textContent, "apple");
+  assert.equal(document.querySelector("pre")?.textContent, "book");
+  assert.ok(document.querySelector("p em"));
+
+  const firstPass = document.body.innerHTML;
+  assert.equal(applyWordReplacements(document.body, { percentage: 30 }), 0);
+  assert.equal(document.body.innerHTML, firstPass);
+  assert.equal(restoreWordReplacements(document.body), wrappers.length);
+  assert.equal(document.body.innerHTML, originalBody);
+  window.close();
+});
