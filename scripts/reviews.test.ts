@@ -1,0 +1,125 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  getNextDueReview,
+  getReviewSchedules,
+  recordRecall,
+  type ReviewStorage,
+} from "../src/learning/reviews.ts";
+
+class FakeStorage {
+  values: Record<string, unknown> = {};
+  writes: Array<Record<string, unknown>> = [];
+
+  async get(defaults: Record<string, unknown>) {
+    return { ...defaults, ...this.values };
+  }
+
+  async set(values: Record<string, unknown>) {
+    this.writes.push(values);
+    Object.assign(this.values, values);
+  }
+}
+
+const storageFor = (storage: FakeStorage) => storage as unknown as ReviewStorage;
+
+test("encountered words without a review schedule are due for their first recall", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-book": { firstSeenAt: 200, lastSeenAt: 200, encounterCount: 1 },
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+
+  const due = await getNextDueReview(storageFor(storage), 1_000);
+
+  assert.equal(due?.entry.id, "en-apple");
+  assert.equal(storage.writes.length, 0, "viewing due words must not create a recall result");
+});
+
+test("remembered answers lengthen the interval and a miss schedules sooner", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  const reviewStorage = storageFor(storage);
+  const first = await recordRecall("en-apple", "remembered", reviewStorage, 1_000);
+  assert.deepEqual(first, {
+    lastReviewedAt: 1_000,
+    lastOutcome: "remembered",
+    intervalDays: 1,
+    nextDueAt: 86_401_000,
+  });
+
+  const second = await recordRecall("en-apple", "remembered", reviewStorage, first.nextDueAt);
+  assert.equal(second.intervalDays, 2);
+  assert.equal(second.nextDueAt, first.nextDueAt + 2 * 86_400_000);
+
+  const missed = await recordRecall("en-apple", "need-practice", reviewStorage, second.nextDueAt);
+  assert.equal(missed.intervalDays, 1);
+  assert.equal(missed.nextDueAt, second.nextDueAt + 60 * 60 * 1_000);
+  assert.equal(missed.lastOutcome, "need-practice");
+  const recovered = await recordRecall("en-apple", "remembered", reviewStorage, missed.nextDueAt);
+  assert.equal(recovered.intervalDays, 1, "a miss resets the next success interval");
+  assert.deepEqual(Object.keys(storage.values).sort(), ["encounteredWords", "reviewSchedules"]);
+});
+
+test("success intervals stop growing at 30 days", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  const reviewStorage = storageFor(storage);
+  let currentTime = 1_000;
+  let schedule = await recordRecall("en-apple", "remembered", reviewStorage, currentTime);
+
+  for (let review = 0; review < 7; review += 1) {
+    currentTime = schedule.nextDueAt;
+    schedule = await recordRecall("en-apple", "remembered", reviewStorage, currentTime);
+  }
+
+  assert.equal(schedule.intervalDays, 30);
+});
+
+test("only due or unscheduled encountered entries appear in the review queue", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+    "en-book": { firstSeenAt: 200, lastSeenAt: 200, encounterCount: 1 },
+  };
+  storage.values.reviewSchedules = {
+    "en-apple": {
+      lastReviewedAt: 300,
+      lastOutcome: "remembered",
+      intervalDays: 1,
+      nextDueAt: 5_000,
+    },
+  };
+
+  const due = await getNextDueReview(storageFor(storage), 1_000);
+  assert.equal(due?.entry.id, "en-book");
+
+  await recordRecall("en-book", "remembered", storageFor(storage), 1_000);
+  assert.equal(await getNextDueReview(storageFor(storage), 1_000), undefined);
+  assert.equal((await getNextDueReview(storageFor(storage), 5_000))?.entry.id, "en-apple");
+});
+
+test("invalid schedule records and entry IDs are ignored", async () => {
+  const storage = new FakeStorage();
+  storage.values.reviewSchedules = {
+    "en-apple": {
+      lastReviewedAt: 300,
+      lastOutcome: "unknown",
+      intervalDays: 1,
+      nextDueAt: 500,
+    },
+    "bad id": {
+      lastReviewedAt: 300,
+      lastOutcome: "remembered",
+      intervalDays: 1,
+      nextDueAt: 500,
+    },
+  };
+
+  assert.deepEqual(await getReviewSchedules(storageFor(storage)), {});
+  await assert.rejects(recordRecall("__proto__", "remembered", storageFor(storage), 1_000), /Invalid/);
+});
