@@ -31,6 +31,30 @@
         </article>
       </section>
 
+      <section class="flashcard-section" aria-labelledby="flashcards-title">
+        <div class="flashcard-heading">
+          <div>
+            <h2 id="flashcards-title">Flashcards</h2>
+            <p id="daily-goal-progress" class="goal-progress" role="status" aria-live="polite">Loading today's goal…</p>
+          </div>
+          <label class="goal-control" for="daily-goal">
+            Daily goal
+            <input id="daily-goal" type="number" min="1" max="50" step="1" value="10" inputmode="numeric" />
+          </label>
+        </div>
+        <p id="daily-goal-status" class="goal-status" role="status" aria-live="polite"></p>
+        <article class="flashcard" aria-label="Vocabulary flashcard">
+          <p id="flashcard-prompt"></p>
+          <button id="flashcard-reveal" type="button" hidden>Reveal Spanish</button>
+          <p id="flashcard-answer" class="flashcard-answer" lang="es" hidden></p>
+          <div id="flashcard-actions" class="flashcard-actions" hidden>
+            <button id="flashcard-remembered" type="button">Remembered</button>
+            <button id="flashcard-practice" type="button">Need practice</button>
+          </div>
+          <p id="flashcard-status" class="flashcard-status" role="status" aria-live="polite"></p>
+        </article>
+      </section>
+
       <section class="word-section" aria-labelledby="words-title">
         <h2 id="words-title">Encountered words</h2>
         <p id="dashboard-status" class="dashboard-status" role="status" aria-live="polite">Loading vocabulary progress…</p>

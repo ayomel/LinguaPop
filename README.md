@@ -27,6 +27,8 @@ Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, an
 
 The extension popup controls replacement settings and offers a quick review for encountered vocabulary. Open the vocabulary dashboard from the popup to see learning counts and review your encountered word list. The content script safely processes eligible webpage text and leaves form fields, editable content, code, and interactive controls unchanged.
 
+The dashboard also has a flashcard review flow and a configurable daily goal. The goal defaults to 10 reviews and accepts 1 to 50. Progress counts explicit review answers and resets on the next local calendar day.
+
 ## Review schedule
 
 Only choosing **Remembered** or **Need practice** records a review. Seeing a word in a webpage or opening the review card does not change its schedule.
