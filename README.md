@@ -25,4 +25,12 @@ pnpm build
 
 Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and select the `dist` directory.
 
-The popup is wired into the Manifest V3 build. The content-script source file is in place, but the manifest does not inject it into websites yet. Page processing and its site access will be added in later issues.
+The extension popup controls replacement settings and offers a quick review for encountered vocabulary. The content script safely processes eligible webpage text and leaves form fields, editable content, code, and interactive controls unchanged.
+
+## Review schedule
+
+Only choosing **Remembered** or **Need practice** records a review. Seeing a word in a webpage or opening the review card does not change its schedule.
+
+- A first remembered answer is due again in 1 day. Consecutive remembered answers double the interval, up to 30 days.
+- A **Need practice** answer is due again in 1 hour and resets the success interval to 1 day.
+- Encountered words without a review record are available for their first explicit recall. Review outcomes and due dates are saved locally, separately from dictionary data.

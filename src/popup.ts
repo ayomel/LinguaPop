@@ -1,4 +1,5 @@
 import { isDifficulty, normalizeHostname, readSettings, type SettingsStorage } from "./settings.ts";
+import { initializeReviewCard } from "./learning/review-card.ts";
 
 interface ActiveTabProvider {
   query(queryInfo: { active: true; lastFocusedWindow: true }): Promise<Array<{ url?: string }>>;
@@ -203,4 +204,5 @@ export async function initializePopup(
 
 if (typeof chrome !== "undefined" && chrome.storage && chrome.tabs) {
   void initializePopup(document, chrome.storage.local, chrome.tabs);
+  void initializeReviewCard(document, chrome.storage.local);
 }
