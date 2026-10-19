@@ -60,7 +60,25 @@ test("remembered answers lengthen the interval and a miss schedules sooner", asy
   assert.equal(missed.lastOutcome, "need-practice");
   const recovered = await recordRecall("en-apple", "remembered", reviewStorage, missed.nextDueAt);
   assert.equal(recovered.intervalDays, 1, "a miss resets the next success interval");
-  assert.deepEqual(Object.keys(storage.values).sort(), ["encounteredWords", "reviewSchedules"]);
+  assert.deepEqual(Object.keys(storage.values).sort(), [
+    "dailyGoalProgress",
+    "encounteredWords",
+    "reviewSchedules",
+  ]);
+  assert.equal((storage.values.dailyGoalProgress as { completed: number }).completed, 2);
+});
+
+test("recall responses reset the daily count at the next local calendar day", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  storage.values.dailyGoalProgress = { date: "2026-10-18", completed: 5 };
+  const now = new Date(2026, 9, 19, 0, 5).getTime();
+
+  await recordRecall("en-apple", "need-practice", storageFor(storage), now);
+
+  assert.deepEqual(storage.values.dailyGoalProgress, { date: "2026-10-19", completed: 1 });
 });
 
 test("success intervals stop growing at 30 days", async () => {

@@ -1,6 +1,7 @@
 import { dictionaryEntries } from "../data/dictionary.ts";
 import { initializeTranslationTooltip } from "../content/tooltip.ts";
 import { getVocabularyDashboardSnapshot } from "./dashboard.ts";
+import { initializeFlashcards } from "./flashcards.ts";
 import type { ReviewStorage } from "./reviews.ts";
 
 export interface VocabularyDashboardController {
@@ -116,4 +117,5 @@ export async function initializeVocabularyDashboard(
 
 if (typeof chrome !== "undefined" && chrome.storage) {
   void initializeVocabularyDashboard(document, chrome.storage.local);
+  void initializeFlashcards(document, chrome.storage.local);
 }

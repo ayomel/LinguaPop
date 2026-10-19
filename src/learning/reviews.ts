@@ -1,5 +1,6 @@
 import { dictionaryEntries, type DictionaryEntry } from "../data/dictionary.ts";
 import { getEncounteredWords } from "./encounters.ts";
+import { DAILY_GOAL_PROGRESS_KEY, getProgressAfterReview } from "./daily-goals.ts";
 
 export const REVIEW_SCHEDULES_KEY = "reviewSchedules";
 export const REMEMBERED_INTERVAL_MULTIPLIER = 2;
@@ -148,7 +149,11 @@ export function recordRecall(
       intervalDays,
       nextDueAt: now + delay,
     };
-    await storage.set({ [REVIEW_SCHEDULES_KEY]: { ...schedules, [entryId]: savedSchedule } });
+    const dailyProgress = await getProgressAfterReview(storage, now);
+    await storage.set({
+      [REVIEW_SCHEDULES_KEY]: { ...schedules, [entryId]: savedSchedule },
+      [DAILY_GOAL_PROGRESS_KEY]: dailyProgress,
+    });
   });
 
   pendingWrites.set(storage, nextWrite.then(() => undefined, () => undefined));
