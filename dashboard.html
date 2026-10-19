@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vocabulary progress · LinguaPop</title>
+    <link rel="stylesheet" href="/src/dashboard.css" />
+  </head>
+  <body>
+    <main aria-labelledby="dashboard-title">
+      <a class="back-link" href="/index.html">← LinguaPop settings</a>
+      <h1 id="dashboard-title">Vocabulary progress</h1>
+      <p class="intro">Review words you have encountered and see what is ready to practice.</p>
+
+      <section class="summary" aria-label="Learning progress counts">
+        <article class="summary-card">
+          <span class="summary-label">Encountered</span>
+          <strong id="count-encountered" class="summary-count" aria-live="polite">—</strong>
+        </article>
+        <article class="summary-card">
+          <span class="summary-label">Practicing</span>
+          <strong id="count-practicing" class="summary-count" aria-live="polite">—</strong>
+        </article>
+        <article class="summary-card">
+          <span class="summary-label">Learned</span>
+          <strong id="count-learned" class="summary-count" aria-live="polite">—</strong>
+        </article>
+        <article class="summary-card">
+          <span class="summary-label">Due to review</span>
+          <strong id="count-due" class="summary-count" aria-live="polite">—</strong>
+        </article>
+      </section>
+
+      <section class="word-section" aria-labelledby="words-title">
+        <h2 id="words-title">Encountered words</h2>
+        <p id="dashboard-status" class="dashboard-status" role="status" aria-live="polite">Loading vocabulary progress…</p>
+        <p id="dashboard-empty" class="empty-state" hidden>
+          No vocabulary yet. Browse a page with LinguaPop enabled to encounter your first Spanish words.
+        </p>
+        <ul id="vocabulary-list" class="vocabulary-list" aria-label="Encountered vocabulary" hidden></ul>
+        <p id="dashboard-error" class="error" role="alert" hidden></p>
+      </section>
+    </main>
+    <script type="module" src="/src/learning/dashboard-page.ts"></script>
+  </body>
+</html>
