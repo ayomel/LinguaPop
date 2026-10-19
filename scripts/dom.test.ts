@@ -46,3 +46,22 @@ test("TreeWalker does not return text inside LinguaPop UI nested in a readable e
   );
   window.close();
 });
+
+test("TreeWalker skips nested interactive controls and all editable modes", () => {
+  const window = new Window();
+  window.document.body.innerHTML = `
+    <div role="switch"><span>switch label</span></div>
+    <div role="slider"><span>slider label</span></div>
+    <div tabindex="0"><span>focusable label</span></div>
+    <div contenteditable="plaintext-only"><span>plain editor</span></div>
+    <div contenteditable="true"><span contenteditable="false">editor child</span></div>
+    <div contenteditable="false">static text</div>
+    <p>Read <em>this</em>.</p>
+  `;
+
+  assert.deepEqual(
+    getEligibleTextNodes(window.document.body).map((node) => node.data),
+    ["static text", "Read ", "this", "."],
+  );
+  window.close();
+});
