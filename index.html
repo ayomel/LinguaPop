@@ -9,13 +9,13 @@
   <body>
     <main aria-labelledby="popup-title">
       <h1 id="popup-title">LinguaPop</h1>
-      <p class="intro">Spanish vocabulary for your everyday browsing.</p>
+      <p id="pair-intro" class="intro">Vocabulary for your everyday browsing.</p>
 
       <section class="learning-review" aria-labelledby="review-title">
         <h2 id="review-title">Quick review</h2>
         <p id="review-prompt" class="review-prompt"></p>
-        <button id="review-reveal" class="review-button" type="button" hidden>Reveal Spanish</button>
-        <p id="review-answer" class="review-answer" lang="es" hidden></p>
+        <button id="review-reveal" class="review-button" type="button" hidden>Reveal translation</button>
+        <p id="review-answer" class="review-answer" hidden></p>
         <div id="review-actions" class="review-actions" hidden>
           <button id="review-remembered" class="review-button" type="button">Remembered</button>
           <button id="review-practice" class="review-button" type="button">Need practice</button>
@@ -27,7 +27,7 @@
       <section class="setting" aria-label="Extension settings">
         <div class="setting-copy">
           <label for="enabled-toggle">Enable LinguaPop</label>
-          <p id="enabled-description">Replace some English words with Spanish as you browse.</p>
+          <p id="enabled-description">Replace some words as you browse.</p>
         </div>
         <input
           id="enabled-toggle"
@@ -82,7 +82,7 @@
           aria-describedby="percentage-description"
           disabled
         />
-        <p id="percentage-description">Choose how many eligible English words to replace.</p>
+        <p id="percentage-description">Choose how many eligible words to replace.</p>
       </section>
 
       <p id="enabled-status" class="status" role="status" aria-live="polite">Loading setting…</p>

@@ -31,6 +31,10 @@ The dashboard also has a flashcard review flow and a configurable daily goal. Th
 
 Single words and common phrases use separate static JSON files. Phrase matches stay within one eligible text node and take precedence over individual words inside the phrase. Run `pnpm dictionary:check` to validate both datasets.
 
+## Language pairs
+
+Runtime features use the `LanguagePair` model in `src/data/language-pairs.ts`. Entries expose `sourceText` and `targetText`, and language metadata supplies display names, text locales, and the optional Web Speech locale. The current adapter maps the English and Spanish word and phrase files into that model. Spanish is the only shipped target. A future pair can provide static entries in the same generic shape, with optional pronunciation text and a speech locale, then pass its configuration to the content, tooltip, review, and dashboard entry points.
+
 ## Review schedule
 
 Only choosing **Remembered** or **Need practice** records a review. Seeing a word in a webpage or opening the review card does not change its schedule.

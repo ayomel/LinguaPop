@@ -1,13 +1,16 @@
 import assert from "node:assert/strict";
 import { performance } from "node:perf_hooks";
 import { Window } from "happy-dom";
-import { dictionaryEntries } from "../src/data/dictionary.ts";
+import { englishToSpanishPair } from "../src/data/language-pairs.ts";
 import { applyWordReplacements } from "../src/content/replacements.ts";
 
 const paragraphCount = 500;
 const wordsPerParagraph = 20;
 const replacementPercentage = 5;
-const words = dictionaryEntries.slice(0, 40).map((entry) => entry.english);
+const words = englishToSpanishPair.entries
+  .filter((entry) => entry.kind === "word")
+  .slice(0, 40)
+  .map((entry) => entry.sourceText);
 const paragraphMarkup = Array.from({ length: paragraphCount }, (_, paragraphIndex) => {
   const paragraphWords = Array.from({ length: wordsPerParagraph }, (_, wordIndex) => {
     return words[(paragraphIndex * wordsPerParagraph + wordIndex) % words.length];
@@ -25,6 +28,7 @@ for (let run = 0; run < 4; run += 1) {
   const start = performance.now();
   const replacementCount = applyWordReplacements(window.document.body, {
     percentage: replacementPercentage,
+    pair: englishToSpanishPair,
   });
   const elapsed = performance.now() - start;
 

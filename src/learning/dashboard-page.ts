@@ -1,4 +1,4 @@
-import { dictionaryEntries } from "../data/dictionary.ts";
+import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
 import { initializeTranslationTooltip } from "../content/tooltip.ts";
 import { getVocabularyDashboardSnapshot } from "./dashboard.ts";
 import { initializeFlashcards } from "./flashcards.ts";
@@ -12,6 +12,7 @@ export async function initializeVocabularyDashboard(
   root: Document = document,
   storage: ReviewStorage = chrome.storage.local,
   now: () => number = Date.now,
+  pair: LanguagePair = englishToSpanishPair,
 ): Promise<VocabularyDashboardController> {
   const summary = {
     encountered: root.querySelector<HTMLElement>("#count-encountered"),
@@ -37,12 +38,12 @@ export async function initializeVocabularyDashboard(
     throw new Error("LinguaPop dashboard controls are missing.");
   }
 
-  const tooltip = initializeTranslationTooltip(root, dictionaryEntries, {}, { storage });
+  const tooltip = initializeTranslationTooltip(root, pair, {}, { storage });
   status.textContent = "Loading vocabulary progress…";
   error.hidden = true;
 
   try {
-    const snapshot = await getVocabularyDashboardSnapshot(storage, now());
+    const snapshot = await getVocabularyDashboardSnapshot(storage, now(), pair);
     summary.encountered.textContent = String(snapshot.encounteredCount);
     summary.practicing.textContent = String(snapshot.practicingCount);
     summary.learned.textContent = String(snapshot.learnedCount);
@@ -64,11 +65,14 @@ export async function initializeVocabularyDashboard(
         const wordButton = root.createElement("button");
         wordButton.type = "button";
         wordButton.className = "word-link";
-        wordButton.textContent = word.entry.english;
-        wordButton.setAttribute("aria-label", `Open translation for ${word.entry.english}`);
+        wordButton.textContent = word.entry.sourceText;
+        wordButton.setAttribute(
+          "aria-label",
+          `Open translation for ${word.entry.sourceText}`,
+        );
         wordButton.setAttribute("data-linguapop-replacement", "true");
         wordButton.setAttribute("data-linguapop-entry-id", word.entry.id);
-        wordButton.setAttribute("data-linguapop-original", word.entry.english);
+        wordButton.setAttribute("data-linguapop-original", word.entry.sourceText);
         const metadata = root.createElement("p");
         const lastSeen = new Date(word.encounter.lastSeenAt);
         const lastSeenLabel = Number.isNaN(lastSeen.getTime()) ? "Unknown" : lastSeen.toLocaleDateString();

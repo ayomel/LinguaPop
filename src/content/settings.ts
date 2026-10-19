@@ -1,5 +1,6 @@
 import { applyWordReplacements, restoreWordReplacements } from "./replacements.ts";
 import { isWithinLinguaPopOwnedElement } from "./dom.ts";
+import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
 import { recordWordEncounters } from "../learning/encounters.ts";
 import {
   didSiteOverrideChange,
@@ -18,6 +19,7 @@ export function startContentSettings(
   root: Element,
   storage: SettingsStorage = chrome.storage.local,
   storageChanges: typeof chrome.storage.onChanged = chrome.storage.onChanged,
+  pair: LanguagePair = englishToSpanishPair,
 ): ContentSettingsController {
   let version = 0;
   let disposed = false;
@@ -70,9 +72,10 @@ export function startContentSettings(
         if (node.nodeType !== 1 && node.nodeType !== 3) continue;
         if (!root.contains(node) || isWithinLinguaPopOwnedElement(node)) continue;
         applyWordReplacements(node as Element | Text, {
+          pair,
           percentage: settings.replacementPercentage,
           difficulty: settings.difficulty,
-          onReplacement: (entry) => encounteredIds.push(entry.id),
+          onReplacement: (entryId) => encounteredIds.push(entryId),
         });
       }
       trackReplacements(encounteredIds);
@@ -114,9 +117,10 @@ export function startContentSettings(
         if (isSiteEnabled(settings, hostname)) {
           const encounteredIds: string[] = [];
           applyWordReplacements(root, {
+            pair,
             percentage: settings.replacementPercentage,
             difficulty: settings.difficulty,
-            onReplacement: (entry) => encounteredIds.push(entry.id),
+            onReplacement: (entryId) => encounteredIds.push(entryId),
           });
           trackReplacements(encounteredIds);
         } else {

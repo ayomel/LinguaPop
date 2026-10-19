@@ -1,6 +1,10 @@
 import { DEFAULT_DAILY_GOAL, getDailyGoalSettings, setDailyGoal } from "./daily-goals.ts";
 import { getEncounteredWords } from "./encounters.ts";
 import { getDueReviews, recordRecall, type RecallOutcome, type ReviewStorage } from "./reviews.ts";
+import {
+  englishToSpanishPair,
+  type LanguagePair,
+} from "../data/language-pairs.ts";
 
 export interface FlashcardsController {
   dispose(): void;
@@ -10,6 +14,7 @@ export async function initializeFlashcards(
   root: Document = document,
   storage: ReviewStorage = chrome.storage.local,
   now: () => number = Date.now,
+  pair: LanguagePair = englishToSpanishPair,
 ): Promise<FlashcardsController> {
   const prompt = root.querySelector<HTMLElement>("#flashcard-prompt");
   const reveal = root.querySelector<HTMLButtonElement>("#flashcard-reveal");
@@ -62,7 +67,7 @@ export async function initializeFlashcards(
       const timestamp = now();
       const [settings, dueReviews] = await Promise.all([
         getDailyGoalSettings(storage, timestamp),
-        getDueReviews(storage, timestamp),
+        getDueReviews(storage, timestamp, pair),
       ]);
       if (disposed) return;
       completedToday = settings.completed;
@@ -83,9 +88,10 @@ export async function initializeFlashcards(
       }
 
       currentEntryId = dueReview.entry.id;
-      prompt.textContent = `Try to recall the Spanish for “${dueReview.entry.english}”.`;
-      answer.lang = "es";
-      answer.textContent = dueReview.entry.spanish;
+      prompt.textContent = `Try to recall the ${pair.targetLanguage.name} for “${dueReview.entry.sourceText}”.`;
+      reveal.textContent = `Reveal ${pair.targetLanguage.name}`;
+      answer.lang = pair.targetLanguage.locale;
+      answer.textContent = dueReview.entry.targetText;
       reveal.hidden = false;
       status.textContent = savedMessage ?? "Think of the answer, reveal it, then choose how well you remembered.";
     } catch {

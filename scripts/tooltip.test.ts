@@ -3,6 +3,7 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import { dictionaryEntries } from "../src/data/dictionary.ts";
 import { phraseEntries } from "../src/data/phrases.ts";
+import { createEnglishToSpanishPair, englishToSpanishPair } from "../src/data/language-pairs.ts";
 import { applyWordReplacements } from "../src/content/replacements.ts";
 import { initializeTranslationTooltip } from "../src/content/tooltip.ts";
 
@@ -34,7 +35,7 @@ test("clicking a replacement opens a translation inside an isolated shadow root"
   const entries = dictionaryEntries.map((entry) =>
     entry.id === "en-apple" ? { ...entry, pronunciation: "mahn-SAH-nah" } : entry,
   );
-  const controller = initializeTranslationTooltip(window.document, entries);
+  const controller = initializeTranslationTooltip(window.document, createEnglishToSpanishPair(entries));
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
 
   click(window, replacement);
@@ -58,14 +59,15 @@ test("phrase replacements open the shared translation tooltip without autoplayin
   const window = new Window({ url: "https://example.test/article" });
   window.document.body.innerHTML = `<p>${Array.from({ length: 10 }, () => "Thank you.").join(" ")}</p>`;
   const phrase = phraseEntries.find((entry) => entry.english === "thank you")!;
-  applyWordReplacements(window.document.body, { percentage: 30, entries: [], phraseEntries: [phrase] });
+  const pair = createEnglishToSpanishPair([], [phrase]);
+  applyWordReplacements(window.document.body, { percentage: 30, pair });
   let spoken = 0;
   const speech = {
     cancel() {},
     getVoices: () => [],
     speak() { spoken += 1; },
   } as unknown as SpeechSynthesis;
-  const controller = initializeTranslationTooltip(window.document, [phrase], { speechSynthesis: speech });
+  const controller = initializeTranslationTooltip(window.document, pair, { speechSynthesis: speech });
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
 
   click(window, replacement);
@@ -90,13 +92,13 @@ test("tooltip displays available static example and grammar details", () => {
         }
       : entry,
   );
-  const controller = initializeTranslationTooltip(window.document, entries);
+  const controller = initializeTranslationTooltip(window.document, createEnglishToSpanishPair(entries));
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
 
   click(window, replacement);
   const shadow = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
-  assert.equal(shadow.querySelector('[data-tooltip-example="spanish"]')?.textContent, "Como una manzana.");
-  assert.equal(shadow.querySelector('[data-tooltip-example="english"]')?.textContent, "I eat an apple.");
+  assert.equal(shadow.querySelector('[data-tooltip-example="target"]')?.textContent, "Como una manzana.");
+  assert.equal(shadow.querySelector('[data-tooltip-example="source"]')?.textContent, "I eat an apple.");
   assert.match(shadow.querySelector('[data-tooltip-example="grammar"]')?.textContent ?? "", /feminine/i);
   controller.dispose();
   window.close();
@@ -109,13 +111,13 @@ test("tooltip omits example details when an entry has none", () => {
       ? { ...entry, exampleSpanish: undefined, exampleEnglish: undefined, grammarNote: undefined }
       : entry,
   );
-  const controller = initializeTranslationTooltip(window.document, entries);
+  const controller = initializeTranslationTooltip(window.document, createEnglishToSpanishPair(entries));
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
 
   click(window, replacement);
   const shadow = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
-  assert.equal(shadow.querySelector('[data-tooltip-example="spanish"]'), null);
-  assert.equal(shadow.querySelector('[data-tooltip-example="english"]'), null);
+  assert.equal(shadow.querySelector('[data-tooltip-example="target"]'), null);
+  assert.equal(shadow.querySelector('[data-tooltip-example="source"]'), null);
   assert.equal(shadow.querySelector('[data-tooltip-example="grammar"]'), null);
   controller.dispose();
   window.close();
@@ -133,12 +135,12 @@ test("tooltip displays a grammar note even when an example is not supplied", () 
         }
       : entry,
   );
-  const controller = initializeTranslationTooltip(window.document, entries);
+  const controller = initializeTranslationTooltip(window.document, createEnglishToSpanishPair(entries));
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
 
   click(window, replacement);
   const shadow = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
-  assert.equal(shadow.querySelector('[data-tooltip-example="spanish"]'), null);
+  assert.equal(shadow.querySelector('[data-tooltip-example="target"]'), null);
   assert.match(shadow.querySelector('[data-tooltip-example="grammar"]')?.textContent ?? "", /feminine/i);
   controller.dispose();
   window.close();
@@ -205,7 +207,7 @@ test("replacement words open the tooltip with Enter and Space", () => {
 test("tooltip loads and persists learned or practicing status by dictionary ID", async () => {
   const window = createPage();
   const storage = new FakeStorage();
-  const controller = initializeTranslationTooltip(window.document, dictionaryEntries, {}, {
+  const controller = initializeTranslationTooltip(window.document, englishToSpanishPair, {}, {
     storage: storage as never,
   });
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
@@ -244,7 +246,7 @@ test("tooltip reports status storage errors without marking the word", async () 
   storage.set = async () => {
     throw new Error("storage unavailable");
   };
-  const controller = initializeTranslationTooltip(window.document, dictionaryEntries, {}, {
+  const controller = initializeTranslationTooltip(window.document, englishToSpanishPair, {}, {
     storage: storage as never,
   });
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;

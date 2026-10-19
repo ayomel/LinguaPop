@@ -5,6 +5,7 @@ import {
   type ReviewStorage,
 } from "./reviews.ts";
 import { getEncounteredWords } from "./encounters.ts";
+import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
 
 export interface ReviewCardController {
   dispose(): void;
@@ -14,6 +15,7 @@ export async function initializeReviewCard(
   root: Document = document,
   storage: ReviewStorage = chrome.storage.local,
   now: () => number = Date.now,
+  pair: LanguagePair = englishToSpanishPair,
 ): Promise<ReviewCardController> {
   const prompt = root.querySelector<HTMLElement>("#review-prompt");
   const reveal = root.querySelector<HTMLButtonElement>("#review-reveal");
@@ -44,7 +46,7 @@ export async function initializeReviewCard(
     status.textContent = savedMessage ?? "Loading your review words…";
 
     try {
-      const dueReview = await getNextDueReview(storage, now());
+      const dueReview = await getNextDueReview(storage, now(), pair);
       if (disposed) return;
 
       if (!dueReview) {
@@ -59,9 +61,10 @@ export async function initializeReviewCard(
       }
 
       currentEntryId = dueReview.entry.id;
-      prompt.textContent = `Try to recall the Spanish for “${dueReview.entry.english}”.`;
-      answer.lang = "es";
-      answer.textContent = dueReview.entry.spanish;
+      prompt.textContent = `Try to recall the ${pair.targetLanguage.name} for “${dueReview.entry.sourceText}”.`;
+      reveal.textContent = `Reveal ${pair.targetLanguage.name}`;
+      answer.lang = pair.targetLanguage.locale;
+      answer.textContent = dueReview.entry.targetText;
       reveal.hidden = false;
       status.textContent = savedMessage ?? "Think of the answer, then reveal it and choose how well you remembered.";
     } catch {

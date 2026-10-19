@@ -1,7 +1,14 @@
 import phraseData from "./phrase-dictionary.json";
-import type { Difficulty, TranslationEntry } from "./dictionary.ts";
+import type { Difficulty } from "./dictionary.ts";
 
-export interface PhraseEntry extends TranslationEntry {
+export interface PhraseEntry {
+  id: string;
+  english: string;
+  spanish: string;
+  pronunciation?: string;
+  exampleSpanish?: string;
+  exampleEnglish?: string;
+  grammarNote?: string;
   difficulty: Difficulty;
 }
 

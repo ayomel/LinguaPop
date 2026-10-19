@@ -1,4 +1,8 @@
-import { dictionaryEntries, type DictionaryEntry } from "../data/dictionary.ts";
+import {
+  englishToSpanishPair,
+  type LanguagePair,
+  type LanguagePairEntry,
+} from "../data/language-pairs.ts";
 import { getEncounteredWords } from "./encounters.ts";
 import { DAILY_GOAL_PROGRESS_KEY, getProgressAfterReview } from "./daily-goals.ts";
 
@@ -21,7 +25,7 @@ export type ReviewScheduleMap = Record<string, ReviewSchedule>;
 export type ReviewStorage = Pick<chrome.storage.StorageArea, "get" | "set">;
 
 export interface DueReview {
-  entry: DictionaryEntry;
+  entry: LanguagePairEntry;
   nextDueAt: number;
 }
 
@@ -84,12 +88,13 @@ export async function getReviewSchedules(
 export async function getDueReviews(
   storage: ReviewStorage = chrome.storage.local,
   now = Date.now(),
+  pair: LanguagePair = englishToSpanishPair,
 ): Promise<DueReview[]> {
   const [encounters, schedules] = await Promise.all([
     getEncounteredWords(storage),
     getReviewSchedules(storage),
   ]);
-  const entriesById = new Map(dictionaryEntries.map((entry) => [entry.id, entry]));
+  const entriesById = new Map(pair.entries.map((entry) => [entry.id, entry]));
   const dueReviews: DueReview[] = [];
 
   for (const [entryId, encounter] of Object.entries(encounters)) {
@@ -107,8 +112,9 @@ export async function getDueReviews(
 export async function getNextDueReview(
   storage: ReviewStorage = chrome.storage.local,
   now = Date.now(),
+  pair: LanguagePair = englishToSpanishPair,
 ): Promise<DueReview | undefined> {
-  return (await getDueReviews(storage, now))[0];
+  return (await getDueReviews(storage, now, pair))[0];
 }
 
 const pendingWrites = new WeakMap<object, Promise<void>>();
