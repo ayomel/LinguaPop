@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import { dictionaryEntries } from "../src/data/dictionary.ts";
+import { phraseEntries } from "../src/data/phrases.ts";
 import { applyWordReplacements } from "../src/content/replacements.ts";
 import { initializeTranslationTooltip } from "../src/content/tooltip.ts";
 
@@ -49,6 +50,30 @@ test("clicking a replacement opens a translation inside an isolated shadow root"
   assert.ok(host.shadowRoot.querySelector("style"));
   assert.equal(replacement.getAttribute("role"), "button");
   assert.equal(replacement.getAttribute("tabindex"), "0");
+  controller.dispose();
+  window.close();
+});
+
+test("phrase replacements open the shared translation tooltip without autoplaying speech", () => {
+  const window = new Window({ url: "https://example.test/article" });
+  window.document.body.innerHTML = `<p>${Array.from({ length: 10 }, () => "Thank you.").join(" ")}</p>`;
+  const phrase = phraseEntries.find((entry) => entry.english === "thank you")!;
+  applyWordReplacements(window.document.body, { percentage: 30, entries: [], phraseEntries: [phrase] });
+  let spoken = 0;
+  const speech = {
+    cancel() {},
+    getVoices: () => [],
+    speak() { spoken += 1; },
+  } as unknown as SpeechSynthesis;
+  const controller = initializeTranslationTooltip(window.document, [phrase], { speechSynthesis: speech });
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
+
+  click(window, replacement);
+  const shadow = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
+  assert.equal(shadow.querySelector("h2")?.textContent, "gracias");
+  assert.match(shadow.textContent ?? "", /Thank you/);
+  assert.equal(spoken, 0);
+
   controller.dispose();
   window.close();
 });

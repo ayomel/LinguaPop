@@ -1,4 +1,4 @@
-import { dictionaryEntries, type DictionaryEntry } from "../data/dictionary.ts";
+import { dictionaryEntries, type TranslationEntry } from "../data/dictionary.ts";
 import {
   getLearningStatuses,
   setLearningStatus,
@@ -30,7 +30,7 @@ function getReplacement(target: EventTarget | null): HTMLElement | undefined {
 
 export function initializeTranslationTooltip(
   document: Document = window.document,
-  entries: readonly DictionaryEntry[] = dictionaryEntries,
+  entries: readonly TranslationEntry[] = dictionaryEntries,
   speechOptions: TooltipSpeechOptions = {},
   learningOptions: TooltipLearningOptions = {},
 ): TranslationTooltipController {

@@ -29,6 +29,8 @@ The extension popup controls replacement settings and offers a quick review for 
 
 The dashboard also has a flashcard review flow and a configurable daily goal. The goal defaults to 10 reviews and accepts 1 to 50. Progress counts explicit review answers and resets on the next local calendar day.
 
+Single words and common phrases use separate static JSON files. Phrase matches stay within one eligible text node and take precedence over individual words inside the phrase. Run `pnpm dictionary:check` to validate both datasets.
+
 ## Review schedule
 
 Only choosing **Remembered** or **Need practice** records a review. Seeing a word in a webpage or opening the review card does not change its schedule.

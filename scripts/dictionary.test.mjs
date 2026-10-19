@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { validateDictionary } from "./validate-dictionary.mjs";
+import { validateDictionary, validatePhraseDictionary } from "./validate-dictionary.mjs";
 
 const dictionaryPath = new URL("../src/data/dictionary.json", import.meta.url);
+const phraseDictionaryPath = new URL("../src/data/phrase-dictionary.json", import.meta.url);
 const validEntry = {
   id: "en-book",
   english: "book",
@@ -18,6 +19,26 @@ test("starter dictionary has 120 valid offline entries", async () => {
   assert.equal(entries.length, 120);
   assert.deepEqual(validateDictionary(entries), []);
   assert.ok(entries.filter((entry) => entry.exampleSpanish && entry.exampleEnglish).length >= 10);
+});
+
+test("phrase dictionary stays separate and contains valid, unique phrase entries", async () => {
+  const phrases = JSON.parse(await readFile(phraseDictionaryPath, "utf8"));
+
+  assert.ok(phrases.length >= 8);
+  assert.deepEqual(validatePhraseDictionary(phrases), []);
+});
+
+test("phrase validation rejects duplicate IDs, duplicate English, and unsupported difficulty", () => {
+  const phrases = [
+    { id: "phrase-thank-you", english: "thank you", spanish: "gracias", difficulty: "beginner" },
+    { id: "phrase-thank-you", english: "Thanks", spanish: "gracias", difficulty: "beginner" },
+    { id: "phrase-thanks", english: " THANK YOU ", spanish: "gracias", difficulty: "expert" },
+  ];
+  const errors = validatePhraseDictionary(phrases);
+
+  assert.ok(errors.some((error) => error.includes("duplicate ID")));
+  assert.ok(errors.some((error) => error.includes("duplicate English phrase")));
+  assert.ok(errors.some((error) => error.includes("unsupported difficulty")));
 });
 
 test("accepts dictionary entries with the required fields", () => {
