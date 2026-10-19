@@ -1,4 +1,4 @@
-import { dictionaryEntries, type TranslationEntry } from "../data/dictionary.ts";
+import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
 import {
   getLearningStatuses,
   setLearningStatus,
@@ -30,7 +30,7 @@ function getReplacement(target: EventTarget | null): HTMLElement | undefined {
 
 export function initializeTranslationTooltip(
   document: Document = window.document,
-  entries: readonly TranslationEntry[] = dictionaryEntries,
+  pair: LanguagePair = englishToSpanishPair,
   speechOptions: TooltipSpeechOptions = {},
   learningOptions: TooltipLearningOptions = {},
 ): TranslationTooltipController {
@@ -63,7 +63,7 @@ export function initializeTranslationTooltip(
 
   const open = (trigger: HTMLElement): void => {
     const entryId = trigger.getAttribute("data-linguapop-entry-id");
-    const entry = entries.find((candidate) => candidate.id === entryId);
+    const entry = pair.entries.find((candidate) => candidate.id === entryId);
     const original = trigger.getAttribute("data-linguapop-original");
     if (!entry || original === null) return;
 
@@ -119,15 +119,15 @@ export function initializeTranslationTooltip(
     const card = document.createElement("section");
     card.className = "card";
     card.setAttribute("role", "dialog");
-    card.setAttribute("aria-label", `Translation for ${entry.spanish}`);
+    card.setAttribute("aria-label", `${pair.targetLanguage.name} translation for ${entry.targetText}`);
 
     const heading = document.createElement("h2");
-    heading.lang = "es";
-    heading.textContent = entry.spanish;
+    heading.lang = pair.targetLanguage.locale;
+    heading.textContent = entry.targetText;
     const translation = document.createElement("p");
     const translationLabel = document.createElement("span");
     translationLabel.className = "label";
-    translationLabel.textContent = "English translation";
+    translationLabel.textContent = `${pair.sourceLanguage.name} translation`;
     const translatedWord = document.createElement("span");
     translatedWord.textContent = original;
     translation.append(translationLabel, document.createElement("br"), translatedWord);
@@ -139,21 +139,21 @@ export function initializeTranslationTooltip(
       card.append(pronunciation);
     }
 
-    if ((entry.exampleSpanish && entry.exampleEnglish) || entry.grammarNote) {
+    if ((entry.exampleTargetText && entry.exampleSourceText) || entry.grammarNote) {
       const example = document.createElement("section");
       example.className = "example";
-      if (entry.exampleSpanish && entry.exampleEnglish) {
+      if (entry.exampleTargetText && entry.exampleSourceText) {
         const exampleHeading = document.createElement("p");
         exampleHeading.className = "label";
         exampleHeading.textContent = "Example";
-        const exampleSpanish = document.createElement("p");
-        exampleSpanish.lang = "es";
-        exampleSpanish.dataset.tooltipExample = "spanish";
-        exampleSpanish.textContent = entry.exampleSpanish;
-        const exampleEnglish = document.createElement("p");
-        exampleEnglish.dataset.tooltipExample = "english";
-        exampleEnglish.textContent = entry.exampleEnglish;
-        example.append(exampleHeading, exampleSpanish, exampleEnglish);
+        const exampleTarget = document.createElement("p");
+        exampleTarget.lang = pair.targetLanguage.locale;
+        exampleTarget.dataset.tooltipExample = "target";
+        exampleTarget.textContent = entry.exampleTargetText;
+        const exampleSource = document.createElement("p");
+        exampleSource.dataset.tooltipExample = "source";
+        exampleSource.textContent = entry.exampleSourceText;
+        example.append(exampleHeading, exampleTarget, exampleSource);
       }
 
       if (entry.grammarNote) {
@@ -171,7 +171,7 @@ export function initializeTranslationTooltip(
     const speechButton = document.createElement("button");
     speechButton.className = "speak";
     speechButton.type = "button";
-    speechButton.textContent = "Speak Spanish";
+    speechButton.textContent = `Speak ${pair.targetLanguage.name}`;
     const speechStatus = document.createElement("p");
     speechStatus.setAttribute("role", "status");
     speechStatus.setAttribute("aria-live", "polite");
@@ -182,25 +182,28 @@ export function initializeTranslationTooltip(
       speechButton.addEventListener("click", () => {
         try {
           const voices = speechSynthesis.getVoices();
+          const targetLocale = pair.targetLanguage.speechLocale ?? pair.targetLanguage.locale;
           const voice =
-            voices.find((candidate) => candidate.lang.toLowerCase() === "es-es") ??
-            voices.find((candidate) => /^es[-_]/i.test(candidate.lang));
+            voices.find((candidate) => candidate.lang.toLowerCase() === targetLocale.toLowerCase()) ??
+            voices.find((candidate) =>
+              candidate.lang.toLowerCase().startsWith(`${pair.targetLanguage.locale.toLowerCase()}-`),
+            );
           if (!voice) {
-            speechStatus.textContent = "No Spanish voice is available in this browser.";
+            speechStatus.textContent = `No ${pair.targetLanguage.name} voice is available in this browser.`;
             return;
           }
 
           speechSynthesis.cancel();
-          const utterance = createUtterance(entry.spanish);
-          utterance.lang = "es-ES";
+          const utterance = createUtterance(entry.targetText);
+          utterance.lang = targetLocale;
           utterance.voice = voice;
           utterance.onerror = () => {
-            speechStatus.textContent = "Could not play the Spanish pronunciation. Try again.";
+            speechStatus.textContent = `Could not play the ${pair.targetLanguage.name} pronunciation. Try again.`;
           };
-          speechStatus.textContent = `Speaking ${entry.spanish}.`;
+          speechStatus.textContent = `Speaking ${entry.targetText}.`;
           speechSynthesis.speak(utterance);
         } catch {
-          speechStatus.textContent = "Could not play the Spanish pronunciation. Try again.";
+          speechStatus.textContent = `Could not play the ${pair.targetLanguage.name} pronunciation. Try again.`;
         }
       });
     }

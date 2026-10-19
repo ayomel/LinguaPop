@@ -1,5 +1,9 @@
-import { dictionaryEntries, type DictionaryEntry, type Difficulty, type TranslationEntry } from "../data/dictionary.ts";
-import { phraseEntries, type PhraseEntry } from "../data/phrases.ts";
+import {
+  englishToSpanishPair,
+  type LanguagePair,
+  type LanguagePairEntry,
+} from "../data/language-pairs.ts";
+import type { Difficulty } from "../data/dictionary.ts";
 import { getEligibleTextNodes } from "./dom.ts";
 
 const replacementSelector = '[data-linguapop-replacement="true"]';
@@ -9,10 +13,9 @@ type ReplacementRoot = Document | DocumentFragment | Element | Text;
 
 export interface ReplacementOptions {
   percentage?: number;
-  entries?: readonly DictionaryEntry[];
-  phraseEntries?: readonly PhraseEntry[];
+  pair?: LanguagePair;
   difficulty?: Difficulty;
-  onReplacement?: (entry: DictionaryEntry) => void;
+  onReplacement?: (entryId: string) => void;
 }
 
 interface Candidate {
@@ -20,8 +23,7 @@ interface Candidate {
   start: number;
   end: number;
   original: string;
-  entry: TranslationEntry;
-  dictionaryEntry?: DictionaryEntry;
+  entry: LanguagePairEntry;
   key: string;
   rank: number;
 }
@@ -61,32 +63,32 @@ function getReplacementElements(root: ReplacementRoot): HTMLElement[] {
   return [...matchesRoot, ...descendants];
 }
 
-function createMatcher(entries: readonly TranslationEntry[]) {
-  const entriesByEnglish = new Map<string, TranslationEntry>();
+function createMatcher(entries: readonly LanguagePairEntry[], sourceLocale: string) {
+  const entriesBySourceText = new Map<string, LanguagePairEntry>();
   for (const entry of entries) {
-    const english = entry.english.trim().toLocaleLowerCase("en");
-    if (english && !entriesByEnglish.has(english)) entriesByEnglish.set(english, entry);
+    const sourceText = entry.sourceText.trim().toLocaleLowerCase(sourceLocale);
+    if (sourceText && !entriesBySourceText.has(sourceText)) entriesBySourceText.set(sourceText, entry);
   }
 
-  const terms = [...entriesByEnglish.keys()].sort(
+  const terms = [...entriesBySourceText.keys()].sort(
     (left, right) => right.length - left.length || (left < right ? -1 : left > right ? 1 : 0),
   );
-  if (terms.length === 0) return { entriesByEnglish, pattern: undefined };
+  if (terms.length === 0) return { entriesBySourceText, pattern: undefined };
 
   const alternatives = terms.map(escapeRegex).join("|");
   const pattern = new RegExp(
     `(?<![\\p{L}\\p{N}_])(${alternatives})(?![\\p{L}\\p{N}_])`,
     "giu",
   );
-  return { entriesByEnglish, pattern };
+  return { entriesBySourceText, pattern };
 }
 
 function getCandidates(
   root: ReplacementRoot,
-  entries: readonly TranslationEntry[],
-  dictionaryEntryIds: ReadonlySet<string>,
+  entries: readonly LanguagePairEntry[],
+  sourceLocale: string,
 ): Candidate[] {
-  const { entriesByEnglish, pattern } = createMatcher(entries);
+  const { entriesBySourceText, pattern } = createMatcher(entries, sourceLocale);
   if (!pattern) return [];
 
   const pageKey = getPageKey(root);
@@ -99,7 +101,7 @@ function getCandidates(
 
     while (match) {
       const original = match[0];
-      const entry = entriesByEnglish.get(original.toLocaleLowerCase("en"));
+      const entry = entriesBySourceText.get(original.toLocaleLowerCase(sourceLocale));
       if (entry) {
         const position = textOffset + match.index;
         const key = `${entry.id}:${position}`;
@@ -109,7 +111,6 @@ function getCandidates(
           end: match.index + original.length,
           original,
           entry,
-          dictionaryEntry: dictionaryEntryIds.has(entry.id) ? (entry as DictionaryEntry) : undefined,
           key,
           rank: hash(`${pageKey}|${key}`),
         });
@@ -124,9 +125,14 @@ function getCandidates(
   return candidates;
 }
 
-function preserveWordCase(original: string, translation: string): string {
-  if (original === original.toLocaleUpperCase("en")) {
-    return translation.toLocaleUpperCase("es");
+function preserveTextCase(
+  original: string,
+  translation: string,
+  sourceLocale: string,
+  targetLocale: string,
+): string {
+  if (original === original.toLocaleUpperCase(sourceLocale)) {
+    return translation.toLocaleUpperCase(targetLocale);
   }
 
   const firstCharacter = Array.from(original)[0];
@@ -134,11 +140,11 @@ function preserveWordCase(original: string, translation: string): string {
 
   const rest = original.slice(firstCharacter.length);
   const isTitleCase =
-    firstCharacter === firstCharacter.toLocaleUpperCase("en") &&
-    rest === rest.toLocaleLowerCase("en");
+    firstCharacter === firstCharacter.toLocaleUpperCase(sourceLocale) &&
+    rest === rest.toLocaleLowerCase(sourceLocale);
 
   return isTitleCase
-    ? `${Array.from(translation)[0]?.toLocaleUpperCase("es") ?? ""}${Array.from(translation).slice(1).join("")}`
+    ? `${Array.from(translation)[0]?.toLocaleUpperCase(targetLocale) ?? ""}${Array.from(translation).slice(1).join("")}`
     : translation;
 }
 
@@ -149,6 +155,7 @@ function appendText(document: Document, fragment: DocumentFragment, value: strin
 function replaceNodeMatches(
   node: Text,
   matches: Candidate[],
+  pair: LanguagePair,
   percentage: number,
   difficulty: Difficulty | "all",
 ): void {
@@ -161,6 +168,8 @@ function replaceNodeMatches(
 
     const replacement = document.createElement("span");
     replacement.setAttribute("data-linguapop-replacement", "true");
+    replacement.setAttribute("data-linguapop-pair-id", pair.id);
+    replacement.setAttribute("data-linguapop-kind", match.entry.kind);
     replacement.setAttribute("data-linguapop-original", match.original);
     replacement.setAttribute("data-linguapop-entry-id", match.entry.id);
     replacement.setAttribute("data-linguapop-percentage", String(percentage));
@@ -170,9 +179,14 @@ function replaceNodeMatches(
     replacement.setAttribute("tabindex", "0");
     replacement.setAttribute(
       "aria-label",
-      `Spanish ${match.entry.partOfSpeech ? "word" : "phrase"} ${match.entry.spanish}. Show English translation for ${match.original}.`,
+      `${pair.targetLanguage.name} ${match.entry.kind} ${match.entry.targetText}. Show ${pair.sourceLanguage.name} translation for ${match.original}.`,
     );
-    replacement.textContent = preserveWordCase(match.original, match.entry.spanish);
+    replacement.textContent = preserveTextCase(
+      match.original,
+      match.entry.targetText,
+      pair.sourceLanguage.locale,
+      pair.targetLanguage.locale,
+    );
     fragment.append(replacement);
     cursor = match.end;
   }
@@ -181,7 +195,7 @@ function replaceNodeMatches(
   node.replaceWith(fragment);
 }
 
-/** Replaces a stable, configured share of eligible dictionary matches. */
+/** Replaces a stable, configured share of eligible entries in the selected language pair. */
 export function applyWordReplacements(
   root: ReplacementRoot = document.body,
   options: ReplacementOptions = {},
@@ -195,7 +209,8 @@ export function applyWordReplacements(
     existing.every(
       (element) =>
         element.getAttribute("data-linguapop-percentage") === String(percentage) &&
-        element.getAttribute("data-linguapop-difficulty") === difficulty,
+        element.getAttribute("data-linguapop-difficulty") === difficulty &&
+        element.getAttribute("data-linguapop-pair-id") === (options.pair ?? englishToSpanishPair).id,
     )
   ) {
     return 0;
@@ -204,19 +219,11 @@ export function applyWordReplacements(
   if (existing.length > 0) restoreWordReplacements(root);
   if (percentage === 0) return 0;
 
-  const entries = options.entries ?? dictionaryEntries;
-  const phrases = options.phraseEntries ?? phraseEntries;
-  const eligibleEntries = options.difficulty
-    ? entries.filter((entry) => entry.difficulty === options.difficulty)
-    : entries;
-  const eligiblePhrases = options.difficulty
-    ? phrases.filter((entry) => entry.difficulty === options.difficulty)
-    : phrases;
-  const candidates = getCandidates(
-    root,
-    [...eligiblePhrases, ...eligibleEntries],
-    new Set(eligibleEntries.map((entry) => entry.id)),
-  );
+  const pair = options.pair ?? englishToSpanishPair;
+  const entries = options.difficulty
+    ? pair.entries.filter((entry) => entry.difficulty === options.difficulty)
+    : pair.entries;
+  const candidates = getCandidates(root, entries, pair.sourceLanguage.locale);
   const targetCount = Math.floor((candidates.length * percentage) / 100);
   const selected = candidates
     .sort((left, right) => left.rank - right.rank || (left.key < right.key ? -1 : left.key > right.key ? 1 : 0))
@@ -230,16 +237,16 @@ export function applyWordReplacements(
   }
 
   for (const [node, matches] of selectedByNode) {
-    replaceNodeMatches(node, matches, percentage, difficulty);
+    replaceNodeMatches(node, matches, pair, percentage, difficulty);
     for (const match of matches) {
-      if (match.dictionaryEntry) options.onReplacement?.(match.dictionaryEntry);
+      if (match.entry.kind === "word") options.onReplacement?.(match.entry.id);
     }
   }
 
   return selected.length;
 }
 
-/** Restores the exact English strings stored by LinguaPop's replacement spans. */
+/** Restores the exact source strings stored by LinguaPop's replacement spans. */
 export function restoreWordReplacements(root: ReplacementRoot = document.body): number {
   const replacements = getReplacementElements(root);
   let restored = 0;

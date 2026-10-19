@@ -5,6 +5,7 @@ import {
   applyWordReplacements,
   restoreWordReplacements,
 } from "../src/content/replacements.ts";
+import { createEnglishToSpanishPair } from "../src/data/language-pairs.ts";
 
 function createPage(markup: string) {
   const window = new Window({ url: "https://example.test/article?section=1" });
@@ -132,18 +133,19 @@ test("only the selected vocabulary difficulty is eligible and changing levels re
     `<p>${Array.from({ length: 20 }, () => "Apple, language, discover.").join(" ")}</p>`,
   );
   const { document } = window;
+  const pair = createEnglishToSpanishPair(entries, []);
 
-  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "beginner", entries }), 6);
+  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "beginner", pair }), 6);
   assert.equal(document.querySelector("[data-linguapop-entry-id='en-apple']")?.textContent, "Manzana");
   assert.equal(document.querySelector("[data-linguapop-entry-id='en-language']"), null);
   assert.equal(document.querySelectorAll("[data-linguapop-entry-id='en-apple']").length, 6);
 
-  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "intermediate", entries }), 6);
+  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "intermediate", pair }), 6);
   assert.equal(document.querySelector("[data-linguapop-entry-id='en-apple']"), null);
   assert.equal(document.querySelector("[data-linguapop-entry-id='en-language']")?.textContent, "idioma");
   assert.equal(document.querySelectorAll("[data-linguapop-entry-id='en-language']").length, 6);
 
-  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "advanced", entries }), 6);
+  assert.equal(applyWordReplacements(document.body, { percentage: 30, difficulty: "advanced", pair }), 6);
   assert.equal(document.querySelector("[data-linguapop-entry-id='en-language']"), null);
   assert.equal(document.querySelector("[data-linguapop-entry-id='en-discover']")?.textContent, "descubrir");
   window.close();

@@ -1,4 +1,8 @@
-import { dictionaryEntries, type DictionaryEntry } from "../data/dictionary.ts";
+import {
+  englishToSpanishPair,
+  type LanguagePair,
+  type LanguagePairEntry,
+} from "../data/language-pairs.ts";
 import { getEncounteredWords, type WordEncounter } from "./encounters.ts";
 import { getLearningStatuses, type LearningStatus } from "./statuses.ts";
 import { getDueReviews, type ReviewStorage } from "./reviews.ts";
@@ -6,7 +10,7 @@ import { getDueReviews, type ReviewStorage } from "./reviews.ts";
 export type DashboardWordStatus = LearningStatus | "new";
 
 export interface DashboardWord {
-  entry: DictionaryEntry;
+  entry: LanguagePairEntry;
   encounter: WordEncounter;
   status: DashboardWordStatus;
   due: boolean;
@@ -23,13 +27,14 @@ export interface VocabularyDashboardSnapshot {
 export async function getVocabularyDashboardSnapshot(
   storage: ReviewStorage = chrome.storage.local,
   now = Date.now(),
+  pair: LanguagePair = englishToSpanishPair,
 ): Promise<VocabularyDashboardSnapshot> {
   const [encounters, statuses, dueReviews] = await Promise.all([
     getEncounteredWords(storage),
     getLearningStatuses(storage),
-    getDueReviews(storage, now),
+    getDueReviews(storage, now, pair),
   ]);
-  const entriesById = new Map(dictionaryEntries.map((entry) => [entry.id, entry]));
+  const entriesById = new Map(pair.entries.map((entry) => [entry.id, entry]));
   const dueIds = new Set(dueReviews.map(({ entry }) => entry.id));
   const words: DashboardWord[] = [];
 
@@ -47,7 +52,7 @@ export async function getVocabularyDashboardSnapshot(
   words.sort(
     (left, right) =>
       right.encounter.lastSeenAt - left.encounter.lastSeenAt ||
-      left.entry.english.localeCompare(right.entry.english),
+      left.entry.sourceText.localeCompare(right.entry.sourceText),
   );
 
   return {

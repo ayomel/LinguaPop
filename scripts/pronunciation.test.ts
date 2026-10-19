@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { dictionaryEntries } from "../src/data/dictionary.ts";
+import { englishToSpanishPair } from "../src/data/language-pairs.ts";
 import { applyWordReplacements } from "../src/content/replacements.ts";
 import { initializeTranslationTooltip } from "../src/content/tooltip.ts";
 
@@ -50,7 +50,7 @@ test("speaks the Spanish word only after the user presses Speak Spanish", () => 
   const window = createPage();
   const synthesis = new FakeSpeechSynthesis();
   synthesis.voices = [spanishVoice("es-ES"), spanishVoice("en-US", "English")];
-  const controller = initializeTranslationTooltip(window.document, dictionaryEntries, {
+  const controller = initializeTranslationTooltip(window.document, englishToSpanishPair, {
     speechSynthesis: synthesis,
     createUtterance,
   });
@@ -74,7 +74,7 @@ test("uses a Spanish voice when an es-ES voice is not installed", () => {
   const window = createPage();
   const synthesis = new FakeSpeechSynthesis();
   synthesis.voices = [spanishVoice("en-US", "English"), spanishVoice("es-MX", "Mexican Spanish")];
-  const controller = initializeTranslationTooltip(window.document, dictionaryEntries, {
+  const controller = initializeTranslationTooltip(window.document, englishToSpanishPair, {
     speechSynthesis: synthesis,
     createUtterance,
   });
@@ -90,7 +90,7 @@ test("uses a Spanish voice when an es-ES voice is not installed", () => {
 
 test("shows a helpful state when speech or a Spanish voice is unavailable", () => {
   const unsupported = createPage();
-  const unsupportedController = initializeTranslationTooltip(unsupported.document, dictionaryEntries, {
+  const unsupportedController = initializeTranslationTooltip(unsupported.document, englishToSpanishPair, {
     speechSynthesis: null,
     createUtterance,
   });
@@ -104,7 +104,7 @@ test("shows a helpful state when speech or a Spanish voice is unavailable", () =
   const noVoice = createPage();
   const synthesis = new FakeSpeechSynthesis();
   synthesis.voices = [spanishVoice("en-US", "English")];
-  const noVoiceController = initializeTranslationTooltip(noVoice.document, dictionaryEntries, {
+  const noVoiceController = initializeTranslationTooltip(noVoice.document, englishToSpanishPair, {
     speechSynthesis: synthesis,
     createUtterance,
   });
@@ -120,7 +120,7 @@ test("stops current speech when the user opens another replaced word", () => {
   const window = createPage();
   const synthesis = new FakeSpeechSynthesis();
   synthesis.voices = [spanishVoice("es-ES")];
-  const controller = initializeTranslationTooltip(window.document, dictionaryEntries, {
+  const controller = initializeTranslationTooltip(window.document, englishToSpanishPair, {
     speechSynthesis: synthesis,
     createUtterance,
   });

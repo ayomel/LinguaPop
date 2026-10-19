@@ -1,5 +1,6 @@
 import { isDifficulty, normalizeHostname, readSettings, type SettingsStorage } from "./settings.ts";
 import { initializeReviewCard } from "./learning/review-card.ts";
+import { englishToSpanishPair, type LanguagePair } from "./data/language-pairs.ts";
 
 interface ActiveTabProvider {
   query(queryInfo: { active: true; lastFocusedWindow: true }): Promise<Array<{ url?: string }>>;
@@ -9,7 +10,12 @@ export async function initializePopup(
   root: Document = document,
   storage: SettingsStorage = chrome.storage.local,
   tabs: ActiveTabProvider = chrome.tabs,
+  pair: LanguagePair = englishToSpanishPair,
 ): Promise<void> {
+  const intro = root.querySelector<HTMLElement>("#pair-intro");
+  const enabledDescription = root.querySelector<HTMLElement>("#enabled-description");
+  const percentageDescription = root.querySelector<HTMLElement>("#percentage-description");
+  const reviewReveal = root.querySelector<HTMLButtonElement>("#review-reveal");
   const toggle = root.querySelector<HTMLInputElement>("#enabled-toggle");
   const siteToggle = root.querySelector<HTMLInputElement>("#site-enabled-toggle");
   const siteHostnameLabel = root.querySelector<HTMLElement>("#site-hostname");
@@ -33,6 +39,15 @@ export async function initializePopup(
   ) {
     throw new Error("LinguaPop popup controls are missing.");
   }
+
+  if (intro) intro.textContent = `${pair.targetLanguage.name} vocabulary for your everyday browsing.`;
+  if (enabledDescription) {
+    enabledDescription.textContent = `Replace some ${pair.sourceLanguage.name} words and phrases with ${pair.targetLanguage.name} as you browse.`;
+  }
+  if (percentageDescription) {
+    percentageDescription.textContent = `Choose how many eligible ${pair.sourceLanguage.name} words and phrases to replace.`;
+  }
+  if (reviewReveal) reviewReveal.textContent = `Reveal ${pair.targetLanguage.name}`;
 
   let currentEnabled = true;
   let savedPercentage = 5;
@@ -203,6 +218,6 @@ export async function initializePopup(
 }
 
 if (typeof chrome !== "undefined" && chrome.storage && chrome.tabs) {
-  void initializePopup(document, chrome.storage.local, chrome.tabs);
-  void initializeReviewCard(document, chrome.storage.local);
+  void initializePopup(document, chrome.storage.local, chrome.tabs, englishToSpanishPair);
+  void initializeReviewCard(document, chrome.storage.local, Date.now, englishToSpanishPair);
 }
