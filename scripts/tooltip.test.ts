@@ -41,23 +41,40 @@ test("clicking a replacement opens a translation inside an isolated shadow root"
   window.close();
 });
 
-test("Escape and outside clicks dismiss the tooltip", () => {
+test("Escape dismisses the tooltip and restores focus", () => {
   const window = createPage();
   const controller = initializeTranslationTooltip(window.document);
   const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
-  const outside = window.document.querySelector("p:last-child")!;
 
   click(window, replacement);
   assert.ok(window.document.querySelector("[data-linguapop-tooltip]"));
   window.document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   assert.equal(window.document.querySelector("[data-linguapop-tooltip]"), null);
   assert.equal(window.document.activeElement, replacement);
+  controller.dispose();
+  window.close();
+});
+
+test("close button dismisses the tooltip and restores focus", () => {
+  const window = createPage();
+  const controller = initializeTranslationTooltip(window.document);
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
 
   click(window, replacement);
-  const closeButton = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot?.querySelector("button");
+  const closeButton = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot?.querySelector("button:last-child");
   assert.ok(closeButton);
   closeButton.click();
   assert.equal(window.document.querySelector("[data-linguapop-tooltip]"), null);
+  assert.equal(window.document.activeElement, replacement);
+  controller.dispose();
+  window.close();
+});
+
+test("outside clicks dismiss the tooltip", () => {
+  const window = createPage();
+  const controller = initializeTranslationTooltip(window.document);
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
+  const outside = window.document.querySelector("p:last-child")!;
 
   click(window, replacement);
   click(window, outside);

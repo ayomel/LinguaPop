@@ -6,6 +6,11 @@ export interface TranslationTooltipController {
   dispose(): void;
 }
 
+export interface TooltipSpeechOptions {
+  speechSynthesis?: SpeechSynthesis | null;
+  createUtterance?: (text: string) => SpeechSynthesisUtterance;
+}
+
 function getReplacement(target: EventTarget | null): HTMLElement | undefined {
   if (!target || typeof target !== "object" || !("nodeType" in target)) return undefined;
   const element = target as Element;
@@ -16,11 +21,25 @@ function getReplacement(target: EventTarget | null): HTMLElement | undefined {
 export function initializeTranslationTooltip(
   document: Document = window.document,
   entries: readonly DictionaryEntry[] = dictionaryEntries,
+  speechOptions: TooltipSpeechOptions = {},
 ): TranslationTooltipController {
+  const speechSynthesis =
+    speechOptions.speechSynthesis === undefined
+      ? document.defaultView?.speechSynthesis
+      : speechOptions.speechSynthesis ?? undefined;
+  const createUtterance =
+    speechOptions.createUtterance ?? ((text: string) => new SpeechSynthesisUtterance(text));
   let host: HTMLDivElement | undefined;
   let currentTrigger: HTMLElement | undefined;
 
   const close = (restoreFocus = false): void => {
+    if (host) {
+      try {
+        speechSynthesis?.cancel();
+      } catch {
+        // Speech synthesis may fail in a restricted browser context.
+      }
+    }
     const trigger = currentTrigger;
     host?.remove();
     host = undefined;
@@ -101,6 +120,44 @@ export function initializeTranslationTooltip(
       card.append(pronunciation);
     }
 
+    const speechButton = document.createElement("button");
+    speechButton.className = "speak";
+    speechButton.type = "button";
+    speechButton.textContent = "Speak Spanish";
+    const speechStatus = document.createElement("p");
+    speechStatus.setAttribute("role", "status");
+    speechStatus.setAttribute("aria-live", "polite");
+    if (!speechSynthesis) {
+      speechButton.disabled = true;
+      speechStatus.textContent = "Speech synthesis is not available in this browser.";
+    } else {
+      speechButton.addEventListener("click", () => {
+        try {
+          const voices = speechSynthesis.getVoices();
+          const voice =
+            voices.find((candidate) => candidate.lang.toLowerCase() === "es-es") ??
+            voices.find((candidate) => /^es[-_]/i.test(candidate.lang));
+          if (!voice) {
+            speechStatus.textContent = "No Spanish voice is available in this browser.";
+            return;
+          }
+
+          speechSynthesis.cancel();
+          const utterance = createUtterance(entry.spanish);
+          utterance.lang = "es-ES";
+          utterance.voice = voice;
+          utterance.onerror = () => {
+            speechStatus.textContent = "Could not play the Spanish pronunciation. Try again.";
+          };
+          speechStatus.textContent = `Speaking ${entry.spanish}.`;
+          speechSynthesis.speak(utterance);
+        } catch {
+          speechStatus.textContent = "Could not play the Spanish pronunciation. Try again.";
+        }
+      });
+    }
+    card.append(speechButton, speechStatus);
+
     const closeButton = document.createElement("button");
     closeButton.type = "button";
     closeButton.textContent = "Close translation";
@@ -121,7 +178,13 @@ export function initializeTranslationTooltip(
       return;
     }
 
-    if (host && !host.contains(event.target as Node)) close();
+    if (
+      host &&
+      !host.contains(event.target as Node) &&
+      !host.shadowRoot?.contains(event.target as Node)
+    ) {
+      close();
+    }
   };
 
   const onKeyDown = (event: KeyboardEvent): void => {
