@@ -1,3 +1,3 @@
-import { applyWordReplacements } from "./content/replacements.ts";
+import { startContentSettings } from "./content/settings.ts";
 
-applyWordReplacements(document.body);
+startContentSettings(document.body);
