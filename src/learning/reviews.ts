@@ -80,10 +80,10 @@ export async function getReviewSchedules(
   return readReviewSchedules(stored[REVIEW_SCHEDULES_KEY]);
 }
 
-export async function getNextDueReview(
+export async function getDueReviews(
   storage: ReviewStorage = chrome.storage.local,
   now = Date.now(),
-): Promise<DueReview | undefined> {
+): Promise<DueReview[]> {
   const [encounters, schedules] = await Promise.all([
     getEncounteredWords(storage),
     getReviewSchedules(storage),
@@ -100,7 +100,14 @@ export async function getNextDueReview(
   }
 
   dueReviews.sort((left, right) => left.nextDueAt - right.nextDueAt || left.entry.id.localeCompare(right.entry.id));
-  return dueReviews[0];
+  return dueReviews;
+}
+
+export async function getNextDueReview(
+  storage: ReviewStorage = chrome.storage.local,
+  now = Date.now(),
+): Promise<DueReview | undefined> {
+  return (await getDueReviews(storage, now))[0];
 }
 
 const pendingWrites = new WeakMap<object, Promise<void>>();

@@ -29,6 +29,19 @@ p {
   margin: 0.5rem 0 1.25rem;
 }
 
+.dashboard-link {
+  display: inline-block;
+  margin: 0 0 1rem;
+  color: #176b52;
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.dashboard-link:focus-visible {
+  outline: 3px solid #7eb69f;
+  outline-offset: 3px;
+}
+
 .learning-review {
   padding: 0.875rem;
   border: 1px solid #c8d8cc;

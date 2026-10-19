@@ -25,7 +25,7 @@ pnpm build
 
 Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and select the `dist` directory.
 
-The extension popup controls replacement settings and offers a quick review for encountered vocabulary. The content script safely processes eligible webpage text and leaves form fields, editable content, code, and interactive controls unchanged.
+The extension popup controls replacement settings and offers a quick review for encountered vocabulary. Open the vocabulary dashboard from the popup to see learning counts and review your encountered word list. The content script safely processes eligible webpage text and leaves form fields, editable content, code, and interactive controls unchanged.
 
 ## Review schedule
 
