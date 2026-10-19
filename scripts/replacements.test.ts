@@ -1,0 +1,87 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { Window } from "happy-dom";
+import {
+  applyWordReplacements,
+  restoreWordReplacements,
+} from "../src/content/replacements.ts";
+
+function createPage(markup: string) {
+  const window = new Window({ url: "https://example.test/article?section=1" });
+  window.document.body.innerHTML = markup;
+  return window;
+}
+
+function matchingWords(): string {
+  return Array.from({ length: 20 }, (_, index) => (index % 2 === 0 ? "Apple" : "APPLE")).join(", ");
+}
+
+function replacementKeys(document: Document): string[] {
+  return Array.from(
+    document.querySelectorAll<HTMLElement>("[data-linguapop-replacement='true']"),
+    (element) => element.dataset.linguapopKey ?? "",
+  );
+}
+
+test("replaces a deterministic percentage of whole dictionary matches", () => {
+  const originalMarkup = `<p>${matchingWords()}! pineapple, unApple, and unknown.</p>
+    <button>Apple</button><textarea>Apple</textarea><pre>Apple</pre>
+    <div contenteditable="true">Apple</div>`;
+  const window = createPage(originalMarkup);
+  const { document } = window;
+  const serializedOriginal = document.body.innerHTML;
+
+  const replaced = applyWordReplacements(document.body, { percentage: 30 });
+  const wrappers = document.querySelectorAll("[data-linguapop-replacement='true']");
+
+  assert.equal(replaced, 6);
+  assert.equal(wrappers.length, 6);
+  assert.match(document.body.textContent ?? "", /pineapple, unApple, and unknown\./);
+  assert.equal(document.querySelector("button")?.textContent, "Apple");
+  assert.equal(document.querySelector("textarea")?.textContent, "Apple");
+  assert.equal(document.querySelector("pre")?.textContent, "Apple");
+  assert.equal(document.querySelector("[contenteditable]")?.textContent, "Apple");
+  assert.ok(Array.from(wrappers).every((wrapper) => ["Manzana", "MANZANA"].includes(wrapper.textContent ?? "")));
+
+  assert.equal(restoreWordReplacements(document.body), 6);
+  assert.equal(document.body.innerHTML, serializedOriginal);
+  window.close();
+});
+
+test("reprocessing the same page is idempotent and changing the percentage restores first", () => {
+  const window = createPage(`<p>${matchingWords()}</p>`);
+  const { document } = window;
+
+  assert.equal(applyWordReplacements(document.body, { percentage: 30 }), 6);
+  const firstHtml = document.body.innerHTML;
+  assert.equal(applyWordReplacements(document.body, { percentage: 30 }), 0);
+  assert.equal(document.body.innerHTML, firstHtml);
+
+  assert.equal(applyWordReplacements(document.body, { percentage: 10 }), 2);
+  assert.equal(replacementKeys(document).length, 2);
+  window.close();
+});
+
+test("selects the same words after a page reload and clamps the percentage to 30", () => {
+  const markup = `<p>${matchingWords()}</p>`;
+  const first = createPage(markup);
+  const second = createPage(markup);
+
+  assert.equal(applyWordReplacements(first.document.body, { percentage: 100 }), 6);
+  assert.equal(applyWordReplacements(second.document.body, { percentage: 30 }), 6);
+  assert.deepEqual(replacementKeys(first.document), replacementKeys(second.document));
+  first.close();
+  second.close();
+});
+
+test("zero percent makes no replacements and an explicit restore returns exact text", () => {
+  const markup = `<p>Apple, book! (${matchingWords()})</p>`;
+  const window = createPage(markup);
+  const { document } = window;
+
+  assert.equal(applyWordReplacements(document.body, { percentage: 0 }), 0);
+  assert.equal(document.querySelectorAll("[data-linguapop-replacement]").length, 0);
+  assert.equal(applyWordReplacements(document.body, { percentage: -5 }), 0);
+  assert.equal(document.body.innerHTML, markup);
+  window.close();
+});

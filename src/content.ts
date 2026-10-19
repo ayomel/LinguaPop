@@ -1,2 +1,3 @@
-// Page processing will be added in the next implementation issue.
-export {};
+import { applyWordReplacements } from "./content/replacements.ts";
+
+applyWordReplacements(document.body);

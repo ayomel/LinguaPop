@@ -9,4 +9,11 @@ export default defineManifest({
     default_popup: "index.html",
     default_title: "LinguaPop",
   },
+  content_scripts: [
+    {
+      matches: ["http://*/*", "https://*/*"],
+      js: ["src/content.ts"],
+      run_at: "document_idle",
+    },
+  ],
 });
