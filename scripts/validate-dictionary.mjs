@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 const dictionaryPath = new URL("../src/data/dictionary.json", import.meta.url);
 const allowedPartsOfSpeech = new Set(["noun", "verb", "adjective", "adverb"]);
 const allowedDifficulties = new Set(["beginner", "intermediate", "advanced"]);
+const optionalTextFields = ["exampleSpanish", "exampleEnglish", "grammarNote"];
+const maxOptionalTextLength = 180;
 
 export function validateDictionary(entries) {
   const errors = [];
@@ -33,6 +35,20 @@ export function validateDictionary(entries) {
 
     if (typeof entry.difficulty !== "string" || !allowedDifficulties.has(entry.difficulty)) {
       errors.push(`${label} has an unsupported difficulty.`);
+    }
+
+    for (const field of optionalTextFields) {
+      if (
+        Object.hasOwn(entry, field) &&
+        (typeof entry[field] !== "string" ||
+          entry[field].trim() === "" ||
+          entry[field].length > maxOptionalTextLength)
+      ) {
+        errors.push(`${label} ${field} must be a non-empty string of at most ${maxOptionalTextLength} characters.`);
+      }
+    }
+    if (Object.hasOwn(entry, "exampleSpanish") !== Object.hasOwn(entry, "exampleEnglish")) {
+      errors.push(`${label} exampleSpanish and exampleEnglish must be provided together.`);
     }
 
     if (typeof entry.id === "string" && entry.id.trim() !== "") {

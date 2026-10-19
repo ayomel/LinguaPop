@@ -53,6 +53,72 @@ test("clicking a replacement opens a translation inside an isolated shadow root"
   window.close();
 });
 
+test("tooltip displays available static example and grammar details", () => {
+  const window = createPage();
+  const entries = dictionaryEntries.map((entry) =>
+    entry.id === "en-apple"
+      ? {
+          ...entry,
+          exampleSpanish: "Como una manzana.",
+          exampleEnglish: "I eat an apple.",
+          grammarNote: "Manzana is feminine; use una.",
+        }
+      : entry,
+  );
+  const controller = initializeTranslationTooltip(window.document, entries);
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
+
+  click(window, replacement);
+  const shadow = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
+  assert.equal(shadow.querySelector('[data-tooltip-example="spanish"]')?.textContent, "Como una manzana.");
+  assert.equal(shadow.querySelector('[data-tooltip-example="english"]')?.textContent, "I eat an apple.");
+  assert.match(shadow.querySelector('[data-tooltip-example="grammar"]')?.textContent ?? "", /feminine/i);
+  controller.dispose();
+  window.close();
+});
+
+test("tooltip omits example details when an entry has none", () => {
+  const window = createPage();
+  const entries = dictionaryEntries.map((entry) =>
+    entry.id === "en-apple"
+      ? { ...entry, exampleSpanish: undefined, exampleEnglish: undefined, grammarNote: undefined }
+      : entry,
+  );
+  const controller = initializeTranslationTooltip(window.document, entries);
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
+
+  click(window, replacement);
+  const shadow = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
+  assert.equal(shadow.querySelector('[data-tooltip-example="spanish"]'), null);
+  assert.equal(shadow.querySelector('[data-tooltip-example="english"]'), null);
+  assert.equal(shadow.querySelector('[data-tooltip-example="grammar"]'), null);
+  controller.dispose();
+  window.close();
+});
+
+test("tooltip displays a grammar note even when an example is not supplied", () => {
+  const window = createPage();
+  const entries = dictionaryEntries.map((entry) =>
+    entry.id === "en-apple"
+      ? {
+          ...entry,
+          exampleSpanish: undefined,
+          exampleEnglish: undefined,
+          grammarNote: "Manzana is feminine.",
+        }
+      : entry,
+  );
+  const controller = initializeTranslationTooltip(window.document, entries);
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-replacement]")!;
+
+  click(window, replacement);
+  const shadow = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
+  assert.equal(shadow.querySelector('[data-tooltip-example="spanish"]'), null);
+  assert.match(shadow.querySelector('[data-tooltip-example="grammar"]')?.textContent ?? "", /feminine/i);
+  controller.dispose();
+  window.close();
+});
+
 test("Escape dismisses the tooltip and restores focus", () => {
   const window = createPage();
   const controller = initializeTranslationTooltip(window.document);

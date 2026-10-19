@@ -99,6 +99,8 @@ export function initializeTranslationTooltip(
       h2 { margin: 0 0 8px; color: #176b52; font-size: 16px; }
       p { margin: 6px 0; }
       .label { color: #536159; font-size: 12px; }
+      .example { margin-top: 12px; padding-top: 8px; border-top: 1px solid #e3ebe5; }
+      .example p { overflow-wrap: anywhere; }
       button {
         margin-top: 10px;
         padding: 5px 9px;
@@ -135,6 +137,35 @@ export function initializeTranslationTooltip(
       const pronunciation = document.createElement("p");
       pronunciation.textContent = `Pronunciation: ${entry.pronunciation}`;
       card.append(pronunciation);
+    }
+
+    if ((entry.exampleSpanish && entry.exampleEnglish) || entry.grammarNote) {
+      const example = document.createElement("section");
+      example.className = "example";
+      if (entry.exampleSpanish && entry.exampleEnglish) {
+        const exampleHeading = document.createElement("p");
+        exampleHeading.className = "label";
+        exampleHeading.textContent = "Example";
+        const exampleSpanish = document.createElement("p");
+        exampleSpanish.lang = "es";
+        exampleSpanish.dataset.tooltipExample = "spanish";
+        exampleSpanish.textContent = entry.exampleSpanish;
+        const exampleEnglish = document.createElement("p");
+        exampleEnglish.dataset.tooltipExample = "english";
+        exampleEnglish.textContent = entry.exampleEnglish;
+        example.append(exampleHeading, exampleSpanish, exampleEnglish);
+      }
+
+      if (entry.grammarNote) {
+        const grammarNote = document.createElement("p");
+        const grammarHeading = document.createElement("span");
+        grammarHeading.className = "label";
+        grammarHeading.textContent = "Grammar: ";
+        grammarNote.dataset.tooltipExample = "grammar";
+        grammarNote.append(grammarHeading, document.createTextNode(entry.grammarNote));
+        example.append(grammarNote);
+      }
+      card.append(example);
     }
 
     const speechButton = document.createElement("button");
