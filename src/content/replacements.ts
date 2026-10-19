@@ -1,4 +1,5 @@
-import { dictionaryEntries, type DictionaryEntry, type Difficulty } from "../data/dictionary.ts";
+import { dictionaryEntries, type DictionaryEntry, type Difficulty, type TranslationEntry } from "../data/dictionary.ts";
+import { phraseEntries, type PhraseEntry } from "../data/phrases.ts";
 import { getEligibleTextNodes } from "./dom.ts";
 
 const replacementSelector = '[data-linguapop-replacement="true"]';
@@ -9,6 +10,7 @@ type ReplacementRoot = Document | DocumentFragment | Element | Text;
 export interface ReplacementOptions {
   percentage?: number;
   entries?: readonly DictionaryEntry[];
+  phraseEntries?: readonly PhraseEntry[];
   difficulty?: Difficulty;
   onReplacement?: (entry: DictionaryEntry) => void;
 }
@@ -18,7 +20,8 @@ interface Candidate {
   start: number;
   end: number;
   original: string;
-  entry: DictionaryEntry;
+  entry: TranslationEntry;
+  dictionaryEntry?: DictionaryEntry;
   key: string;
   rank: number;
 }
@@ -58,8 +61,8 @@ function getReplacementElements(root: ReplacementRoot): HTMLElement[] {
   return [...matchesRoot, ...descendants];
 }
 
-function createMatcher(entries: readonly DictionaryEntry[]) {
-  const entriesByEnglish = new Map<string, DictionaryEntry>();
+function createMatcher(entries: readonly TranslationEntry[]) {
+  const entriesByEnglish = new Map<string, TranslationEntry>();
   for (const entry of entries) {
     const english = entry.english.trim().toLocaleLowerCase("en");
     if (english && !entriesByEnglish.has(english)) entriesByEnglish.set(english, entry);
@@ -80,7 +83,8 @@ function createMatcher(entries: readonly DictionaryEntry[]) {
 
 function getCandidates(
   root: ReplacementRoot,
-  entries: readonly DictionaryEntry[],
+  entries: readonly TranslationEntry[],
+  dictionaryEntryIds: ReadonlySet<string>,
 ): Candidate[] {
   const { entriesByEnglish, pattern } = createMatcher(entries);
   if (!pattern) return [];
@@ -105,6 +109,7 @@ function getCandidates(
           end: match.index + original.length,
           original,
           entry,
+          dictionaryEntry: dictionaryEntryIds.has(entry.id) ? (entry as DictionaryEntry) : undefined,
           key,
           rank: hash(`${pageKey}|${key}`),
         });
@@ -165,7 +170,7 @@ function replaceNodeMatches(
     replacement.setAttribute("tabindex", "0");
     replacement.setAttribute(
       "aria-label",
-      `Spanish word ${match.entry.spanish}. Show English translation for ${match.original}.`,
+      `Spanish ${match.entry.partOfSpeech ? "word" : "phrase"} ${match.entry.spanish}. Show English translation for ${match.original}.`,
     );
     replacement.textContent = preserveWordCase(match.original, match.entry.spanish);
     fragment.append(replacement);
@@ -200,10 +205,18 @@ export function applyWordReplacements(
   if (percentage === 0) return 0;
 
   const entries = options.entries ?? dictionaryEntries;
+  const phrases = options.phraseEntries ?? phraseEntries;
   const eligibleEntries = options.difficulty
     ? entries.filter((entry) => entry.difficulty === options.difficulty)
     : entries;
-  const candidates = getCandidates(root, eligibleEntries);
+  const eligiblePhrases = options.difficulty
+    ? phrases.filter((entry) => entry.difficulty === options.difficulty)
+    : phrases;
+  const candidates = getCandidates(
+    root,
+    [...eligiblePhrases, ...eligibleEntries],
+    new Set(eligibleEntries.map((entry) => entry.id)),
+  );
   const targetCount = Math.floor((candidates.length * percentage) / 100);
   const selected = candidates
     .sort((left, right) => left.rank - right.rank || (left.key < right.key ? -1 : left.key > right.key ? 1 : 0))
@@ -218,7 +231,9 @@ export function applyWordReplacements(
 
   for (const [node, matches] of selectedByNode) {
     replaceNodeMatches(node, matches, percentage, difficulty);
-    for (const match of matches) options.onReplacement?.(match.entry);
+    for (const match of matches) {
+      if (match.dictionaryEntry) options.onReplacement?.(match.dictionaryEntry);
+    }
   }
 
   return selected.length;

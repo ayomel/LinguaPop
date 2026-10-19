@@ -1,0 +1,14 @@
+[
+  { "id": "phrase-good-morning", "english": "good morning", "spanish": "buenos días", "difficulty": "beginner" },
+  { "id": "phrase-good-afternoon", "english": "good afternoon", "spanish": "buenas tardes", "difficulty": "beginner" },
+  { "id": "phrase-good-evening", "english": "good evening", "spanish": "buenas noches", "difficulty": "beginner" },
+  { "id": "phrase-good-night", "english": "good night", "spanish": "buenas noches", "difficulty": "beginner" },
+  { "id": "phrase-thank-you", "english": "thank you", "spanish": "gracias", "difficulty": "beginner" },
+  { "id": "phrase-you-are-welcome", "english": "you're welcome", "spanish": "de nada", "difficulty": "beginner" },
+  { "id": "phrase-how-are-you", "english": "how are you", "spanish": "cómo estás", "difficulty": "beginner" },
+  { "id": "phrase-nice-to-meet-you", "english": "nice to meet you", "spanish": "mucho gusto", "difficulty": "beginner" },
+  { "id": "phrase-see-you-soon", "english": "see you soon", "spanish": "hasta pronto", "difficulty": "beginner" },
+  { "id": "phrase-see-you-later", "english": "see you later", "spanish": "hasta luego", "difficulty": "beginner" },
+  { "id": "phrase-have-a-nice-day", "english": "have a nice day", "spanish": "que tengas un buen día", "difficulty": "intermediate" },
+  { "id": "phrase-i-am-sorry", "english": "i am sorry", "spanish": "lo siento", "difficulty": "beginner" }
+]

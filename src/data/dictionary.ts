@@ -3,7 +3,7 @@ import dictionaryData from "./dictionary.json";
 export type PartOfSpeech = "noun" | "verb" | "adjective" | "adverb";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 
-export interface DictionaryEntry {
+export interface TranslationEntry {
   id: string;
   english: string;
   spanish: string;
@@ -11,6 +11,11 @@ export interface DictionaryEntry {
   exampleSpanish?: string;
   exampleEnglish?: string;
   grammarNote?: string;
+  partOfSpeech?: PartOfSpeech;
+  difficulty?: Difficulty;
+}
+
+export interface DictionaryEntry extends TranslationEntry {
   partOfSpeech: PartOfSpeech;
   difficulty: Difficulty;
 }
