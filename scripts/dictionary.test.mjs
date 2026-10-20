@@ -13,10 +13,10 @@ const validEntry = {
   difficulty: "beginner",
 };
 
-test("starter dictionary has 120 valid offline entries", async () => {
+test("dictionary has 220 valid offline entries", async () => {
   const entries = JSON.parse(await readFile(dictionaryPath, "utf8"));
 
-  assert.equal(entries.length, 120);
+  assert.equal(entries.length, 220);
   assert.deepEqual(validateDictionary(entries), []);
   assert.ok(entries.filter((entry) => entry.exampleSpanish && entry.exampleEnglish).length >= 10);
 });
