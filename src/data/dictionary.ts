@@ -1,6 +1,15 @@
 import dictionaryData from "./dictionary.json";
 
-export type PartOfSpeech = "noun" | "verb" | "adjective" | "adverb" | "pronoun";
+export type PartOfSpeech =
+  | "noun"
+  | "verb"
+  | "adjective"
+  | "adverb"
+  | "pronoun"
+  | "auxiliary"
+  | "conjunction"
+  | "determiner"
+  | "preposition";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 export type VocabularyDifficulty = Difficulty | "all";
 

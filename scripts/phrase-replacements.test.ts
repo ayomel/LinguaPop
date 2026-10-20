@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import { applyWordReplacements, restoreWordReplacements } from "../src/content/replacements.ts";
+import { dictionaryEntries } from "../src/data/dictionary.ts";
 import { createEnglishToSpanishPair } from "../src/data/language-pairs.ts";
 import { phraseEntries } from "../src/data/phrases.ts";
 
@@ -157,5 +158,19 @@ test("the plural you-all phrase takes priority over standalone you", () => {
   const replacements = Array.from(window.document.querySelectorAll<HTMLElement>("[data-linguapop-replacement='true']"));
   assert.ok(replacements.every((replacement) => replacement.dataset.linguapopEntryId === phrase.id));
   assert.ok(replacements.every((replacement) => replacement.textContent === "ustedes"));
+  window.close();
+});
+
+test("a fixed have phrase takes priority over its individual word entries", () => {
+  const phrase = phraseEntries.find((entry) => entry.english === "I have a question");
+  assert.ok(phrase);
+  const pair = createEnglishToSpanishPair(dictionaryEntries, [phrase]);
+  const window = new Window();
+  window.document.body.innerHTML = `<p>${Array.from({ length: 10 }, () => "I have a question").join("! ")}</p>`;
+
+  assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair }), 3);
+  const replacements = Array.from(window.document.querySelectorAll<HTMLElement>("[data-linguapop-replacement='true']"));
+  assert.ok(replacements.every((replacement) => replacement.dataset.linguapopEntryId === phrase.id));
+  assert.ok(replacements.every((replacement) => replacement.textContent === "Tengo una pregunta"));
   window.close();
 });

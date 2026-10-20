@@ -35,5 +35,11 @@
   { "id": "phrase-im-cold-curly", "english": "I’m cold", "spanish": "tengo frío", "difficulty": "beginner" },
   { "id": "phrase-you-will-be-happy", "english": "you will be happy", "spanish": "estarás feliz", "difficulty": "beginner" },
   { "id": "phrase-he-will-be-happy", "english": "he will be happy", "spanish": "estará feliz", "difficulty": "beginner" },
-  { "id": "phrase-you-have-got-a-book", "english": "you have got a book", "spanish": "tienes un libro", "difficulty": "beginner" }
+  { "id": "phrase-you-have-got-a-book", "english": "you have got a book", "spanish": "tienes un libro", "difficulty": "beginner" },
+  { "id": "phrase-what-do-you-want", "english": "what do you want?", "spanish": "¿Qué quieres?", "difficulty": "beginner" },
+  { "id": "phrase-i-had-a-good-day", "english": "I had a good day", "spanish": "tuve un buen día", "difficulty": "beginner" },
+  { "id": "phrase-i-have-a-question", "english": "I have a question", "spanish": "tengo una pregunta", "difficulty": "beginner" },
+  { "id": "phrase-that-is-good", "english": "that is good", "spanish": "eso está bien", "difficulty": "beginner" },
+  { "id": "phrase-where-are-you-going", "english": "where are you going?", "spanish": "¿Adónde vas?", "difficulty": "beginner" },
+  { "id": "phrase-i-will-go", "english": "I will go", "spanish": "iré", "difficulty": "beginner" }
 ]

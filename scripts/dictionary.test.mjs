@@ -13,14 +13,16 @@ const validEntry = {
   difficulty: "beginner",
 };
 
-test("dictionary has 506 valid offline entries including subject pronouns", async () => {
+test("dictionary has 551 valid offline entries including common question and auxiliary words", async () => {
   const entries = JSON.parse(await readFile(dictionaryPath, "utf8"));
 
-  assert.equal(entries.length, 506);
+  assert.equal(entries.length, 551);
   assert.deepEqual(validateDictionary(entries), []);
   assert.ok(entries.filter((entry) => entry.exampleSpanish && entry.exampleEnglish).length >= 10);
   assert.deepEqual(
-    entries.filter((entry) => entry.partOfSpeech === "pronoun").map(({ english, spanish }) => [english, spanish]),
+    entries
+      .filter((entry) => ["I", "you", "he", "she", "we", "they"].includes(entry.english))
+      .map(({ english, spanish }) => [english, spanish]),
     [["I", "yo"], ["you", "tú"], ["he", "él"], ["she", "ella"], ["we", "nosotros"], ["they", "ellos"]],
   );
 });
@@ -28,8 +30,48 @@ test("dictionary has 506 valid offline entries including subject pronouns", asyn
 test("phrase dictionary stays separate and contains valid, unique phrase entries", async () => {
   const phrases = JSON.parse(await readFile(phraseDictionaryPath, "utf8"));
 
-  assert.equal(phrases.length, 37);
+  assert.equal(phrases.length, 43);
   assert.deepEqual(validatePhraseDictionary(phrases), []);
+});
+
+test("the common-word expansion covers all 50 selected terms", async () => {
+  const entries = JSON.parse(await readFile(dictionaryPath, "utf8"));
+  const phrases = JSON.parse(await readFile(phraseDictionaryPath, "utf8"));
+  const targets = `what had have that going who when where why which this these those do does did be is are was were has will would can could should must know think make get go come see say give take because but and or if with from before after about more most`.split(" ");
+  const wordEntries = new Set(entries.map(({ english }) => english.toLocaleLowerCase("en")));
+
+  assert.equal(targets.length, 50);
+  for (const target of targets) {
+    const hasWordEntry = wordEntries.has(target);
+    const hasPhraseCoverage = phrases.some(({ english }) =>
+      new RegExp(`\\b${target}\\b`, "i").test(english),
+    );
+    assert.ok(hasWordEntry || hasPhraseCoverage, `Expected coverage for ${target}`);
+  }
+
+  for (const phraseOnlyWord of ["had", "have", "that", "going", "will"]) {
+    assert.ok(!wordEntries.has(phraseOnlyWord), `Expected ${phraseOnlyWord} to use phrase context`);
+    assert.ok(
+      phrases.some(({ english }) => new RegExp(`\\b${phraseOnlyWord}\\b`, "i").test(english)),
+      `Expected a fixed phrase for ${phraseOnlyWord}`,
+    );
+  }
+});
+
+test("context phrases give fixed translations for the five example words", async () => {
+  const phrases = JSON.parse(await readFile(phraseDictionaryPath, "utf8"));
+  const expected = new Map([
+    ["what do you want?", "¿Qué quieres?"],
+    ["I had a good day", "tuve un buen día"],
+    ["I have a question", "tengo una pregunta"],
+    ["that is good", "eso está bien"],
+    ["where are you going?", "¿Adónde vas?"],
+    ["I will go", "iré"],
+  ]);
+  const matching = phrases.filter(({ english }) => expected.has(english));
+
+  assert.equal(matching.length, expected.size);
+  for (const phrase of matching) assert.equal(phrase.spanish, expected.get(phrase.english));
 });
 
 test("everyday phrase entries include fixed context and each apostrophe style", async () => {
@@ -68,6 +110,17 @@ test("phrase validation rejects duplicate IDs, duplicate English, and unsupporte
 
 test("accepts dictionary entries with the required fields", () => {
   assert.deepEqual(validateDictionary([validEntry]), []);
+});
+
+test("accepts precise function-word categories", () => {
+  const entries = ["auxiliary", "conjunction", "determiner", "preposition"].map((partOfSpeech) => ({
+    ...validEntry,
+    id: `en-${partOfSpeech}`,
+    english: partOfSpeech,
+    partOfSpeech,
+  }));
+
+  assert.deepEqual(validateDictionary(entries), []);
 });
 
 test("accepts complete optional example and grammar fields", () => {
