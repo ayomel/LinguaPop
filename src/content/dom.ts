@@ -61,11 +61,39 @@ function isExcludedElement(element: Element): boolean {
   return tabIndex !== null && tabIndex !== "-1";
 }
 
+function isAnonPastePasteText(node: Node): boolean {
+  const element = node.parentElement;
+  const view = element?.ownerDocument.defaultView;
+  if (
+    !element ||
+    !["anonpaste.com", "www.anonpaste.com"].includes(view?.location.hostname ?? "") ||
+    !view?.location.pathname.startsWith("/l/")
+  ) {
+    return false;
+  }
+
+  const line = element.closest("span.quick-view-source__line-text");
+  return Boolean(
+    line?.closest("code") &&
+      line.closest("pre.quick-view-source__code") &&
+      line.closest(".quick-view-source--without-line-numbers") &&
+      line.closest(".quick-view-content--source") &&
+      line.closest("article.quick-view-document") &&
+      line.closest("main.quick-view-page"),
+  );
+}
+
 function isExcludedTextNode(node: Node, root: Node): boolean {
   let element = node.parentElement;
+  const isAnonPasteText = isAnonPastePasteText(node);
 
   while (element) {
-    if (isExcludedElement(element)) return true;
+    if (
+      isExcludedElement(element) &&
+      !(isAnonPasteText && (element.tagName === "PRE" || element.tagName === "CODE"))
+    ) {
+      return true;
+    }
     if (element === root) break;
     element = element.parentElement;
   }
