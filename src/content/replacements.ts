@@ -32,6 +32,43 @@ function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function getPhraseSourceVariants(sourceText: string): string[] {
+  const subjectAuxiliary = /\b(i|you|he|she|it|we|they)\s+(am|are|is|have|has|will|would|had)\b/giu;
+  const matches = [...sourceText.matchAll(subjectAuxiliary)];
+  if (matches.length === 0) return [sourceText];
+
+  const getContractedForms = (text: string): string[] => {
+    const [subject, auxiliary] = text.toLocaleLowerCase("en").split(/\s+/);
+    const suffix = {
+      am: subject === "i" ? "m" : undefined,
+      are: ["you", "we", "they"].includes(subject ?? "") ? "re" : undefined,
+      is: ["he", "she", "it"].includes(subject ?? "") ? "s" : undefined,
+      have: "ve",
+      has: ["he", "she", "it"].includes(subject ?? "") ? "s" : undefined,
+      will: "ll",
+      would: "d",
+      had: "d",
+    }[auxiliary ?? ""];
+
+    if (!subject || !suffix) return [text.toLocaleLowerCase("en")];
+    return [`${subject}'${suffix}`, `${subject}’${suffix}`];
+  };
+
+  let variants = [""];
+  let cursor = 0;
+  for (const match of matches) {
+    const start = match.index ?? 0;
+    const end = start + match[0].length;
+    const forms = [match[0].toLocaleLowerCase("en"), ...getContractedForms(match[0])];
+    variants = variants.flatMap((variant) =>
+      forms.map((form) => `${variant}${sourceText.slice(cursor, start)}${form}`),
+    );
+    cursor = end;
+  }
+
+  return variants.map((variant) => `${variant}${sourceText.slice(cursor)}`);
+}
+
 function clampPercentage(value: number | undefined): number {
   if (value === undefined || !Number.isFinite(value)) return 5;
   return Math.min(maximumPercentage, Math.max(0, value));
@@ -66,8 +103,16 @@ function getReplacementElements(root: ReplacementRoot): HTMLElement[] {
 function createMatcher(entries: readonly LanguagePairEntry[], sourceLocale: string) {
   const entriesBySourceText = new Map<string, LanguagePairEntry>();
   for (const entry of entries) {
-    const sourceText = entry.sourceText.trim().toLocaleLowerCase(sourceLocale);
-    if (sourceText && !entriesBySourceText.has(sourceText)) entriesBySourceText.set(sourceText, entry);
+    const sourceTexts =
+      entry.kind === "phrase" && sourceLocale.toLocaleLowerCase("en").startsWith("en")
+        ? getPhraseSourceVariants(entry.sourceText)
+        : [entry.sourceText];
+    for (const sourceText of sourceTexts) {
+      const normalizedSourceText = sourceText.trim().toLocaleLowerCase(sourceLocale);
+      if (normalizedSourceText && !entriesBySourceText.has(normalizedSourceText)) {
+        entriesBySourceText.set(normalizedSourceText, entry);
+      }
+    }
   }
 
   const terms = [...entriesBySourceText.keys()].sort(
@@ -77,7 +122,7 @@ function createMatcher(entries: readonly LanguagePairEntry[], sourceLocale: stri
 
   const alternatives = terms.map(escapeRegex).join("|");
   const pattern = new RegExp(
-    `(?<![\\p{L}\\p{N}_])(${alternatives})(?![\\p{L}\\p{N}_])`,
+    `(?<![\\p{L}\\p{N}_'’])(${alternatives})(?![\\p{L}\\p{N}_'’])`,
     "giu",
   );
   return { entriesBySourceText, pattern };
