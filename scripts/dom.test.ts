@@ -65,3 +65,47 @@ test("TreeWalker skips nested interactive controls and all editable modes", () =
   );
   window.close();
 });
+
+test("TreeWalker includes prose in AnonPaste quick-view text while excluding other code blocks", () => {
+  const window = new Window({ url: "https://anonpaste.com/l/example" });
+  window.document.body.innerHTML = `
+    <main class="quick-view-page">
+      <article class="quick-view-document">
+        <div class="quick-view-content quick-view-content--source">
+          <div class="quick-view-source quick-view-source--without-line-numbers">
+            <pre class="quick-view-source__code"><code>
+              <span class="quick-view-source__row"><span class="quick-view-source__line-text">You'll be happy to see everyone.</span></span>
+            </code></pre>
+          </div>
+        </div>
+      </article>
+    </main>
+    <pre><code>const greeting = "hello";</code></pre>
+  `;
+
+  assert.deepEqual(
+    getEligibleTextNodes(window.document.body).map((node) => node.data.trim()).filter(Boolean),
+    ["You'll be happy to see everyone."],
+  );
+  window.close();
+});
+
+test("TreeWalker does not include code-like content on other AnonPaste routes", () => {
+  const window = new Window({ url: "https://anonpaste.com/pastebin" });
+  window.document.body.innerHTML = `
+    <main class="quick-view-page">
+      <article class="quick-view-document">
+        <div class="quick-view-content quick-view-content--source">
+          <div class="quick-view-source quick-view-source--without-line-numbers">
+            <pre class="quick-view-source__code"><code>
+              <span class="quick-view-source__row"><span class="quick-view-source__line-text">You'll be happy.</span></span>
+            </code></pre>
+          </div>
+        </div>
+      </article>
+    </main>
+  `;
+
+  assert.deepEqual(getEligibleTextNodes(window.document.body), []);
+  window.close();
+});
