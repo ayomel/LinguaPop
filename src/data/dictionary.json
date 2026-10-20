@@ -503,5 +503,12 @@
   { "id": "en-entirely", "english": "entirely", "spanish": "enteramente", "partOfSpeech": "adverb", "difficulty": "advanced" },
   { "id": "en-immediately", "english": "immediately", "spanish": "inmediatamente", "partOfSpeech": "adverb", "difficulty": "intermediate" },
   { "id": "en-eventually", "english": "eventually", "spanish": "finalmente", "partOfSpeech": "adverb", "difficulty": "advanced" },
-  { "id": "en-fortunately", "english": "fortunately", "spanish": "afortunadamente", "partOfSpeech": "adverb", "difficulty": "advanced" }
+  { "id": "en-fortunately", "english": "fortunately", "spanish": "afortunadamente", "partOfSpeech": "adverb", "difficulty": "advanced" },
+
+  { "id": "en-i", "english": "I", "spanish": "yo", "partOfSpeech": "pronoun", "difficulty": "beginner" },
+  { "id": "en-you", "english": "you", "spanish": "tú", "partOfSpeech": "pronoun", "difficulty": "beginner", "grammarNote": "Informal singular you. Use usted for polite singular address; ustedes is common for plural you in Latin America." },
+  { "id": "en-he", "english": "he", "spanish": "él", "partOfSpeech": "pronoun", "difficulty": "beginner", "grammarNote": "Él has an accent when it is the subject pronoun; el without an accent means the." },
+  { "id": "en-she", "english": "she", "spanish": "ella", "partOfSpeech": "pronoun", "difficulty": "beginner" },
+  { "id": "en-we", "english": "we", "spanish": "nosotros", "partOfSpeech": "pronoun", "difficulty": "beginner", "grammarNote": "Use nosotras for an all-feminine group." },
+  { "id": "en-they", "english": "they", "spanish": "ellos", "partOfSpeech": "pronoun", "difficulty": "beginner", "grammarNote": "Use ellas for an all-feminine group." }
 ]
