@@ -32,5 +32,8 @@
   { "id": "phrase-im-hungry-curly", "english": "I’m hungry", "spanish": "tengo hambre", "difficulty": "beginner" },
   { "id": "phrase-i-am-cold", "english": "I am cold", "spanish": "tengo frío", "difficulty": "beginner" },
   { "id": "phrase-im-cold", "english": "I'm cold", "spanish": "tengo frío", "difficulty": "beginner" },
-  { "id": "phrase-im-cold-curly", "english": "I’m cold", "spanish": "tengo frío", "difficulty": "beginner" }
+  { "id": "phrase-im-cold-curly", "english": "I’m cold", "spanish": "tengo frío", "difficulty": "beginner" },
+  { "id": "phrase-you-will-be-happy", "english": "you will be happy", "spanish": "estarás feliz", "difficulty": "beginner" },
+  { "id": "phrase-he-will-be-happy", "english": "he will be happy", "spanish": "estará feliz", "difficulty": "beginner" },
+  { "id": "phrase-you-have-got-a-book", "english": "you have got a book", "spanish": "tienes un libro", "difficulty": "beginner" }
 ]

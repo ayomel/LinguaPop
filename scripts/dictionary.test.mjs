@@ -28,7 +28,7 @@ test("dictionary has 506 valid offline entries including subject pronouns", asyn
 test("phrase dictionary stays separate and contains valid, unique phrase entries", async () => {
   const phrases = JSON.parse(await readFile(phraseDictionaryPath, "utf8"));
 
-  assert.equal(phrases.length, 34);
+  assert.equal(phrases.length, 37);
   assert.deepEqual(validatePhraseDictionary(phrases), []);
 });
 
@@ -42,6 +42,9 @@ test("everyday phrase entries include fixed context and each apostrophe style", 
     ["I am a student", "soy estudiante"], ["I'm a student", "soy estudiante"], ["I’m a student", "soy estudiante"],
     ["I am hungry", "tengo hambre"], ["I'm hungry", "tengo hambre"], ["I’m hungry", "tengo hambre"],
     ["I am cold", "tengo frío"], ["I'm cold", "tengo frío"], ["I’m cold", "tengo frío"],
+    ["you will be happy", "estarás feliz"],
+    ["he will be happy", "estará feliz"],
+    ["you have got a book", "tienes un libro"],
     ["you all", "ustedes"],
   ]);
   const matching = phrases.filter(({ english }) => expected.has(english));

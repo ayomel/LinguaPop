@@ -88,6 +88,61 @@ test("context phrases match straight and curly contractions before standalone pr
   window.close();
 });
 
+test("contractions match their expanded contextual phrase and preserve source casing", () => {
+  for (const [english, source, expected] of [
+    ["you will be happy", "you'll be happy", "estarás feliz"],
+    ["you will be happy", "you’ll be happy", "estarás feliz"],
+    ["you will be happy", "You will be happy", "Estarás feliz"],
+    ["you will be happy", "YOU'LL BE HAPPY", "ESTARÁS FELIZ"],
+    ["he will be happy", "he'll be happy", "estará feliz"],
+    ["he will be happy", "he’ll be happy", "estará feliz"],
+  ]) {
+    const phrase = phraseEntries.find((entry) => entry.english === english);
+    assert.ok(phrase);
+    const pair = createEnglishToSpanishPair([], [phrase]);
+    const window = new Window();
+    window.document.body.innerHTML = `<p>${Array.from({ length: 10 }, () => source).join("! ")}</p>`;
+
+    assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair }), 3);
+    const replacements = Array.from(window.document.querySelectorAll<HTMLElement>("[data-linguapop-replacement='true']"));
+    assert.ok(replacements.every((replacement) => replacement.textContent === expected));
+    assert.ok(replacements.every((replacement) => replacement.dataset.linguapopEntryId === phrase.id));
+    window.close();
+  }
+});
+
+test("have contractions resolve through their expanded contextual phrase", () => {
+  const phrase = phraseEntries.find((entry) => entry.english === "you have got a book");
+  assert.ok(phrase);
+  const pair = createEnglishToSpanishPair([], [phrase]);
+
+  for (const source of ["you've got a book", "you’ve got a book"]) {
+    const window = new Window();
+    window.document.body.innerHTML = `<p>${Array.from({ length: 10 }, () => source).join("! ")}</p>`;
+
+    assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair }), 3);
+    const replacements = Array.from(window.document.querySelectorAll<HTMLElement>("[data-linguapop-replacement='true']"));
+    assert.ok(replacements.every((replacement) => replacement.textContent === "tienes un libro"));
+    assert.ok(replacements.every((replacement) => replacement.dataset.linguapopEntryId === phrase.id));
+    window.close();
+  }
+});
+
+test("does not replace pronouns inside contractions without a matching phrase", () => {
+  const words = [
+    { id: "en-you", english: "you", spanish: "tú", partOfSpeech: "pronoun" as const, difficulty: "beginner" as const },
+    { id: "en-he", english: "he", spanish: "él", partOfSpeech: "pronoun" as const, difficulty: "beginner" as const },
+  ];
+  const pair = createEnglishToSpanishPair(words, []);
+  const window = new Window();
+  window.document.body.innerHTML = `<p>${Array.from({ length: 10 }, () => "you'll he'll you've you’ll he’ll you’ve").join("! ")}</p>`;
+
+  assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair }), 0);
+  assert.equal(window.document.querySelectorAll("[data-linguapop-replacement='true']").length, 0);
+  assert.match(window.document.body.textContent ?? "", /you'll he'll you've you’ll he’ll you’ve/);
+  window.close();
+});
+
 test("the plural you-all phrase takes priority over standalone you", () => {
   const phrase = phraseEntries.find((entry) => entry.english === "you all");
   assert.ok(phrase);
