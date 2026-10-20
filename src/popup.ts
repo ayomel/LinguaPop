@@ -1,6 +1,7 @@
 import { isDifficulty, normalizeHostname, readSettings, type SettingsStorage } from "./settings.ts";
 import { initializeReviewCard } from "./learning/review-card.ts";
 import { englishToSpanishPair, type LanguagePair } from "./data/language-pairs.ts";
+import type { VocabularyDifficulty } from "./data/dictionary.ts";
 
 interface ActiveTabProvider {
   query(queryInfo: { active: true; lastFocusedWindow: true }): Promise<Array<{ url?: string }>>;
@@ -51,7 +52,7 @@ export async function initializePopup(
 
   let currentEnabled = true;
   let savedPercentage = 5;
-  let savedDifficulty: "beginner" | "intermediate" | "advanced" = "beginner";
+  let savedDifficulty: VocabularyDifficulty = "beginner";
   let currentSiteEnabled = true;
   let hostname: string | undefined;
   let siteAvailable = false;
