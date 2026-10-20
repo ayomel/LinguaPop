@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 const dictionaryPath = new URL("../src/data/dictionary.json", import.meta.url);
 const phraseDictionaryPath = new URL("../src/data/phrase-dictionary.json", import.meta.url);
-const allowedPartsOfSpeech = new Set(["noun", "verb", "adjective", "adverb"]);
+const allowedPartsOfSpeech = new Set(["noun", "verb", "adjective", "adverb", "pronoun"]);
 const allowedDifficulties = new Set(["beginner", "intermediate", "advanced"]);
 const optionalTextFields = ["exampleSpanish", "exampleEnglish", "grammarNote"];
 const maxOptionalTextLength = 180;

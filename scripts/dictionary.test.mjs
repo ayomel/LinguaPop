@@ -13,19 +13,41 @@ const validEntry = {
   difficulty: "beginner",
 };
 
-test("dictionary has 500 valid offline entries", async () => {
+test("dictionary has 506 valid offline entries including subject pronouns", async () => {
   const entries = JSON.parse(await readFile(dictionaryPath, "utf8"));
 
-  assert.equal(entries.length, 500);
+  assert.equal(entries.length, 506);
   assert.deepEqual(validateDictionary(entries), []);
   assert.ok(entries.filter((entry) => entry.exampleSpanish && entry.exampleEnglish).length >= 10);
+  assert.deepEqual(
+    entries.filter((entry) => entry.partOfSpeech === "pronoun").map(({ english, spanish }) => [english, spanish]),
+    [["I", "yo"], ["you", "tú"], ["he", "él"], ["she", "ella"], ["we", "nosotros"], ["they", "ellos"]],
+  );
 });
 
 test("phrase dictionary stays separate and contains valid, unique phrase entries", async () => {
   const phrases = JSON.parse(await readFile(phraseDictionaryPath, "utf8"));
 
-  assert.ok(phrases.length >= 8);
+  assert.equal(phrases.length, 34);
   assert.deepEqual(validatePhraseDictionary(phrases), []);
+});
+
+test("everyday phrase entries include fixed context and each apostrophe style", async () => {
+  const phrases = JSON.parse(await readFile(phraseDictionaryPath, "utf8"));
+  const expected = new Map([
+    ["I am happy", "estoy feliz"], ["I'm happy", "estoy feliz"], ["I’m happy", "estoy feliz"],
+    ["I am sad", "estoy triste"], ["I'm sad", "estoy triste"], ["I’m sad", "estoy triste"],
+    ["I am here", "estoy aquí"], ["I'm here", "estoy aquí"], ["I’m here", "estoy aquí"],
+    ["I am at home", "estoy en casa"], ["I'm at home", "estoy en casa"], ["I’m at home", "estoy en casa"],
+    ["I am a student", "soy estudiante"], ["I'm a student", "soy estudiante"], ["I’m a student", "soy estudiante"],
+    ["I am hungry", "tengo hambre"], ["I'm hungry", "tengo hambre"], ["I’m hungry", "tengo hambre"],
+    ["I am cold", "tengo frío"], ["I'm cold", "tengo frío"], ["I’m cold", "tengo frío"],
+    ["you all", "ustedes"],
+  ]);
+  const matching = phrases.filter(({ english }) => expected.has(english));
+
+  assert.equal(matching.length, expected.size);
+  for (const phrase of matching) assert.equal(phrase.spanish, expected.get(phrase.english));
 });
 
 test("phrase validation rejects duplicate IDs, duplicate English, and unsupported difficulty", () => {

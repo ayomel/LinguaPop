@@ -66,3 +66,41 @@ test("phrase data has stable phrase IDs and supported difficulty levels", () => 
   assert.equal(new Set(phraseEntries.map((entry) => entry.id)).size, phraseEntries.length);
   assert.ok(phraseEntries.every((entry) => ["beginner", "intermediate", "advanced"].includes(entry.difficulty)));
 });
+
+test("context phrases match straight and curly contractions before standalone pronouns", () => {
+  const phraseTexts = ["I am happy", "I'm happy", "I’m happy"];
+  const window = new Window();
+  const sentence = Array.from({ length: 10 }, (_, index) => phraseTexts[index % phraseTexts.length]).join("! ");
+  window.document.body.innerHTML = `<p>${sentence}</p>`;
+  const originalMarkup = window.document.body.innerHTML;
+  const words = [
+    { id: "en-i", english: "I", spanish: "yo", partOfSpeech: "pronoun" as const, difficulty: "beginner" as const },
+  ];
+  const phrases = phraseEntries.filter((entry) => phraseTexts.includes(entry.english));
+  const pair = createEnglishToSpanishPair(words, phrases);
+
+  assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair }), 3);
+  const replacements = Array.from(window.document.querySelectorAll<HTMLElement>("[data-linguapop-replacement='true']"));
+  assert.ok(replacements.every((replacement) => phrases.some((phrase) => phrase.id === replacement.dataset.linguapopEntryId)));
+  assert.ok(replacements.every((replacement) => replacement.textContent?.toLocaleLowerCase() === "estoy feliz"));
+  assert.equal(restoreWordReplacements(window.document.body), replacements.length);
+  assert.equal(window.document.body.innerHTML, originalMarkup);
+  window.close();
+});
+
+test("the plural you-all phrase takes priority over standalone you", () => {
+  const phrase = phraseEntries.find((entry) => entry.english === "you all");
+  assert.ok(phrase);
+  const words = [
+    { id: "en-you", english: "you", spanish: "tú", partOfSpeech: "pronoun" as const, difficulty: "beginner" as const },
+  ];
+  const pair = createEnglishToSpanishPair(words, [phrase]);
+  const window = new Window();
+  window.document.body.innerHTML = `<p>${Array.from({ length: 10 }, () => "you all").join("! ")}</p>`;
+
+  assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair }), 3);
+  const replacements = Array.from(window.document.querySelectorAll<HTMLElement>("[data-linguapop-replacement='true']"));
+  assert.ok(replacements.every((replacement) => replacement.dataset.linguapopEntryId === phrase.id));
+  assert.ok(replacements.every((replacement) => replacement.textContent === "ustedes"));
+  window.close();
+});
