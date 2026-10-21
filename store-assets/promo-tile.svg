@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 280" width="440" height="280">
+  <rect width="440" height="280" fill="#F8FBF8"/>
+  <rect x="0" y="0" width="13" height="280" fill="#176B52"/>
+  <image href="../public/icons/linguapop.svg" x="35" y="35" width="48" height="48"/>
+  <text x="96" y="66" fill="#176B52" font-family="Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="-0.5">LinguaPop</text>
+  <text x="35" y="132" fill="#17211B" font-family="Arial, sans-serif" font-size="32" font-weight="700" letter-spacing="-1.2">Practice Spanish</text>
+  <text x="35" y="170" fill="#17211B" font-family="Arial, sans-serif" font-size="32" font-weight="700" letter-spacing="-1.2">as you browse.</text>
+  <text x="36" y="204" fill="#44534B" font-family="Arial, sans-serif" font-size="15">English-to-Spanish reading practice.</text>
+  <rect x="35" y="226" width="188" height="30" rx="15" fill="#E5F0E9"/>
+  <text x="51" y="246" fill="#176B52" font-family="Arial, sans-serif" font-size="13" font-weight="700">Read · Notice · Review</text>
+  <g transform="translate(287 87)">
+    <rect x="0" y="0" width="112" height="64" rx="18" fill="#176B52"/>
+    <path d="M24 64 16 77l30-13" fill="#176B52"/>
+    <text x="10" y="40" fill="#F8FBF8" font-family="Arial, sans-serif" font-size="15" font-weight="600">good morning</text>
+    <rect x="5" y="94" width="112" height="64" rx="18" fill="#F0A94B"/>
+    <path d="M28 158 22 171l29-13" fill="#F0A94B"/>
+    <text x="15" y="132" fill="#17211B" font-family="Arial, sans-serif" font-size="17" font-weight="700">buenos días</text>
+    <path d="M54 76h50" fill="none" stroke="#9BB9A6" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 7"/>
+  </g>
+</svg>
