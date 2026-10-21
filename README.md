@@ -2,6 +2,8 @@
 
 **Practice Spanish while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces a chosen share of eligible English words and phrases on web pages with Spanish. It saves encountered vocabulary for later review.
 
+See the [engineering case study](docs/engineering-case-study.md) for the problem, implementation choices, and verification boundaries.
+
 ## What it does
 
 - Adjust how much page text changes, choose a vocabulary level, and pause LinguaPop globally or for one site.
