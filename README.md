@@ -13,6 +13,10 @@ See the [engineering case study](docs/engineering-case-study.md) for the problem
 
 Settings, encountered vocabulary, and review progress are stored with `chrome.storage.local`. The extension ships English-to-Spanish vocabulary as static word and phrase data. English to Spanish is the only language pair currently available.
 
+## Permissions and data
+
+The `storage` permission saves settings, site overrides, encountered words, and review progress on this device. The `activeTab` permission lets the popup read the current tab's URL so it can show the per-site toggle. The content script matches HTTP and HTTPS pages because LinguaPop works on page text. LinguaPop does not send page text or learning data to a remote service.
+
 ## How it fits together
 
 ```mermaid
@@ -54,9 +58,10 @@ Open the LinguaPop popup, raise the replacement percentage to make the sample ea
 pnpm build
 pnpm test
 pnpm dictionary:check
+pnpm manifest:check
 ```
 
-`pnpm build` runs the TypeScript check before bundling the extension. The dictionary check validates both word and phrase data.
+`pnpm build` runs the TypeScript check before bundling the extension. Run `pnpm manifest:check` after the build to verify its permissions and page match scope. The dictionary check validates both word and phrase data.
 
 ## Code map
 

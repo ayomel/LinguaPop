@@ -35,6 +35,9 @@ jobs:
       - name: Build and type-check
         run: pnpm build
 
+      - name: Validate extension permissions and page access
+        run: pnpm manifest:check
+
       - name: Run tests
         run: pnpm test
 

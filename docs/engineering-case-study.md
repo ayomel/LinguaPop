@@ -18,7 +18,7 @@ The extension changes text it does not own. A useful version has to preserve the
 
 ## What the checks cover
 
-The automated suite covers replacement stability and restoration, protected page content, phrase and contraction matching, settings changes, tooltip interaction, and learning storage. `pnpm build` runs TypeScript checking before producing the extension bundle. `pnpm dictionary:check` validates the bundled word and phrase data.
+The automated suite covers replacement stability and restoration, protected page content, phrase and contraction matching, settings changes, tooltip interaction, and learning storage. `pnpm build` runs TypeScript checking before producing the extension bundle. `pnpm dictionary:check` validates the bundled word and phrase data. `pnpm manifest:check` guards the built extension's permissions and page match scope.
 
 The [replacement benchmark](performance.md) uses a synthetic Happy DOM page. It is useful for comparing cold and warm matcher runs on the same machine and runtime, but it does not measure browser layout or represent every real website. The sample reading page supports a manual Chrome walkthrough; automated tests and fixture rendering do not replace that live extension check.
 
