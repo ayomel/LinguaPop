@@ -128,12 +128,49 @@ function createMatcher(entries: readonly LanguagePairEntry[], sourceLocale: stri
   return { entriesBySourceText, pattern };
 }
 
-function getCandidates(
-  root: ReplacementRoot,
+type Matcher = ReturnType<typeof createMatcher>;
+
+const matcherCache = new WeakMap<
+  readonly LanguagePairEntry[],
+  Map<string, Map<VocabularyDifficulty, Matcher>>
+>();
+
+function getMatcher(
   entries: readonly LanguagePairEntry[],
   sourceLocale: string,
+  difficulty: VocabularyDifficulty,
+): Matcher {
+  let matchersByLocale = matcherCache.get(entries);
+  if (!matchersByLocale) {
+    matchersByLocale = new Map();
+    matcherCache.set(entries, matchersByLocale);
+  }
+
+  let matchersByDifficulty = matchersByLocale.get(sourceLocale);
+  if (!matchersByDifficulty) {
+    matchersByDifficulty = new Map();
+    matchersByLocale.set(sourceLocale, matchersByDifficulty);
+  }
+
+  const cachedMatcher = matchersByDifficulty.get(difficulty);
+  if (cachedMatcher) return cachedMatcher;
+
+  const eligibleEntries =
+    difficulty === "all"
+      ? entries
+      : entries.filter((entry) => entry.difficulty === difficulty);
+  const matcher = createMatcher(eligibleEntries, sourceLocale);
+  matchersByDifficulty.set(difficulty, matcher);
+  return matcher;
+}
+
+function getCandidates(
+  root: ReplacementRoot,
+  pair: LanguagePair,
+  difficulty: VocabularyDifficulty,
 ): Candidate[] {
-  const { entriesBySourceText, pattern } = createMatcher(entries, sourceLocale);
+  const sourceLocale = pair.sourceLanguage.locale;
+  const { entriesBySourceText, pattern } = getMatcher(pair.entries, sourceLocale, difficulty);
   if (!pattern) return [];
 
   const pageKey = getPageKey(root);
@@ -265,11 +302,7 @@ export function applyWordReplacements(
   if (percentage === 0) return 0;
 
   const pair = options.pair ?? englishToSpanishPair;
-  const entries =
-    options.difficulty && options.difficulty !== "all"
-      ? pair.entries.filter((entry) => entry.difficulty === options.difficulty)
-      : pair.entries;
-  const candidates = getCandidates(root, entries, pair.sourceLanguage.locale);
+  const candidates = getCandidates(root, pair, difficulty);
   const targetCount = Math.floor((candidates.length * percentage) / 100);
   const selected = candidates
     .sort((left, right) => left.rank - right.rank || (left.key < right.key ? -1 : left.key > right.key ? 1 : 0))

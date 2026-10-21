@@ -19,35 +19,72 @@ const paragraphMarkup = Array.from({ length: paragraphCount }, (_, paragraphInde
 }).join("");
 const expectedReplacementCount =
   (paragraphCount * wordsPerParagraph * replacementPercentage) / 100;
-const samples: number[] = [];
-
-for (let run = 0; run < 4; run += 1) {
+const createWindow = (): Window => {
   const window = new Window({ url: "https://benchmark.example/article" });
   window.document.body.innerHTML = paragraphMarkup;
+  return window;
+};
+const createPair = () => ({
+  ...englishToSpanishPair,
+  entries: [...englishToSpanishPair.entries],
+});
+const median = (samples: number[]): number => {
+  const sorted = [...samples].sort((left, right) => left - right);
+  return sorted[Math.floor(sorted.length / 2)] ?? 0;
+};
+
+const coldSamples: number[] = [];
+
+for (let run = 0; run < 4; run += 1) {
+  const window = createWindow();
+  const pair = createPair();
 
   const start = performance.now();
   const replacementCount = applyWordReplacements(window.document.body, {
     percentage: replacementPercentage,
-    pair: englishToSpanishPair,
+    pair,
   });
   const elapsed = performance.now() - start;
 
   assert.equal(replacementCount, expectedReplacementCount);
-  if (run > 0) samples.push(elapsed);
+  if (run > 0) coldSamples.push(elapsed);
   window.close();
 }
 
-const sortedSamples = [...samples].sort((left, right) => left - right);
-const medianMs = sortedSamples[1];
+const warmPair = createPair();
+const warmupWindow = createWindow();
+assert.equal(
+  applyWordReplacements(warmupWindow.document.body, {
+    percentage: replacementPercentage,
+    pair: warmPair,
+  }),
+  expectedReplacementCount,
+);
+warmupWindow.close();
+
+const warmSamples: number[] = [];
+for (let run = 0; run < 3; run += 1) {
+  const window = createWindow();
+  const start = performance.now();
+  const replacementCount = applyWordReplacements(window.document.body, {
+    percentage: replacementPercentage,
+    pair: warmPair,
+  });
+  warmSamples.push(performance.now() - start);
+  assert.equal(replacementCount, expectedReplacementCount);
+  window.close();
+}
 
 console.log(
   JSON.stringify(
     {
-      fixture: `${paragraphCount} paragraphs, ${paragraphCount * wordsPerParagraph} words, ${words.length} dictionary terms`,
+      fixture: `${paragraphCount} paragraphs, ${paragraphCount * wordsPerParagraph} words using ${words.length} unique source words`,
+      matcherEntries: englishToSpanishPair.entries.length,
       replacementPercentage,
       replacements: expectedReplacementCount,
-      measuredRuns: samples.length,
-      medianMs: Number(medianMs?.toFixed(2)),
+      coldMedianMs: Number(median(coldSamples).toFixed(2)),
+      warmMedianMs: Number(median(warmSamples).toFixed(2)),
+      measuredRunsPerMode: coldSamples.length,
       runtime: `Node ${process.version}`,
     },
     null,
