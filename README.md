@@ -1,44 +1,76 @@
 # LinguaPop
 
-LinguaPop is a Chrome extension for learning Spanish while browsing the web.
+**Practice Spanish while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces a chosen share of eligible English words and phrases on web pages with Spanish. It saves encountered vocabulary for later review.
 
-## Requirements
+See the [engineering case study](docs/engineering-case-study.md) for the problem, implementation choices, and verification boundaries.
 
-- Node.js 20.19 or newer in the 20.x line, or 22.12 or newer
-- pnpm
-- Google Chrome
+## What it does
 
-Vite's current release supports Node.js 20.19+ in the 20.x line and 22.12+.
+- Adjust how much page text changes, choose a vocabulary level, and pause LinguaPop globally or for one site.
+- Match complete phrases before individual words, and skip editable fields, code, and interactive controls.
+- Open a translation tooltip, collect encountered words, and review them with flashcards.
+- Track review progress with a daily goal and a schedule based on explicit "Remembered" or "Need practice" answers.
 
-## Set up
+Settings, encountered vocabulary, and review progress are stored with `chrome.storage.local`. The extension ships English-to-Spanish vocabulary as static word and phrase data. English to Spanish is the only language pair currently available.
+
+## Permissions and data
+
+The `storage` permission saves settings, site overrides, encountered words, and review progress on this device. The `activeTab` permission lets the popup read the current tab's URL so it can show the per-site toggle. The content script matches HTTP and HTTPS pages because LinguaPop works on page text. LinguaPop does not send page text or learning data to a remote service.
+
+## How it fits together
+
+```mermaid
+flowchart LR
+    Page[Web page text] --> Content[Content script]
+    Content --> Match[Safe text and phrase matching]
+    Data[Bundled English and Spanish data] --> Match
+    Match --> PageResult[Spanish text and translation tooltip]
+    Match --> Encounters[Encountered vocabulary]
+    Encounters --> Local[(Chrome local storage)]
+    Local --> Review[Popup, flashcards, and dashboard]
+    Review --> Local
+```
+
+The runtime uses a language-neutral `LanguagePair` model, while the shipped English and Spanish dictionaries remain in separate JSON files. Longer phrase matches take precedence over single-word matches within an eligible text node.
+
+## Run it locally
+
+You'll need Node.js 20.19 or newer in the 20.x line, Node.js 22.12 or newer, pnpm, and Google Chrome.
 
 ```sh
 pnpm install
-pnpm dev
-```
-
-## Build and load in Chrome
-
-```sh
 pnpm build
 ```
 
-Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and select the `dist` directory.
+In Chrome, open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the generated `dist` directory.
 
-The extension popup controls replacement settings and offers a quick review for encountered vocabulary. Open the vocabulary dashboard from the popup to see learning counts and review your encountered word list. The content script safely processes eligible webpage text and leaves form fields, editable content, code, and interactive controls unchanged.
+To try the extension on the sample reading page, start the Vite server in a second terminal and open `http://localhost:5173/demo.html` in Chrome:
 
-The dashboard also has a flashcard review flow and a configurable daily goal. The goal defaults to 10 reviews and accepts 1 to 50. Progress counts explicit review answers and resets on the next local calendar day.
+```sh
+pnpm dev
+```
 
-Single words and common phrases use separate static JSON files. Phrase matches stay within one eligible text node and take precedence over individual words inside the phrase. Run `pnpm dictionary:check` to validate both datasets.
+Open the LinguaPop popup, raise the replacement percentage to make the sample easier to see, then refresh the page. Select a Spanish replacement to open its translation. The editable field and code sample show page content that LinguaPop skips.
 
-## Language pairs
+## Checks
 
-Runtime features use the `LanguagePair` model in `src/data/language-pairs.ts`. Entries expose `sourceText` and `targetText`, and language metadata supplies display names, text locales, and the optional Web Speech locale. The current adapter maps the English and Spanish word and phrase files into that model. Spanish is the only shipped target. A future pair can provide static entries in the same generic shape, with optional pronunciation text and a speech locale, then pass its configuration to the content, tooltip, review, and dashboard entry points.
+```sh
+pnpm build
+pnpm test
+pnpm dictionary:check
+pnpm manifest:check
+```
 
-## Review schedule
+`pnpm build` runs the TypeScript check before bundling the extension. Run `pnpm manifest:check` after the build to verify its permissions and page match scope. The dictionary check validates both word and phrase data.
 
-Only choosing **Remembered** or **Need practice** records a review. Seeing a word in a webpage or opening the review card does not change its schedule.
+## Code map
 
-- A first remembered answer is due again in 1 day. Consecutive remembered answers double the interval, up to 30 days.
-- A **Need practice** answer is due again in 1 hour and resets the success interval to 1 day.
-- Encountered words without a review record are available for their first explicit recall. Review outcomes and due dates are saved locally, separately from dictionary data.
+- `manifest.config.ts` and `src/content.ts` define the Manifest V3 extension entry points.
+- `src/content/` contains webpage matching and translation tooltip behavior.
+- `src/data/` contains the language-pair adapter and bundled vocabulary.
+- `src/learning/` contains encounters, review scheduling, flashcards, and the dashboard.
+- `src/popup.ts` and `src/settings.ts` implement extension controls and saved preferences.
+
+## Current scope
+
+LinguaPop currently ships one pair: English to Spanish. The language-pair model gives the runtime a shared contract for a future pair, but additional languages are not included yet.

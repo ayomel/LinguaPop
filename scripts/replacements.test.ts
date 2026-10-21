@@ -171,3 +171,21 @@ test("all vocabulary difficulty includes words from every level", () => {
   assert.ok(replacedEntryCounts.every((count) => count > 0));
   window.close();
 });
+
+test("rebuilds the matcher when a language pair receives a new entries array", () => {
+  const entries = [
+    { id: "en-apple", english: "apple", spanish: "manzana", partOfSpeech: "noun" as const, difficulty: "beginner" as const },
+  ];
+  const window = createPage(`<p>${Array.from({ length: 20 }, () => "apple").join(" ")}</p>`);
+  const pair = createEnglishToSpanishPair(entries, []);
+
+  assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair }), 6);
+  assert.equal(window.document.querySelector("[data-linguapop-entry-id='en-apple']")?.textContent, "manzana");
+
+  restoreWordReplacements(window.document.body);
+  pair.entries = pair.entries.map((entry) => ({ ...entry, targetText: "fruta" }));
+
+  assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair }), 6);
+  assert.equal(window.document.querySelector("[data-linguapop-entry-id='en-apple']")?.textContent, "fruta");
+  window.close();
+});

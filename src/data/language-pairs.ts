@@ -13,16 +13,16 @@ export interface LanguageMetadata {
 }
 
 export interface LanguagePairEntry {
-  id: string;
-  kind: "word" | "phrase";
-  sourceText: string;
-  targetText: string;
-  pronunciation?: string;
-  exampleSourceText?: string;
-  exampleTargetText?: string;
-  grammarNote?: string;
-  partOfSpeech?: PartOfSpeech;
-  difficulty: Difficulty;
+  readonly id: string;
+  readonly kind: "word" | "phrase";
+  readonly sourceText: string;
+  readonly targetText: string;
+  readonly pronunciation?: string;
+  readonly exampleSourceText?: string;
+  readonly exampleTargetText?: string;
+  readonly grammarNote?: string;
+  readonly partOfSpeech?: PartOfSpeech;
+  readonly difficulty: Difficulty;
 }
 
 export interface LanguagePair {

@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test",
     "benchmark:replacements": "tsx scripts/benchmark-replacements.ts",
+    "manifest:check": "node scripts/validate-manifest.mjs",
     "dictionary:check": "node scripts/validate-dictionary.mjs"
   },
   "devDependencies": {
