@@ -1,10 +1,18 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 
 const manifestPath = new URL("../dist/manifest.json", import.meta.url);
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 
 assert.equal(manifest.manifest_version, 3, "The built extension must use Manifest V3.");
+for (const size of [16, 48, 128]) {
+  const iconPath = manifest.icons?.[size];
+  assert.equal(typeof iconPath, "string", `The built extension must declare a ${size}px icon.`);
+  await access(new URL(`../dist/${iconPath}`, import.meta.url));
+}
+for (const iconPath of Object.values(manifest.action?.default_icon ?? {})) {
+  await access(new URL(`../dist/${iconPath}`, import.meta.url));
+}
 assert.deepEqual(
   [...(manifest.permissions ?? [])].sort(),
   ["activeTab", "storage"],
@@ -31,4 +39,4 @@ assert.equal(
   "The content script should run after the page document is ready.",
 );
 
-console.log("Validated Manifest V3, extension permissions, and HTTP/HTTPS page scope.");
+console.log("Validated Manifest V3, icons, extension permissions, and HTTP/HTTPS page scope.");
