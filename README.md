@@ -33,6 +33,10 @@ flowchart LR
 
 The runtime uses a language-neutral `LanguagePair` model. Spanish and French words and phrases are stored in separate JSON files; the French starter set includes 215 beginner words and 20 phrases. Within an eligible text node, longer phrases take priority over individual words.
 
+## Try it without building
+
+Download the [LinguaPop v0.1.0 release](https://github.com/ayomel/LinguaPop/releases/tag/v0.1.0) and unzip it. In Chrome, open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the extracted folder that contains `manifest.json`.
+
 ## Run it locally
 
 You’ll need Node.js 20.19 or newer in the 20.x line, or Node.js 22.12 or newer, along with pnpm and Google Chrome.
@@ -43,6 +47,8 @@ pnpm build
 ```
 
 In Chrome, open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the generated `dist` directory.
+
+Read the [privacy policy](https://ayomel.github.io/LinguaPop/privacy-policy.html).
 
 To try the sample reading page, run `pnpm dev` in another terminal and open `http://localhost:5173/demo.html` in Chrome:
 

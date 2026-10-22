@@ -1,12 +1,18 @@
+---
+layout: default
+title: LinguaPop Privacy Policy
+permalink: /privacy-policy.html
+---
+
 # LinguaPop Privacy Policy
 
 **Last updated: October 22, 2026**
 
-LinguaPop helps you practice Spanish by replacing selected English words and phrases on webpages. This policy describes what the extension processes and stores.
+LinguaPop helps you practice Spanish or French by replacing selected English words and phrases on webpages. This policy describes what the extension processes and stores.
 
 ## Information LinguaPop handles
 
-- **Webpage text:** While LinguaPop is enabled on an HTTP or HTTPS page, its content script reads eligible text in that page to find bundled English vocabulary and show Spanish replacements. This processing happens in your browser. LinguaPop does not save the original page text or send it to the developer or another service.
+- **Webpage text:** While LinguaPop is enabled on an HTTP or HTTPS page, its content script reads eligible text in that page to find bundled English vocabulary and show replacements in your selected language. This processing happens in your browser. LinguaPop does not save the original page text or send it to the developer or another service.
 - **Settings:** The extension saves your on/off state, replacement percentage, vocabulary level, and any per-site on/off choices. Per-site choices contain the hostnames you selected.
 - **Learning progress:** LinguaPop saves the IDs of vocabulary entries you encounter, encounter counts and timestamps, review outcomes and schedules, and daily-goal settings and progress. For each encountered word, it also saves the most recently encountered containing sentence (up to 500 characters) so it can show that context during review. It keeps one sentence per word, not a page history.
 
@@ -22,7 +28,7 @@ Settings, learning progress, and the saved context sentences are stored in Chrom
 
 ## Your choices
 
-You can pause LinguaPop globally or for an individual site from the popup. You can adjust the replacement percentage and vocabulary level there. Removing LinguaPop from Chrome removes access to its local extension data.
+You can choose Spanish or French, pause LinguaPop globally or for an individual site, and adjust the replacement percentage and vocabulary level from the popup. Removing LinguaPop from Chrome removes access to its local extension data.
 
 ## Changes to this policy
 
@@ -34,4 +40,4 @@ For privacy questions or support, contact [huntermelverton@gmail.com](mailto:hun
 
 ## Chrome Web Store Limited Use
 
-LinguaPop's use of webpage text is limited to its disclosed purpose: finding bundled English vocabulary and providing Spanish reading practice. Information is processed and stored only as described above, is not sold, and is not transferred to third parties for advertising or other unrelated purposes. The developer does not read users' webpage text or learning records.
+LinguaPop's use of webpage text is limited to its disclosed purpose: finding bundled English vocabulary and providing Spanish or French reading practice. Information is processed and stored only as described above, is not sold, and is not transferred to third parties for advertising or other unrelated purposes. The developer does not read users' webpage text or learning records.

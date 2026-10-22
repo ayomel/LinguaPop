@@ -33,7 +33,7 @@ LinguaPop supports English-to-Spanish and English-to-French practice. It process
 - **Single purpose:** Use the statement above.
 - **Permissions:** `storage` stores settings and learning progress locally. `activeTab` lets the popup read the current tab URL to show the per-site control. The content script runs on HTTP and HTTPS pages for the reading-practice feature.
 - **Data handling:** Disclose that webpage text is processed locally to deliver the feature, and that settings, selected site hostnames, vocabulary/review progress, and one most recently encountered sentence per word (up to 500 characters) are stored locally. Do not state that the extension handles no user data.
-- **Privacy policy URL:** Publish [privacy-policy.md](privacy-policy.md) at a stable public URL and paste that URL into the dashboard. The policy already uses the support email above.
+- **Privacy policy URL:** [https://ayomel.github.io/LinguaPop/privacy-policy.html](https://ayomel.github.io/LinguaPop/privacy-policy.html)
 - **Distribution:** Public.
 
 ## Store artwork
@@ -46,6 +46,5 @@ The screenshots should be uploaded in order, starting with the in-context readin
 
 ## Before submission
 
-- Publish the privacy policy at a stable public URL.
 - Build the package and confirm the ZIP's root contains `manifest.json`.
 - Verify screenshots show the current extension and meet the Chrome Web Store's 1280x800 or 640x400 size requirement.
