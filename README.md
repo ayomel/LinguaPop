@@ -1,19 +1,21 @@
 # LinguaPop
 
-**Practice Spanish while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces selected English words and phrases on eligible web pages with Spanish. It saves the words you encounter so you can review them later.
+**Practice Spanish while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces some eligible English words and phrases on web pages with Spanish. It saves those words for you to review later.
 
 See the [engineering case study](docs/engineering-case-study.md) for the problem, implementation choices, and verification boundaries.
 
 ## What it does
 
-- Choose how much page text LinguaPop changes and set a vocabulary level. Pause it everywhere or on a specific site.
-- Replace full phrases before individual words. LinguaPop skips editable fields, code, and interactive controls.
-- Open a translation from the tooltip, then review encountered words with flashcards.
-- Set a daily goal. Mark words "Remembered" or "Need practice" to schedule reviews.
+- Choose how much page text changes and which vocabulary level to use. You can also pause LinguaPop everywhere or on a specific site.
+- Replace complete phrases before individual words. LinguaPop skips editable fields, code, and interactive controls.
+- Select a replacement to see its translation, then review encountered words with flashcards.
+- Track review progress with a daily goal and a schedule based on explicit "Remembered" or "Need practice" answers.
+
+Settings, encountered words, and review progress are saved in `chrome.storage.local`. The extension includes English-to-Spanish word and phrase data. English to Spanish is the only language pair available right now.
 
 ## Permissions and data
 
-The `storage` permission saves settings, site overrides, encountered vocabulary, and review progress in `chrome.storage.local` on your device. The `activeTab` permission lets the popup read the current tab's URL and show the per-site toggle. The content script runs on HTTP and HTTPS pages. LinguaPop does not send page text or learning data to a remote service.
+The `storage` permission saves your settings, site overrides, encountered words, and review progress on this device. The `activeTab` permission lets the popup read the current tab’s URL and show its per-site toggle. LinguaPop works with page text on HTTP and HTTPS sites. It does not send page text or learning data to a remote service.
 
 ## How it works
 
@@ -29,11 +31,11 @@ flowchart LR
     Review --> Local
 ```
 
-The `LanguagePair` model keeps replacement logic separate from language data. LinguaPop currently ships English and Spanish dictionaries in separate JSON files. It checks phrases before single words in each eligible text node.
+The runtime uses a language-neutral `LanguagePair` model. The English and Spanish dictionaries are stored in separate JSON files. Within an eligible text node, longer phrases take priority over individual words.
 
 ## Run it locally
 
-Use Node.js 20.19.x or newer in the 20.x line, or Node.js 22.12 or newer. You also need pnpm and Google Chrome.
+You’ll need Node.js 20.19 or newer in the 20.x line, or Node.js 22.12 or newer, along with pnpm and Google Chrome.
 
 ```sh
 pnpm install
