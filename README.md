@@ -2,6 +2,8 @@
 
 **Practice a language while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces some eligible English words and phrases on web pages with Spanish or French. It saves encountered vocabulary for review later.
 
+![A sample reading page with LinguaPop replacements highlighted in yellow.](.github/pr-screenshots/changed-word-highlight-after.png)
+
 See the [engineering case study](docs/engineering-case-study.md) for the problem, implementation choices, and verification boundaries.
 
 ## What it does
@@ -12,6 +14,14 @@ See the [engineering case study](docs/engineering-case-study.md) for the problem
 - Track review progress with a daily goal and a schedule based on explicit "Remembered" or "Need practice" answers.
 
 Settings, encountered words, and review progress are saved in `chrome.storage.local`. Choose English-to-Spanish or English-to-French in the popup. Each pair has its own word encounters, review schedule, and daily review progress.
+
+## Before and after
+
+The same reading sample before and after LinguaPop replaces eligible words and phrases:
+
+| Before LinguaPop | After LinguaPop |
+|:--:|:--:|
+| ![English reading sample before replacements.](.github/pr-screenshots/changed-word-highlight-before.png) | ![Spanish replacements highlighted in the reading sample.](.github/pr-screenshots/changed-word-highlight-after.png) |
 
 ## Permissions and data
 
