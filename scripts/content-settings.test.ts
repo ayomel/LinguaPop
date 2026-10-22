@@ -466,6 +466,33 @@ test("graduated words stop replacing and return to replacements when ungraduated
   window.close();
 });
 
+test("selecting French reprocesses an open page and stores French-specific encounters", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  storage.values.languagePairId = "en-es";
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+  assert.ok(window.document.querySelector('[data-linguapop-entry-id="en-apple"]'));
+
+  storage.values.languagePairId = "en-fr";
+  changes.emit({ languagePairId: { oldValue: "en-es", newValue: "en-fr" } });
+  await settleStorageChange();
+  await settleStorageChange();
+
+  const replacement = window.document.querySelector('[data-linguapop-entry-id="en-fr-apple"]');
+  assert.ok(replacement);
+  assert.equal(replacement?.textContent, "Pomme");
+  assert.ok(Object.hasOwn(storage.values.encounteredWords as Record<string, unknown>, "en-fr-apple"));
+  assert.ok(Object.hasOwn(storage.values.encounteredWords as Record<string, unknown>, "en-apple"));
+  controller.dispose();
+  window.close();
+});
+
 test("progress storage errors do not prevent page replacements", async () => {
   const window = createPage();
   const storage = new FakeStorage();

@@ -5,6 +5,8 @@ import { dictionaryEntries } from "../src/data/dictionary.ts";
 import { phraseEntries } from "../src/data/phrases.ts";
 import {
   createEnglishToSpanishPair,
+  englishToFrenchPair,
+  getLanguagePair,
   type LanguagePair,
 } from "../src/data/language-pairs.ts";
 import { applyWordReplacements } from "../src/content/replacements.ts";
@@ -39,6 +41,49 @@ test("the shipped English to Spanish pair maps existing word and phrase data to 
   assert.deepEqual(apple && [apple.kind, apple.sourceText, apple.targetText], ["word", "apple", "manzana"]);
   assert.deepEqual(phrase && [phrase.kind, phrase.sourceText, phrase.targetText], ["phrase", "thank you", "gracias"]);
   assert.equal(apple?.exampleSourceText, dictionaryEntries.find((entry) => entry.id === apple?.id)?.exampleEnglish);
+});
+
+test("the shipped English to French pair maps its curated words and phrases to generic fields", () => {
+  const apple = englishToFrenchPair.entries.find((entry) => entry.id === "en-fr-apple");
+  const phrase = englishToFrenchPair.entries.find((entry) => entry.id === "phrase-fr-thank-you");
+
+  assert.equal(getLanguagePair("en-fr"), englishToFrenchPair);
+  assert.deepEqual(englishToFrenchPair.sourceLanguage, { name: "English", locale: "en" });
+  assert.deepEqual(englishToFrenchPair.targetLanguage, {
+    name: "French",
+    locale: "fr",
+    speechLocale: "fr-FR",
+  });
+  assert.deepEqual(apple && [apple.kind, apple.sourceText, apple.targetText], ["word", "apple", "pomme"]);
+  assert.deepEqual(phrase && [phrase.kind, phrase.sourceText, phrase.targetText], ["phrase", "thank you", "merci"]);
+  assert.ok(englishToFrenchPair.entries.length >= 180);
+});
+
+test("the English-to-French pair drives replacement tooltip labels and French speech", () => {
+  const window = new Window({ url: "https://example.test/article" });
+  window.document.body.innerHTML = `<p>${Array.from({ length: 10 }, () => "apple").join(" ")}</p>`;
+  assert.equal(applyWordReplacements(window.document.body, { percentage: 30, pair: englishToFrenchPair }), 3);
+  const replacement = window.document.querySelector<HTMLElement>("[data-linguapop-entry-id='en-fr-apple']")!;
+  const utterances: Array<{ text: string; lang: string }> = [];
+  const controller = initializeTranslationTooltip(window.document, englishToFrenchPair, {
+    speechSynthesis: {
+      cancel() {},
+      getVoices: () => [{ lang: "fr-FR" }],
+      speak(utterance: { text: string; lang: string }) { utterances.push(utterance); },
+    } as unknown as SpeechSynthesis,
+    createUtterance: (text) => ({ text, lang: "", voice: null, onerror: null }) as SpeechSynthesisUtterance,
+  });
+
+  replacement.click();
+  const shadow = window.document.querySelector("[data-linguapop-tooltip]")?.shadowRoot!;
+  assert.equal(shadow.querySelector("h2")?.lang, "fr");
+  assert.match(shadow.textContent ?? "", /Speak French/);
+  shadow.querySelector<HTMLButtonElement>("button.speak")!.click();
+  assert.equal(utterances[0]?.text, "pomme");
+  assert.equal(utterances[0]?.lang, "fr-FR");
+
+  controller.dispose();
+  window.close();
 });
 
 test("replacement and pronunciation rendering use the configured pair metadata", () => {

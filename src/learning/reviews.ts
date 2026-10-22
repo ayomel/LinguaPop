@@ -5,7 +5,7 @@ import {
 } from "../data/language-pairs.ts";
 import { getEncounteredWords } from "./encounters.ts";
 import { getGraduatedWords, GRADUATED_WORDS_KEY } from "./graduated-words.ts";
-import { DAILY_GOAL_PROGRESS_KEY, getProgressAfterReview } from "./daily-goals.ts";
+import { dailyGoalProgressKey, getProgressAfterReview } from "./daily-goals.ts";
 import { getLearningStatuses, LEARNING_STATUSES_KEY } from "./statuses.ts";
 
 export const REVIEW_SCHEDULES_KEY = "reviewSchedules";
@@ -134,6 +134,7 @@ export function recordRecall(
   outcome: RecallOutcome,
   storage: ReviewStorage = chrome.storage.local,
   now = Date.now(),
+  pair: LanguagePair = englishToSpanishPair,
 ): Promise<ReviewSchedule> {
   if (!isEntryId(entryId)) return Promise.reject(new TypeError("Invalid dictionary entry ID."));
   if (!isRecallOutcome(outcome)) return Promise.reject(new TypeError("Invalid recall outcome."));
@@ -166,10 +167,10 @@ export function recordRecall(
     if (shouldGraduate) graduatedWords[entryId] = true;
     const learningStatuses = shouldGraduate ? await getLearningStatuses(storage) : undefined;
     if (learningStatuses) learningStatuses[entryId] = "learned";
-    const dailyProgress = await getProgressAfterReview(storage, now);
+    const dailyProgress = await getProgressAfterReview(storage, now, pair.id);
     const updates: Record<string, unknown> = {
       [REVIEW_SCHEDULES_KEY]: { ...schedules, [entryId]: savedSchedule },
-      [DAILY_GOAL_PROGRESS_KEY]: dailyProgress,
+      [dailyGoalProgressKey(pair.id)]: dailyProgress,
     };
     if (shouldGraduate && learningStatuses) {
       updates[GRADUATED_WORDS_KEY] = graduatedWords;

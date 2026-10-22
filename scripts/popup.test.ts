@@ -291,3 +291,20 @@ test("popup restores the saved difficulty when saving fails", async () => {
   assert.equal(window.document.querySelector("#settings-error")?.hasAttribute("hidden"), false);
   window.close();
 });
+
+test("popup persists language-pair selection and updates its review language", async () => {
+  const window = await createPopup();
+  const storage = new PopupStorage();
+  await initializeTestPopup(window, storage);
+
+  const select = window.document.querySelector<HTMLSelectElement>("#language-pair")!;
+  assert.deepEqual(Array.from(select.options, (option) => option.value), ["en-es", "en-fr"]);
+  select.value = "en-fr";
+  select.dispatchEvent(new window.Event("change"));
+  await settlePopupChange();
+
+  assert.equal(storage.values.languagePairId, "en-fr");
+  assert.match(window.document.querySelector("#pair-intro")?.textContent ?? "", /French/);
+  assert.equal(window.document.querySelector("#review-reveal")?.textContent, "Reveal French");
+  window.close();
+});

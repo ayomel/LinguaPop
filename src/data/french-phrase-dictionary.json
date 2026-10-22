@@ -1,0 +1,122 @@
+[
+  {
+    "id": "phrase-fr-good-morning",
+    "english": "good morning",
+    "french": "bonjour",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-good-evening",
+    "english": "good evening",
+    "french": "bonsoir",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-how-are-you",
+    "english": "how are you",
+    "french": "comment allez-vous",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-i-am-fine",
+    "english": "I am fine",
+    "french": "je vais bien",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-thank-you",
+    "english": "thank you",
+    "french": "merci",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-you-are-welcome",
+    "english": "you are welcome",
+    "french": "de rien",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-please",
+    "english": "please",
+    "french": "s’il vous plaît",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-excuse-me",
+    "english": "excuse me",
+    "french": "excusez-moi",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-i-am-sorry",
+    "english": "I am sorry",
+    "french": "je suis désolé",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-see-you-soon",
+    "english": "see you soon",
+    "french": "à bientôt",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-see-you-tomorrow",
+    "english": "see you tomorrow",
+    "french": "à demain",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-where-is",
+    "english": "where is",
+    "french": "où se trouve",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-how-much",
+    "english": "how much",
+    "french": "combien ça coûte",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-i-would-like",
+    "english": "I would like",
+    "french": "je voudrais",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-my-name-is",
+    "english": "my name is",
+    "french": "je m’appelle",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-have-a-good-day",
+    "english": "have a good day",
+    "french": "bonne journée",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-what-time-is-it",
+    "english": "what time is it",
+    "french": "quelle heure est-il",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-i-dont-understand",
+    "english": "I don't understand",
+    "french": "je ne comprends pas",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-do-you-speak-english",
+    "english": "do you speak English",
+    "french": "parlez-vous anglais",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "phrase-fr-a-table-for-two",
+    "english": "a table for two",
+    "french": "une table pour deux",
+    "difficulty": "beginner"
+  }
+]

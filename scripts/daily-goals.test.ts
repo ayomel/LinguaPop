@@ -4,6 +4,8 @@ import {
   DEFAULT_DAILY_GOAL,
   getDailyGoalProgress,
   getDailyGoalSettings,
+  dailyGoalProgressKey,
+  getProgressAfterReview,
   setDailyGoal,
   type DailyGoalStorage,
 } from "../src/learning/daily-goals.ts";
@@ -50,4 +52,13 @@ test("daily goal accepts values from one to fifty and rejects values outside the
   await assert.rejects(setDailyGoal(0, storageFor(storage)), /between 1 and 50/);
   await assert.rejects(setDailyGoal(51, storageFor(storage)), /between 1 and 50/);
   await assert.rejects(setDailyGoal(1.5, storageFor(storage)), /between 1 and 50/);
+});
+
+test("daily review progress is stored separately for each language pair", async () => {
+  const storage = new FakeStorage();
+  const now = new Date(2026, 9, 19, 12).getTime();
+  const nextProgress = await getProgressAfterReview(storageFor(storage), now, "en-fr");
+  await storageFor(storage).set({ [dailyGoalProgressKey("en-fr")]: nextProgress });
+  assert.equal((await getDailyGoalProgress(storageFor(storage), now, "en-fr")).completed, 1);
+  assert.equal((await getDailyGoalProgress(storageFor(storage), now, "en-es")).completed, 0);
 });

@@ -16,6 +16,7 @@ export interface DailyGoalSettings extends DailyGoalProgress {
 export type DailyGoalStorage = Pick<chrome.storage.StorageArea, "get" | "set">;
 
 interface StoredDailyGoal {
+  [key: string]: unknown;
   [DAILY_GOAL_KEY]?: unknown;
   [DAILY_GOAL_PROGRESS_KEY]?: unknown;
 }
@@ -38,6 +39,10 @@ function localDateKey(now: number): string {
   return `${year}-${month}-${day}`;
 }
 
+export function dailyGoalProgressKey(pairId = "en-es"): string {
+  return pairId === "en-es" ? DAILY_GOAL_PROGRESS_KEY : `${DAILY_GOAL_PROGRESS_KEY}:${pairId}`;
+}
+
 function readProgress(value: unknown, date: string): DailyGoalProgress {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return { date, completed: 0 };
@@ -57,13 +62,15 @@ function readProgress(value: unknown, date: string): DailyGoalProgress {
 export async function getDailyGoalSettings(
   storage: DailyGoalStorage = chrome.storage.local,
   now = Date.now(),
+  pairId = "en-es",
 ): Promise<DailyGoalSettings> {
   const date = localDateKey(now);
+  const progressKey = dailyGoalProgressKey(pairId);
   const stored = await storage.get<StoredDailyGoal>({
     [DAILY_GOAL_KEY]: DEFAULT_DAILY_GOAL,
-    [DAILY_GOAL_PROGRESS_KEY]: { date, completed: 0 },
+    [progressKey]: { date, completed: 0 },
   });
-  const progress = readProgress(stored[DAILY_GOAL_PROGRESS_KEY], date);
+  const progress = readProgress(stored[progressKey], date);
   return {
     goal: isGoal(stored[DAILY_GOAL_KEY]) ? stored[DAILY_GOAL_KEY] : DEFAULT_DAILY_GOAL,
     ...progress,
@@ -73,8 +80,9 @@ export async function getDailyGoalSettings(
 export async function getDailyGoalProgress(
   storage: DailyGoalStorage = chrome.storage.local,
   now = Date.now(),
+  pairId = "en-es",
 ): Promise<DailyGoalProgress> {
-  const { date, completed } = await getDailyGoalSettings(storage, now);
+  const { date, completed } = await getDailyGoalSettings(storage, now, pairId);
   return { date, completed };
 }
 
@@ -92,11 +100,13 @@ export async function setDailyGoal(
 export async function getProgressAfterReview(
   storage: DailyGoalStorage,
   now: number,
+  pairId = "en-es",
 ): Promise<DailyGoalProgress> {
   const date = localDateKey(now);
+  const progressKey = dailyGoalProgressKey(pairId);
   const stored = await storage.get<StoredDailyGoal>({
-    [DAILY_GOAL_PROGRESS_KEY]: { date, completed: 0 },
+    [progressKey]: { date, completed: 0 },
   });
-  const progress = readProgress(stored[DAILY_GOAL_PROGRESS_KEY], date);
+  const progress = readProgress(stored[progressKey], date);
   return { date, completed: progress.completed + 1 };
 }

@@ -1,22 +1,12 @@
 export interface AnkiExportRow {
-  spanish: string;
-  english: string;
+  targetText: string;
+  sourceText: string;
   partOfSpeech: string;
-  exampleSpanish: string;
-  exampleEnglish: string;
+  exampleTargetText: string;
+  exampleSourceText: string;
   difficulty: string;
   learningStatus: "new" | "practicing" | "learned";
 }
-
-const columns = [
-  "Spanish",
-  "English",
-  "Part of speech",
-  "Example (Spanish)",
-  "Example (English)",
-  "Difficulty",
-  "Learning status",
-] as const;
 
 function escapeTsvField(value: string): string {
   return /[\t\r\n"]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
@@ -27,14 +17,23 @@ function learningStatusLabel(status: AnkiExportRow["learningStatus"]): string {
 }
 
 /** Serializes encountered vocabulary as a UTF-8, tab-separated Anki import file. */
-export function serializeAnkiExport(rows: readonly AnkiExportRow[]): string {
+export function serializeAnkiExport(rows: readonly AnkiExportRow[], targetLanguage: string): string {
+  const columns = [
+    targetLanguage,
+    "English",
+    "Part of speech",
+    `Example (${targetLanguage})`,
+    "Example (English)",
+    "Difficulty",
+    "Learning status",
+  ];
   const lines = rows.map((row) =>
     [
-      row.spanish,
-      row.english,
+      row.targetText,
+      row.sourceText,
       row.partOfSpeech,
-      row.exampleSpanish,
-      row.exampleEnglish,
+      row.exampleTargetText,
+      row.exampleSourceText,
       row.difficulty,
       learningStatusLabel(row.learningStatus),
     ]

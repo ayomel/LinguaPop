@@ -4,7 +4,7 @@
 
 **Name:** LinguaPop
 
-**Short description:** Practice Spanish as you browse. Replace selected English words and phrases, check translations, and review vocabulary you encounter.
+**Short description:** Practice Spanish or French as you browse. Replace selected English words and phrases, check translations, and review vocabulary you encounter.
 
 **Category:** Education
 
@@ -12,13 +12,13 @@
 
 **Support contact:** huntermelverton@gmail.com
 
-**Single purpose:** Help users practice Spanish while reading webpages by replacing selected English words and phrases with Spanish and supporting review of encountered vocabulary.
+**Single purpose:** Help users practice Spanish or French while reading webpages by replacing selected English words and phrases with the selected language and supporting review of encountered vocabulary.
 
 ## Detailed description
 
-Build everyday Spanish vocabulary a little at a time, right in the pages you already read.
+Build everyday Spanish or French vocabulary a little at a time, right in the pages you already read.
 
-LinguaPop replaces a percentage of eligible English words and phrases with Spanish. Choose a replacement for its translation, then review vocabulary you encounter with flashcards and a daily goal.
+Choose English-to-Spanish or English-to-French in the popup. LinguaPop replaces a percentage of eligible English words and phrases with the selected language. Choose a replacement for its translation, then review vocabulary you encounter with flashcards and a daily goal.
 
 - Choose a replacement percentage and a beginner, intermediate, advanced, or all-level vocabulary set.
 - Pause LinguaPop everywhere or turn it off for a specific site.
@@ -26,7 +26,7 @@ LinguaPop replaces a percentage of eligible English words and phrases with Spani
 - Save encountered vocabulary and review it later with recall-based scheduling and its most recently encountered sentence (up to 500 characters per word).
 - Keep settings and learning progress in Chrome's local extension storage.
 
-LinguaPop currently supports English-to-Spanish practice. It processes eligible page text locally to provide replacements and saves one recently encountered sentence (up to 500 characters) per encountered word in Chrome's local extension storage for review. It does not send page text or learning data to a LinguaPop server. Editable fields, code, and interactive content are skipped.
+LinguaPop supports English-to-Spanish and English-to-French practice. It processes eligible page text locally to provide replacements and saves one recently encountered sentence (up to 500 characters) per encountered word in Chrome's local extension storage for review. Each language pair keeps separate encounter, review, and daily progress. It does not send page text or learning data to a LinguaPop server. Editable fields, code, and interactive content are skipped.
 
 ## Privacy declarations to complete in the dashboard
 

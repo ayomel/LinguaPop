@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 
 const dictionaryPath = new URL("../src/data/dictionary.json", import.meta.url);
 const phraseDictionaryPath = new URL("../src/data/phrase-dictionary.json", import.meta.url);
+const frenchDictionaryPath = new URL("../src/data/french-dictionary.json", import.meta.url);
+const frenchPhraseDictionaryPath = new URL("../src/data/french-phrase-dictionary.json", import.meta.url);
 const allowedPartsOfSpeech = new Set([
   "noun",
   "verb",
@@ -15,10 +17,9 @@ const allowedPartsOfSpeech = new Set([
   "preposition",
 ]);
 const allowedDifficulties = new Set(["beginner", "intermediate", "advanced"]);
-const optionalTextFields = ["exampleSpanish", "exampleEnglish", "grammarNote"];
 const maxOptionalTextLength = 180;
 
-export function validateDictionary(entries) {
+export function validateDictionary(entries, sourceField = "english", targetField = "spanish", exampleTargetField = `example${targetField[0].toUpperCase()}${targetField.slice(1)}`) {
   const errors = [];
   const ids = new Set();
   const englishTerms = new Set();
@@ -34,7 +35,7 @@ export function validateDictionary(entries) {
       return;
     }
 
-    for (const field of ["id", "english", "spanish"]) {
+    for (const field of ["id", sourceField, targetField]) {
       if (typeof entry[field] !== "string" || entry[field].trim() === "") {
         errors.push(`${label} must include a non-empty ${field}.`);
       }
@@ -48,7 +49,7 @@ export function validateDictionary(entries) {
       errors.push(`${label} has an unsupported difficulty.`);
     }
 
-    for (const field of optionalTextFields) {
+    for (const field of [exampleTargetField, "exampleEnglish", "grammarNote"]) {
       if (
         Object.hasOwn(entry, field) &&
         (typeof entry[field] !== "string" ||
@@ -58,8 +59,8 @@ export function validateDictionary(entries) {
         errors.push(`${label} ${field} must be a non-empty string of at most ${maxOptionalTextLength} characters.`);
       }
     }
-    if (Object.hasOwn(entry, "exampleSpanish") !== Object.hasOwn(entry, "exampleEnglish")) {
-      errors.push(`${label} exampleSpanish and exampleEnglish must be provided together.`);
+    if (Object.hasOwn(entry, exampleTargetField) !== Object.hasOwn(entry, "exampleEnglish")) {
+      errors.push(`${label} ${exampleTargetField} and exampleEnglish must be provided together.`);
     }
 
     if (typeof entry.id === "string" && entry.id.trim() !== "") {
@@ -67,19 +68,19 @@ export function validateDictionary(entries) {
       ids.add(entry.id);
     }
 
-    if (typeof entry.english === "string" && entry.english.trim() !== "") {
-      const normalizedEnglish = entry.english.trim().toLocaleLowerCase("en");
-      if (englishTerms.has(normalizedEnglish)) {
-        errors.push(`${label} has a duplicate English term: ${entry.english}.`);
+    if (typeof entry[sourceField] === "string" && entry[sourceField].trim() !== "") {
+      const normalizedSource = entry[sourceField].trim().toLocaleLowerCase("en");
+      if (englishTerms.has(normalizedSource)) {
+        errors.push(`${label} has a duplicate ${sourceField === "english" ? "English" : "source"} term: ${entry[sourceField]}.`);
       }
-      englishTerms.add(normalizedEnglish);
+      englishTerms.add(normalizedSource);
     }
   });
 
   return errors;
 }
 
-export function validatePhraseDictionary(entries) {
+export function validatePhraseDictionary(entries, sourceField = "english", targetField = "spanish") {
   const errors = [];
   const ids = new Set();
   const englishPhrases = new Set();
@@ -101,18 +102,18 @@ export function validatePhraseDictionary(entries) {
       ids.add(entry.id);
     }
 
-    for (const field of ["english", "spanish"]) {
+    for (const field of [sourceField, targetField]) {
       if (typeof entry[field] !== "string" || entry[field].trim() === "") {
         errors.push(`${label} must include a non-empty ${field}.`);
       }
     }
 
-    if (typeof entry.english === "string" && entry.english.trim() !== "") {
-      const normalizedEnglish = entry.english.trim().toLocaleLowerCase("en");
-      if (englishPhrases.has(normalizedEnglish)) {
-        errors.push(`${label} has a duplicate English phrase: ${entry.english}.`);
+    if (typeof entry[sourceField] === "string" && entry[sourceField].trim() !== "") {
+      const normalizedSource = entry[sourceField].trim().toLocaleLowerCase("en");
+      if (englishPhrases.has(normalizedSource)) {
+        errors.push(`${label} has a duplicate ${sourceField === "english" ? "English" : "source"} phrase: ${entry[sourceField]}.`);
       }
-      englishPhrases.add(normalizedEnglish);
+      englishPhrases.add(normalizedSource);
     }
 
     if (typeof entry.difficulty !== "string" || !allowedDifficulties.has(entry.difficulty)) {
@@ -128,11 +129,15 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const errors = validateDictionary(entries);
   const phrases = JSON.parse(await readFile(phraseDictionaryPath, "utf8"));
   errors.push(...validatePhraseDictionary(phrases));
+  const frenchEntries = JSON.parse(await readFile(frenchDictionaryPath, "utf8"));
+  errors.push(...validateDictionary(frenchEntries, "english", "french", "exampleFrench"));
+  const frenchPhrases = JSON.parse(await readFile(frenchPhraseDictionaryPath, "utf8"));
+  errors.push(...validatePhraseDictionary(frenchPhrases, "english", "french"));
 
   if (errors.length > 0) {
     console.error(errors.join("\n"));
     process.exitCode = 1;
   } else {
-    console.log(`Validated ${entries.length} dictionary entries and ${phrases.length} phrase entries.`);
+    console.log(`Validated ${entries.length} Spanish words, ${phrases.length} Spanish phrases, ${frenchEntries.length} French words, and ${frenchPhrases.length} French phrases.`);
   }
 }

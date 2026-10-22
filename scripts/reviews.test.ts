@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { englishToFrenchPair } from "../src/data/language-pairs.ts";
 import {
   getDueReviews,
   getNextDueReview,
@@ -133,6 +134,18 @@ test("graduates a word after consecutive remembered reviews reach the maximum in
   assert.deepEqual(storage.values.graduatedWords, { "en-apple": true });
   assert.equal((storage.values.learningStatuses as Record<string, string>)["en-apple"], "learned");
   assert.deepEqual(await getDueReviews(storageFor(storage), schedule!.nextDueAt), []);
+});
+
+test("French reviews update the French daily goal progress key", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-fr-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+
+  await recordRecall("en-fr-apple", "remembered", storageFor(storage), 1_000, englishToFrenchPair);
+
+  assert.deepEqual(storage.values.dailyGoalProgress, undefined);
+  assert.equal((storage.values["dailyGoalProgress:en-fr"] as { completed: number }).completed, 1);
 });
 
 test("only due or unscheduled encountered entries appear in the review queue", async () => {

@@ -191,7 +191,8 @@ p {
   font-weight: 650;
 }
 
-#vocabulary-difficulty {
+#vocabulary-difficulty,
+#language-pair {
   box-sizing: border-box;
   width: 100%;
   min-height: 2.25rem;
@@ -203,12 +204,14 @@ p {
   font: inherit;
 }
 
-#vocabulary-difficulty:focus-visible {
+#vocabulary-difficulty:focus-visible,
+#language-pair:focus-visible {
   outline: 3px solid #7eb69f;
   outline-offset: 2px;
 }
 
-#vocabulary-difficulty:disabled {
+#vocabulary-difficulty:disabled,
+#language-pair:disabled {
   cursor: wait;
   opacity: 0.65;
 }

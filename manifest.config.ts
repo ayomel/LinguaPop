@@ -4,7 +4,7 @@ export default defineManifest({
   manifest_version: 3,
   name: "LinguaPop",
   version: "0.1.0",
-  description: "Learn Spanish while browsing the web.",
+  description: "Practice Spanish or French while browsing the web.",
   icons: {
     16: "icons/linguapop-16.png",
     48: "icons/linguapop-48.png",
