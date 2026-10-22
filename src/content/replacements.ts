@@ -16,6 +16,7 @@ export interface ReplacementOptions {
   percentage?: number;
   pair?: LanguagePair;
   difficulty?: VocabularyDifficulty;
+  excludedEntryIds?: ReadonlySet<string>;
   onReplacement?: (entryId: string, contextSentence: string) => void;
 }
 
@@ -170,6 +171,7 @@ function getCandidates(
   root: ReplacementRoot,
   pair: LanguagePair,
   difficulty: VocabularyDifficulty,
+  excludedEntryIds: ReadonlySet<string>,
 ): Candidate[] {
   const sourceLocale = pair.sourceLanguage.locale;
   const { entriesBySourceText, pattern } = getMatcher(pair.entries, sourceLocale, difficulty);
@@ -186,7 +188,7 @@ function getCandidates(
     while (match) {
       const original = match[0];
       const entry = entriesBySourceText.get(original.toLocaleLowerCase(sourceLocale));
-      if (entry) {
+      if (entry && !excludedEntryIds.has(entry.id)) {
         const position = textOffset + match.index;
         const key = `${entry.id}:${position}`;
         candidates.push({
@@ -288,6 +290,7 @@ export function applyWordReplacements(
 ): number {
   const percentage = clampPercentage(options.percentage);
   const difficulty = options.difficulty ?? "all";
+  const excludedEntryIds = options.excludedEntryIds ?? new Set<string>();
   const existing = getReplacementElements(root);
 
   if (
@@ -296,7 +299,8 @@ export function applyWordReplacements(
       (element) =>
         element.getAttribute("data-linguapop-percentage") === String(percentage) &&
         element.getAttribute("data-linguapop-difficulty") === difficulty &&
-        element.getAttribute("data-linguapop-pair-id") === (options.pair ?? englishToSpanishPair).id,
+        element.getAttribute("data-linguapop-pair-id") === (options.pair ?? englishToSpanishPair).id &&
+        !excludedEntryIds.has(element.getAttribute("data-linguapop-entry-id") ?? ""),
     )
   ) {
     return 0;
@@ -306,7 +310,7 @@ export function applyWordReplacements(
   if (percentage === 0) return 0;
 
   const pair = options.pair ?? englishToSpanishPair;
-  const candidates = getCandidates(root, pair, difficulty);
+  const candidates = getCandidates(root, pair, difficulty, excludedEntryIds);
   const targetCount = Math.floor((candidates.length * percentage) / 100);
   const selected = candidates
     .sort((left, right) => left.rank - right.rank || (left.key < right.key ? -1 : left.key > right.key ? 1 : 0))

@@ -124,3 +124,33 @@ test("flashcards review legacy encounters that do not have a context sentence", 
   controller.dispose();
   window.close();
 });
+
+test("flashcards announce when a remembered word graduates", async () => {
+  const window = createFlashcardPage();
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  storage.values.reviewSchedules = {
+    "en-apple": {
+      lastReviewedAt: 100,
+      lastOutcome: "remembered",
+      intervalDays: 16,
+      nextDueAt: 1_000,
+    },
+  };
+  const controller = await initializeFlashcards(
+    window.document,
+    storage as unknown as ReviewStorage,
+    () => 1_000,
+  );
+
+  window.document.querySelector<HTMLButtonElement>("#flashcard-reveal")!.click();
+  window.document.querySelector<HTMLButtonElement>("#flashcard-remembered")!.click();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  assert.deepEqual(storage.values.graduatedWords, { "en-apple": true });
+  assert.match(window.document.querySelector("#flashcard-status")?.textContent ?? "", /graduated/i);
+  controller.dispose();
+  window.close();
+});

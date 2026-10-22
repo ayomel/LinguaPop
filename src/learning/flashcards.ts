@@ -1,7 +1,13 @@
 import { renderHighlightedContextSentence } from "./context-sentence.ts";
 import { DEFAULT_DAILY_GOAL, getDailyGoalSettings, setDailyGoal } from "./daily-goals.ts";
 import { getEncounteredWords } from "./encounters.ts";
-import { getDueReviews, recordRecall, type RecallOutcome, type ReviewStorage } from "./reviews.ts";
+import {
+  getDueReviews,
+  MAX_REVIEW_INTERVAL_DAYS,
+  recordRecall,
+  type RecallOutcome,
+  type ReviewStorage,
+} from "./reviews.ts";
 import {
   englishToSpanishPair,
   type LanguagePair,
@@ -129,9 +135,14 @@ export async function initializeFlashcards(
     disableActions(true);
     status.textContent = "Saving your review…";
     try {
-      await recordRecall(entryId, outcome, storage, now());
+      const schedule = await recordRecall(entryId, outcome, storage, now());
+      const graduatedEntry = pair.entries.find((entry) => entry.id === entryId);
+      const savedMessage =
+        outcome === "remembered" && schedule.intervalDays >= MAX_REVIEW_INTERVAL_DAYS
+          ? `${graduatedEntry?.targetText ?? "This word"} has graduated and will no longer appear in reading practice. Return it to practice from the dashboard if you need it again.`
+          : "Review saved. Your next review time is scheduled.";
       currentEntryId = undefined;
-      await renderNext("Review saved. Your next review time is scheduled.");
+      await renderNext(savedMessage);
     } catch {
       disableActions(false);
       status.textContent = "Your review could not be saved. Try again.";

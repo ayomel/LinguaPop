@@ -25,11 +25,15 @@ function createDashboardPage() {
       <strong id="count-practicing"></strong>
       <strong id="count-learned"></strong>
       <strong id="count-due"></strong>
+      <strong id="count-graduated"></strong>
       <button id="export-vocabulary" type="button" disabled>Export for Anki (.tsv)</button>
       <p id="export-status" role="status"></p>
+      <p id="graduated-status" role="status"></p>
       <p id="dashboard-status" role="status"></p>
       <p id="dashboard-empty" hidden></p>
       <ul id="vocabulary-list" hidden></ul>
+      <p id="graduated-empty"></p>
+      <ul id="graduated-list" hidden></ul>
       <p id="dashboard-error" role="alert" hidden></p>
     </main>
   `;
@@ -83,6 +87,48 @@ test("dashboard counts match valid encountered words and local learning schedule
       ["en-apple", "learned", false],
     ],
   );
+});
+
+test("dashboard separates graduated words from vocabulary in progress", async () => {
+  const storage = createProgressStorage();
+  storage.values.graduatedWords = { "en-book": true };
+
+  const snapshot = await getVocabularyDashboardSnapshot(reviewStorageFor(storage), 1_000);
+
+  assert.equal(snapshot.graduatedCount, 1);
+  assert.deepEqual(snapshot.graduatedWords.map(({ entry }) => entry.id), ["en-book"]);
+  assert.deepEqual(snapshot.words.filter(({ graduated }) => !graduated).map(({ entry }) => entry.id), [
+    "en-city",
+    "en-apple",
+  ]);
+});
+
+test("dashboard returns a graduated word to practice and makes it due again", async () => {
+  const window = createDashboardPage();
+  const storage = createProgressStorage();
+  storage.values.graduatedWords = { "en-book": true };
+  const controller = await initializeVocabularyDashboard(
+    window.document,
+    reviewStorageFor(storage),
+    () => 1_000,
+  );
+
+  assert.equal(window.document.querySelector("#count-graduated")?.textContent, "1");
+  assert.equal(window.document.querySelectorAll("#graduated-list [data-ungraduate-entry]").length, 1);
+  assert.equal(window.document.querySelector('[data-linguapop-entry-id="en-book"]')?.closest("#vocabulary-list"), null);
+
+  window.document.querySelector<HTMLButtonElement>("[data-ungraduate-entry='en-book']")!.click();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  assert.deepEqual(storage.values.graduatedWords, {});
+  assert.equal((storage.values.learningStatuses as Record<string, string>)["en-book"], "practicing");
+  assert.equal((storage.values.reviewSchedules as Record<string, unknown>)["en-book"], undefined);
+  assert.ok(window.document.querySelector('#vocabulary-list [data-linguapop-entry-id="en-book"]'));
+  assert.equal(window.document.querySelector("#count-graduated")?.textContent, "0");
+  assert.equal(window.document.querySelector("#count-due")?.textContent, "2");
+
+  controller.dispose();
+  window.close();
 });
 
 test("dashboard lists encountered words, labels their state, and opens translation details", async () => {

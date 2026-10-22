@@ -442,6 +442,30 @@ test("content settings save only the sentence containing each encountered word",
   window.close();
 });
 
+test("graduated words stop replacing and return to replacements when ungraduated", async () => {
+  const window = createPage();
+  const storage = new FakeStorage();
+  storage.values.graduatedWords = { "en-apple": true };
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+  await controller.ready;
+  await settleStorageChange();
+
+  assert.equal(window.document.querySelectorAll("[data-linguapop-entry-id='en-apple']").length, 0);
+
+  storage.values.graduatedWords = {};
+  changes.emit({ graduatedWords: { oldValue: { "en-apple": true }, newValue: {} } });
+  await settleStorageChange();
+
+  assert.ok(window.document.querySelectorAll("[data-linguapop-entry-id='en-apple']").length > 0);
+  controller.dispose();
+  window.close();
+});
+
 test("progress storage errors do not prevent page replacements", async () => {
   const window = createPage();
   const storage = new FakeStorage();
