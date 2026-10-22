@@ -4,7 +4,9 @@ import {
   type LanguagePairEntry,
 } from "../data/language-pairs.ts";
 import { getEncounteredWords } from "./encounters.ts";
+import { getGraduatedWords, GRADUATED_WORDS_KEY } from "./graduated-words.ts";
 import { DAILY_GOAL_PROGRESS_KEY, getProgressAfterReview } from "./daily-goals.ts";
+import { getLearningStatuses, LEARNING_STATUSES_KEY } from "./statuses.ts";
 
 export const REVIEW_SCHEDULES_KEY = "reviewSchedules";
 export const REMEMBERED_INTERVAL_MULTIPLIER = 2;
@@ -91,16 +93,17 @@ export async function getDueReviews(
   now = Date.now(),
   pair: LanguagePair = englishToSpanishPair,
 ): Promise<DueReview[]> {
-  const [encounters, schedules] = await Promise.all([
+  const [encounters, schedules, graduatedWords] = await Promise.all([
     getEncounteredWords(storage),
     getReviewSchedules(storage),
+    getGraduatedWords(storage),
   ]);
   const entriesById = new Map(pair.entries.map((entry) => [entry.id, entry]));
   const dueReviews: DueReview[] = [];
 
   for (const [entryId, encounter] of Object.entries(encounters)) {
     const entry = entriesById.get(entryId);
-    if (!entry) continue;
+    if (!entry || Object.hasOwn(graduatedWords, entryId)) continue;
     const schedule = schedules[entryId];
     const nextDueAt = schedule?.nextDueAt ?? encounter.firstSeenAt;
     if (!schedule || schedule.nextDueAt <= now) {
@@ -143,6 +146,7 @@ export function recordRecall(
     }
 
     const schedules = await getReviewSchedules(storage);
+    const graduatedWords = await getGraduatedWords(storage);
     const previous = schedules[entryId];
     const intervalDays =
       outcome === "remembered"
@@ -158,11 +162,20 @@ export function recordRecall(
       intervalDays,
       nextDueAt: now + delay,
     };
+    const shouldGraduate = outcome === "remembered" && intervalDays >= MAX_REVIEW_INTERVAL_DAYS;
+    if (shouldGraduate) graduatedWords[entryId] = true;
+    const learningStatuses = shouldGraduate ? await getLearningStatuses(storage) : undefined;
+    if (learningStatuses) learningStatuses[entryId] = "learned";
     const dailyProgress = await getProgressAfterReview(storage, now);
-    await storage.set({
+    const updates: Record<string, unknown> = {
       [REVIEW_SCHEDULES_KEY]: { ...schedules, [entryId]: savedSchedule },
       [DAILY_GOAL_PROGRESS_KEY]: dailyProgress,
-    });
+    };
+    if (shouldGraduate && learningStatuses) {
+      updates[GRADUATED_WORDS_KEY] = graduatedWords;
+      updates[LEARNING_STATUSES_KEY] = learningStatuses;
+    }
+    await storage.set(updates);
   });
 
   pendingWrites.set(storage, nextWrite.then(() => undefined, () => undefined));

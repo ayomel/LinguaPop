@@ -1,5 +1,6 @@
 import {
   getNextDueReview,
+  MAX_REVIEW_INTERVAL_DAYS,
   recordRecall,
   type RecallOutcome,
   type ReviewStorage,
@@ -99,8 +100,14 @@ export async function initializeReviewCard(
     setActionDisabled(true);
     status.textContent = "Saving your review…";
     try {
-      await recordRecall(currentEntryId, outcome, storage, now());
-      await renderNext("Review saved. Your next review time is scheduled.");
+      const entryId = currentEntryId;
+      const schedule = await recordRecall(entryId, outcome, storage, now());
+      const graduatedEntry = pair.entries.find((entry) => entry.id === entryId);
+      const savedMessage =
+        outcome === "remembered" && schedule.intervalDays >= MAX_REVIEW_INTERVAL_DAYS
+          ? `${graduatedEntry?.targetText ?? "This word"} has graduated and will no longer appear in reading practice. Return it to practice from the dashboard if you need it again.`
+          : "Review saved. Your next review time is scheduled.";
+      await renderNext(savedMessage);
     } catch {
       setActionDisabled(false);
       status.textContent = "Your review could not be saved. Try again.";

@@ -29,6 +29,10 @@
           <span class="summary-label">Due to review</span>
           <strong id="count-due" class="summary-count" aria-live="polite">—</strong>
         </article>
+        <article class="summary-card">
+          <span class="summary-label">Graduated</span>
+          <strong id="count-graduated" class="summary-count" aria-live="polite">—</strong>
+        </article>
       </section>
 
       <section class="flashcard-section" aria-labelledby="flashcards-title">
@@ -58,16 +62,25 @@
 
       <section class="word-section" aria-labelledby="words-title">
         <div class="word-section-heading">
-          <h2 id="words-title">Encountered vocabulary</h2>
+          <h2 id="words-title">Vocabulary in progress</h2>
           <button id="export-vocabulary" class="export-button" type="button" disabled>Export for Anki (.tsv)</button>
         </div>
         <p id="export-status" class="export-status" role="status" aria-live="polite"></p>
         <p id="dashboard-status" class="dashboard-status" role="status" aria-live="polite">Loading vocabulary progress…</p>
         <p id="dashboard-empty" class="empty-state" hidden>
-          No vocabulary yet. Browse a page with LinguaPop enabled to encounter your first words.
+          No vocabulary in progress. Browse with LinguaPop enabled to encounter words; graduated words appear below.
         </p>
-        <ul id="vocabulary-list" class="vocabulary-list" aria-label="Encountered vocabulary" hidden></ul>
+        <ul id="vocabulary-list" class="vocabulary-list" aria-label="Vocabulary in progress" hidden></ul>
         <p id="dashboard-error" class="error" role="alert" hidden></p>
+      </section>
+
+      <section class="word-section graduated-section" aria-labelledby="graduated-title">
+        <h2 id="graduated-title">Graduated words</h2>
+        <p id="graduated-status" class="graduated-status" role="status" aria-live="polite"></p>
+        <p id="graduated-empty" class="empty-state">
+          Words graduate after consecutive remembered reviews reach the 30-day interval.
+        </p>
+        <ul id="graduated-list" class="vocabulary-list graduated-list" aria-label="Graduated vocabulary" hidden></ul>
       </section>
     </main>
     <script type="module" src="/src/learning/dashboard-page.ts"></script>

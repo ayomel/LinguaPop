@@ -2,6 +2,7 @@ import { applyWordReplacements, restoreWordReplacements } from "./replacements.t
 import { isWithinLinguaPopOwnedElement } from "./dom.ts";
 import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
 import { recordWordEncounters, type WordEncounterInput } from "../learning/encounters.ts";
+import { getGraduatedWords } from "../learning/graduated-words.ts";
 import {
   didSiteOverrideChange,
   isSiteEnabled,
@@ -24,6 +25,7 @@ export function startContentSettings(
   let version = 0;
   let disposed = false;
   let currentSettings: LinguaPopSettings | undefined;
+  let graduatedEntryIds = new Set<string>();
   let flushScheduled = false;
   const pendingNodes = new Set<Node>();
   const ownerDocument = root.ownerDocument;
@@ -73,6 +75,7 @@ export function startContentSettings(
         if (!root.contains(node) || isWithinLinguaPopOwnedElement(node)) continue;
         applyWordReplacements(node as Element | Text, {
           pair,
+          excludedEntryIds: graduatedEntryIds,
           percentage: settings.replacementPercentage,
           difficulty: settings.difficulty,
           onReplacement: (entryId, contextSentence) => {
@@ -110,16 +113,21 @@ export function startContentSettings(
     const requestVersion = ++version;
 
     try {
-      const settings = await readSettings(storage);
+      const [settings, graduatedWords] = await Promise.all([
+        readSettings(storage),
+        getGraduatedWords(storage),
+      ]);
       if (disposed || requestVersion !== version) return;
 
       currentSettings = settings;
+      graduatedEntryIds = new Set(Object.keys(graduatedWords));
       pendingNodes.clear();
       pauseObserver(() => {
         if (isSiteEnabled(settings, hostname)) {
           const encounteredEntries: WordEncounterInput[] = [];
           applyWordReplacements(root, {
             pair,
+            excludedEntryIds: graduatedEntryIds,
             percentage: settings.replacementPercentage,
             difficulty: settings.difficulty,
             onReplacement: (entryId, contextSentence) => {
@@ -152,6 +160,7 @@ export function startContentSettings(
       (!changes.enabled &&
         !changes.replacementPercentage &&
         !changes.difficulty &&
+        !changes.graduatedWords &&
         !siteOverrideChanged)
     ) return;
     void synchronize();

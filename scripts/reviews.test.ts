@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  getDueReviews,
   getNextDueReview,
   getReviewSchedules,
+  MAX_REVIEW_INTERVAL_DAYS,
   recordRecall,
   type ReviewStorage,
 } from "../src/learning/reviews.ts";
@@ -112,6 +114,25 @@ test("success intervals stop growing at 30 days", async () => {
   }
 
   assert.equal(schedule.intervalDays, 30);
+});
+
+test("graduates a word after consecutive remembered reviews reach the maximum interval", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  let reviewAt = 1_000;
+  let schedule: Awaited<ReturnType<typeof recordRecall>> | undefined;
+
+  for (let review = 0; review < 6; review += 1) {
+    schedule = await recordRecall("en-apple", "remembered", storageFor(storage), reviewAt);
+    reviewAt = schedule.nextDueAt;
+  }
+
+  assert.equal(schedule?.intervalDays, MAX_REVIEW_INTERVAL_DAYS);
+  assert.deepEqual(storage.values.graduatedWords, { "en-apple": true });
+  assert.equal((storage.values.learningStatuses as Record<string, string>)["en-apple"], "learned");
+  assert.deepEqual(await getDueReviews(storageFor(storage), schedule!.nextDueAt), []);
 });
 
 test("only due or unscheduled encountered entries appear in the review queue", async () => {

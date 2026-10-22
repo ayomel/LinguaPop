@@ -112,3 +112,33 @@ test("review card supports legacy encounters without a saved context sentence", 
   controller.dispose();
   window.close();
 });
+
+test("quick review announces when a remembered word graduates", async () => {
+  const window = createReviewPage();
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  storage.values.reviewSchedules = {
+    "en-apple": {
+      lastReviewedAt: 100,
+      lastOutcome: "remembered",
+      intervalDays: 16,
+      nextDueAt: 1_000,
+    },
+  };
+  const controller = await initializeReviewCard(
+    window.document,
+    storage as unknown as ReviewStorage,
+    () => 1_000,
+  );
+
+  window.document.querySelector<HTMLButtonElement>("#review-reveal")!.click();
+  window.document.querySelector<HTMLButtonElement>("#review-remembered")!.click();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  assert.deepEqual(storage.values.graduatedWords, { "en-apple": true });
+  assert.match(window.document.querySelector("#review-status")?.textContent ?? "", /graduated/i);
+  controller.dispose();
+  window.close();
+});
