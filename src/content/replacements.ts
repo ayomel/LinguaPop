@@ -4,6 +4,7 @@ import {
   type LanguagePairEntry,
 } from "../data/language-pairs.ts";
 import type { VocabularyDifficulty } from "../data/dictionary.ts";
+import { getContainingSentence } from "../learning/context-sentence.ts";
 import { getEligibleTextNodes } from "./dom.ts";
 
 const replacementSelector = '[data-linguapop-replacement="true"]';
@@ -15,7 +16,7 @@ export interface ReplacementOptions {
   percentage?: number;
   pair?: LanguagePair;
   difficulty?: VocabularyDifficulty;
-  onReplacement?: (entryId: string) => void;
+  onReplacement?: (entryId: string, contextSentence: string) => void;
 }
 
 interface Candidate {
@@ -24,6 +25,7 @@ interface Candidate {
   end: number;
   original: string;
   entry: LanguagePairEntry;
+  contextSentence: string;
   key: string;
   rank: number;
 }
@@ -193,6 +195,7 @@ function getCandidates(
           end: match.index + original.length,
           original,
           entry,
+          contextSentence: getContainingSentence(node.data, match.index, match.index + original.length),
           key,
           rank: hash(`${pageKey}|${key}`),
         });
@@ -319,7 +322,9 @@ export function applyWordReplacements(
   for (const [node, matches] of selectedByNode) {
     replaceNodeMatches(node, matches, pair, percentage, difficulty);
     for (const match of matches) {
-      if (match.entry.kind === "word") options.onReplacement?.(match.entry.id);
+      if (match.entry.kind === "word") {
+        options.onReplacement?.(match.entry.id, match.contextSentence);
+      }
     }
   }
 

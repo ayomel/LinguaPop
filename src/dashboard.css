@@ -175,6 +175,20 @@ p {
   font-weight: 600;
 }
 
+.flashcard-context {
+  padding-left: 0.75rem;
+  border-left: 3px solid #c4d8c9;
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+.flashcard-context mark {
+  border-radius: 0.125rem;
+  color: #17211b;
+  background: #f4d36d;
+  font-weight: 700;
+}
+
 .flashcard-answer {
   color: #176b52;
   font-size: 1.25rem;

@@ -56,9 +56,22 @@ p {
 }
 
 .review-prompt,
+.review-context,
 .review-answer,
 .review-status {
   margin: 0.5rem 0 0;
+}
+
+.review-context {
+  padding-left: 0.625rem;
+  border-left: 3px solid #c8d8cc;
+}
+
+.review-context mark {
+  border-radius: 0.125rem;
+  color: #17211b;
+  background: #f4d36d;
+  font-weight: 700;
 }
 
 .review-answer {

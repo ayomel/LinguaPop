@@ -421,6 +421,27 @@ test("content settings track only words actually replaced and update local encou
   window.close();
 });
 
+test("content settings save only the sentence containing each encountered word", async () => {
+  const window = createPage();
+  const appleText = Array.from({ length: 20 }, () => "Apple.").join(" ");
+  window.document.body.innerHTML = `<p>Before this. ${appleText} After this.</p>`;
+  const storage = new FakeStorage();
+  const changes = new FakeStorageChanges();
+  const controller = startContentSettings(
+    window.document.body,
+    storage as unknown as SettingsStorage,
+    changes as unknown as typeof chrome.storage.onChanged,
+  );
+
+  await controller.ready;
+  await settleStorageChange();
+
+  const encounter = (storage.values.encounteredWords as Record<string, WordEncounter>)?.["en-apple"];
+  assert.equal(encounter?.contextSentence, "Apple.");
+  controller.dispose();
+  window.close();
+});
+
 test("progress storage errors do not prevent page replacements", async () => {
   const window = createPage();
   const storage = new FakeStorage();

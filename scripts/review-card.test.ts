@@ -22,6 +22,7 @@ function createReviewPage() {
     <section aria-labelledby="review-title">
       <h2 id="review-title">Quick review</h2>
       <p id="review-prompt"></p>
+      <p id="review-context" hidden></p>
       <button id="review-reveal" type="button" hidden>Reveal Spanish</button>
       <p id="review-answer" lang="es" hidden></p>
       <div id="review-actions" hidden>
@@ -38,7 +39,12 @@ test("review card asks for recall before reveal and schedules only an explicit r
   const window = createReviewPage();
   const storage = new FakeStorage();
   storage.values.encounteredWords = {
-    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+    "en-apple": {
+      firstSeenAt: 100,
+      lastSeenAt: 100,
+      encounterCount: 1,
+      contextSentence: "I picked an Apple from the tree.",
+    },
   };
   const controller = await initializeReviewCard(
     window.document,
@@ -47,9 +53,13 @@ test("review card asks for recall before reveal and schedules only an explicit r
   );
   const reveal = window.document.querySelector<HTMLButtonElement>("#review-reveal")!;
   const answer = window.document.querySelector<HTMLElement>("#review-answer")!;
+  const context = window.document.querySelector<HTMLElement>("#review-context")!;
   const actions = window.document.querySelector<HTMLElement>("#review-actions")!;
 
   assert.match(window.document.querySelector("#review-prompt")?.textContent ?? "", /apple/i);
+  assert.equal(context.hidden, false);
+  assert.equal(context.textContent, "I picked an Apple from the tree.");
+  assert.equal(context.querySelector("mark")?.textContent, "Apple");
   assert.equal(answer.hidden, true);
   assert.equal(actions.hidden, true);
   assert.equal(storage.values.reviewSchedules, undefined);
@@ -80,6 +90,25 @@ test("review card gives a first-review empty state when no words were encountere
 
   assert.match(window.document.querySelector("#review-prompt")?.textContent ?? "", /browse to encounter/i);
   assert.equal(window.document.querySelector("#review-reveal")?.hidden, true);
+  controller.dispose();
+  window.close();
+});
+
+test("review card supports legacy encounters without a saved context sentence", async () => {
+  const window = createReviewPage();
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  const controller = await initializeReviewCard(
+    window.document,
+    storage as unknown as ReviewStorage,
+    () => 1_000,
+  );
+
+  assert.match(window.document.querySelector("#review-prompt")?.textContent ?? "", /apple/i);
+  assert.equal(window.document.querySelector("#review-context")?.hidden, true);
+  assert.equal(window.document.querySelector("#review-answer")?.hidden, true);
   controller.dispose();
   window.close();
 });

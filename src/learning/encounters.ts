@@ -1,9 +1,17 @@
+import { MAX_CONTEXT_SENTENCE_LENGTH } from "./context-sentence.ts";
+
 export const ENCOUNTERED_WORDS_KEY = "encounteredWords";
 
 export interface WordEncounter {
   firstSeenAt: number;
   lastSeenAt: number;
   encounterCount: number;
+  contextSentence?: string;
+}
+
+export interface WordEncounterInput {
+  entryId: string;
+  contextSentence?: string;
 }
 
 export type WordEncounterMap = Record<string, WordEncounter>;
@@ -40,10 +48,17 @@ function readEncounterMap(rawRecords: unknown): WordEncounterMap {
       continue;
     }
 
+    const validContext =
+      typeof record.contextSentence === "string" &&
+      record.contextSentence.trim().length > 0 &&
+      record.contextSentence.length <= MAX_CONTEXT_SENTENCE_LENGTH
+        ? { contextSentence: record.contextSentence }
+        : {};
     records[entryId] = {
       firstSeenAt: record.firstSeenAt,
       lastSeenAt: record.lastSeenAt,
       encounterCount: record.encounterCount,
+      ...validContext,
     };
   }
   return records;
@@ -60,22 +75,31 @@ let pendingWrite: Promise<void> = Promise.resolve();
 
 /** Records each actually displayed replacement in local extension storage. */
 export function recordWordEncounters(
-  entryIds: readonly string[],
+  entries: readonly (string | WordEncounterInput)[],
   storage: EncounterStorage = chrome.storage.local,
   now: () => number = Date.now,
 ): Promise<void> {
   const nextWrite = pendingWrite.then(async () => {
-    const validIds = entryIds.filter(isEntryId);
-    if (validIds.length === 0) return;
+    const validEntries = entries
+      .map((entry) => typeof entry === "string" ? { entryId: entry } : entry)
+      .filter(({ entryId }) => isEntryId(entryId));
+    if (validEntries.length === 0) return;
 
     const records = await getEncounteredWords(storage);
     const timestamp = now();
-    for (const entryId of validIds) {
+    for (const { entryId, contextSentence: rawContext } of validEntries) {
       const previous = Object.hasOwn(records, entryId) ? records[entryId] : undefined;
+      const trimmedContext = typeof rawContext === "string" ? rawContext.trim() : "";
+      const contextSentence = trimmedContext
+        ? trimmedContext.length <= MAX_CONTEXT_SENTENCE_LENGTH
+          ? trimmedContext
+          : `${trimmedContext.slice(0, MAX_CONTEXT_SENTENCE_LENGTH - 1).trimEnd()}…`
+        : previous?.contextSentence;
       records[entryId] = {
         firstSeenAt: previous?.firstSeenAt ?? timestamp,
         lastSeenAt: timestamp,
         encounterCount: (previous?.encounterCount ?? 0) + 1,
+        ...(contextSentence ? { contextSentence } : {}),
       };
     }
     await storage.set({ [ENCOUNTERED_WORDS_KEY]: records });

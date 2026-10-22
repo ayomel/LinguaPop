@@ -27,6 +27,7 @@ export type ReviewStorage = Pick<chrome.storage.StorageArea, "get" | "set">;
 export interface DueReview {
   entry: LanguagePairEntry;
   nextDueAt: number;
+  contextSentence?: string;
 }
 
 interface StoredReviewSchedules {
@@ -102,7 +103,9 @@ export async function getDueReviews(
     if (!entry) continue;
     const schedule = schedules[entryId];
     const nextDueAt = schedule?.nextDueAt ?? encounter.firstSeenAt;
-    if (!schedule || schedule.nextDueAt <= now) dueReviews.push({ entry, nextDueAt });
+    if (!schedule || schedule.nextDueAt <= now) {
+      dueReviews.push({ entry, nextDueAt, contextSentence: encounter.contextSentence });
+    }
   }
 
   dueReviews.sort((left, right) => left.nextDueAt - right.nextDueAt || left.entry.id.localeCompare(right.entry.id));

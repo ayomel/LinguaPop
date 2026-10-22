@@ -1,3 +1,4 @@
+import { renderHighlightedContextSentence } from "./context-sentence.ts";
 import { DEFAULT_DAILY_GOAL, getDailyGoalSettings, setDailyGoal } from "./daily-goals.ts";
 import { getEncounteredWords } from "./encounters.ts";
 import { getDueReviews, recordRecall, type RecallOutcome, type ReviewStorage } from "./reviews.ts";
@@ -17,6 +18,7 @@ export async function initializeFlashcards(
   pair: LanguagePair = englishToSpanishPair,
 ): Promise<FlashcardsController> {
   const prompt = root.querySelector<HTMLElement>("#flashcard-prompt");
+  const context = root.querySelector<HTMLElement>("#flashcard-context");
   const reveal = root.querySelector<HTMLButtonElement>("#flashcard-reveal");
   const answer = root.querySelector<HTMLElement>("#flashcard-answer");
   const actions = root.querySelector<HTMLElement>("#flashcard-actions");
@@ -28,7 +30,7 @@ export async function initializeFlashcards(
   const goalStatus = root.querySelector<HTMLElement>("#daily-goal-status");
 
   if (
-    !prompt || !reveal || !answer || !actions || !remembered || !needPractice || !status ||
+    !prompt || !context || !reveal || !answer || !actions || !remembered || !needPractice || !status ||
     !goalInput || !progress || !goalStatus
   ) {
     throw new Error("LinguaPop flashcard controls are missing.");
@@ -62,6 +64,8 @@ export async function initializeFlashcards(
     answer.textContent = "";
     disableActions(false);
     status.textContent = "Loading your flashcards…";
+    context.hidden = true;
+    context.replaceChildren();
 
     try {
       const timestamp = now();
@@ -89,6 +93,14 @@ export async function initializeFlashcards(
 
       currentEntryId = dueReview.entry.id;
       prompt.textContent = `Try to recall the ${pair.targetLanguage.name} for “${dueReview.entry.sourceText}”.`;
+      if (dueReview.contextSentence) {
+        renderHighlightedContextSentence(
+          context,
+          dueReview.contextSentence,
+          dueReview.entry.sourceText,
+          pair.sourceLanguage.locale,
+        );
+      }
       reveal.textContent = `Reveal ${pair.targetLanguage.name}`;
       answer.lang = pair.targetLanguage.locale;
       answer.textContent = dueReview.entry.targetText;
