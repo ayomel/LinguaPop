@@ -1,6 +1,6 @@
 import { applyWordReplacements, restoreWordReplacements } from "./replacements.ts";
 import { isWithinLinguaPopOwnedElement } from "./dom.ts";
-import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
+import { englishToSpanishPair, getLanguagePair, type LanguagePair } from "../data/language-pairs.ts";
 import { recordWordEncounters, type WordEncounterInput } from "../learning/encounters.ts";
 import { getGraduatedWords } from "../learning/graduated-words.ts";
 import {
@@ -25,6 +25,7 @@ export function startContentSettings(
   let version = 0;
   let disposed = false;
   let currentSettings: LinguaPopSettings | undefined;
+  let activePair = pair;
   let graduatedEntryIds = new Set<string>();
   let flushScheduled = false;
   const pendingNodes = new Set<Node>();
@@ -74,7 +75,7 @@ export function startContentSettings(
         if (node.nodeType !== 1 && node.nodeType !== 3) continue;
         if (!root.contains(node) || isWithinLinguaPopOwnedElement(node)) continue;
         applyWordReplacements(node as Element | Text, {
-          pair,
+          pair: activePair,
           excludedEntryIds: graduatedEntryIds,
           percentage: settings.replacementPercentage,
           difficulty: settings.difficulty,
@@ -120,13 +121,14 @@ export function startContentSettings(
       if (disposed || requestVersion !== version) return;
 
       currentSettings = settings;
+      activePair = getLanguagePair(settings.languagePairId) ?? pair;
       graduatedEntryIds = new Set(Object.keys(graduatedWords));
       pendingNodes.clear();
       pauseObserver(() => {
         if (isSiteEnabled(settings, hostname)) {
           const encounteredEntries: WordEncounterInput[] = [];
           applyWordReplacements(root, {
-            pair,
+            pair: activePair,
             excludedEntryIds: graduatedEntryIds,
             percentage: settings.replacementPercentage,
             difficulty: settings.difficulty,
@@ -160,6 +162,7 @@ export function startContentSettings(
       (!changes.enabled &&
         !changes.replacementPercentage &&
         !changes.difficulty &&
+        !changes.languagePairId &&
         !changes.graduatedWords &&
         !siteOverrideChanged)
     ) return;

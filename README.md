@@ -1,6 +1,6 @@
 # LinguaPop
 
-**Practice Spanish while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces some eligible English words and phrases on web pages with Spanish. It saves those words for you to review later.
+**Practice a language while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces some eligible English words and phrases on web pages with Spanish or French. It saves encountered vocabulary for review later.
 
 See the [engineering case study](docs/engineering-case-study.md) for the problem, implementation choices, and verification boundaries.
 
@@ -11,7 +11,7 @@ See the [engineering case study](docs/engineering-case-study.md) for the problem
 - Select a replacement to see its translation, then review encountered words with flashcards.
 - Track review progress with a daily goal and a schedule based on explicit "Remembered" or "Need practice" answers.
 
-Settings, encountered words, and review progress are saved in `chrome.storage.local`. The extension includes English-to-Spanish word and phrase data. English to Spanish is the only language pair available right now.
+Settings, encountered words, and review progress are saved in `chrome.storage.local`. Choose English-to-Spanish or English-to-French in the popup. Each pair has its own word encounters, review schedule, and daily review progress.
 
 ## Permissions and data
 
@@ -23,15 +23,15 @@ The `storage` permission saves your settings, site overrides, encountered words,
 flowchart LR
     Page[Web page text] --> Content[Content script]
     Content --> Match[Eligible text and phrase matching]
-    Data[Bundled English and Spanish data] --> Match
-    Match --> PageResult[Spanish text and translation tooltip]
+    Data[Bundled Spanish and French data] --> Match
+    Match --> PageResult[Selected language and translation tooltip]
     Match --> Encounters[Encountered vocabulary]
     Encounters --> Local[(Chrome local storage)]
     Local --> Review[Popup, flashcards, and dashboard]
     Review --> Local
 ```
 
-The runtime uses a language-neutral `LanguagePair` model. The English and Spanish dictionaries are stored in separate JSON files. Within an eligible text node, longer phrases take priority over individual words.
+The runtime uses a language-neutral `LanguagePair` model. Spanish and French words and phrases are stored in separate JSON files; the French starter set includes 215 beginner words and 20 phrases. Within an eligible text node, longer phrases take priority over individual words.
 
 ## Run it locally
 
@@ -50,7 +50,7 @@ To try the sample reading page, run `pnpm dev` in another terminal and open `htt
 pnpm dev
 ```
 
-Open the LinguaPop popup, raise the replacement percentage, and refresh the page. Select a Spanish replacement to see its translation. The editable field and code sample show content LinguaPop skips.
+Open the LinguaPop popup, choose English to Spanish or English to French, raise the replacement percentage, and refresh the page. Select a replacement to see its translation. The editable field and code sample show content LinguaPop skips.
 
 ## Checks
 

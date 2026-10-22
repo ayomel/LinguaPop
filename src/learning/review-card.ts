@@ -101,7 +101,7 @@ export async function initializeReviewCard(
     status.textContent = "Saving your review…";
     try {
       const entryId = currentEntryId;
-      const schedule = await recordRecall(entryId, outcome, storage, now());
+      const schedule = await recordRecall(entryId, outcome, storage, now(), pair);
       const graduatedEntry = pair.entries.find((entry) => entry.id === entryId);
       const savedMessage =
         outcome === "remembered" && schedule.intervalDays >= MAX_REVIEW_INTERVAL_DAYS

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
+import { englishToFrenchPair } from "../src/data/language-pairs.ts";
 import { initializeReviewCard } from "../src/learning/review-card.ts";
 import type { ReviewStorage } from "../src/learning/reviews.ts";
 
@@ -139,6 +140,27 @@ test("quick review announces when a remembered word graduates", async () => {
 
   assert.deepEqual(storage.values.graduatedWords, { "en-apple": true });
   assert.match(window.document.querySelector("#review-status")?.textContent ?? "", /graduated/i);
+  controller.dispose();
+  window.close();
+});
+
+test("quick review uses French target text and language metadata", async () => {
+  const window = createReviewPage();
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-fr-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  const controller = await initializeReviewCard(
+    window.document,
+    storage as unknown as ReviewStorage,
+    () => 1_000,
+    englishToFrenchPair,
+  );
+
+  assert.match(window.document.querySelector("#review-prompt")?.textContent ?? "", /apple/i);
+  window.document.querySelector<HTMLButtonElement>("#review-reveal")!.click();
+  assert.equal(window.document.querySelector("#review-answer")?.textContent, "pomme");
+  assert.equal(window.document.querySelector("#review-answer")?.getAttribute("lang"), "fr");
   controller.dispose();
   window.close();
 });

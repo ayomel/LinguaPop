@@ -1,4 +1,4 @@
-import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
+import { englishToSpanishPair, getLanguagePair, type LanguagePair } from "../data/language-pairs.ts";
 import { initializeTranslationTooltip } from "../content/tooltip.ts";
 import {
   getVocabularyDashboardSnapshot,
@@ -7,6 +7,7 @@ import {
 import { serializeAnkiExport, type AnkiExportRow } from "./ankiExport.ts";
 import { initializeFlashcards } from "./flashcards.ts";
 import type { ReviewStorage } from "./reviews.ts";
+import { readSettings } from "../settings.ts";
 
 export interface VocabularyDashboardController {
   dispose(): void;
@@ -70,7 +71,7 @@ export async function initializeVocabularyDashboard(
         throw new Error("Local file downloads are not available.");
       }
 
-      const file = new Blob([serializeAnkiExport(exportRows)], {
+      const file = new Blob([serializeAnkiExport(exportRows, pair.targetLanguage.name)], {
         type: "text/tab-separated-values;charset=utf-8",
       });
       const fileUrl = view.URL.createObjectURL(file);
@@ -107,11 +108,11 @@ export async function initializeVocabularyDashboard(
     try {
       const snapshot = await getVocabularyDashboardSnapshot(storage, now(), pair);
       exportRows = snapshot.words.map(({ entry, status: learningStatus }) => ({
-        spanish: entry.targetText,
-        english: entry.sourceText,
+        targetText: entry.targetText,
+        sourceText: entry.sourceText,
         partOfSpeech: entry.partOfSpeech ?? "",
-        exampleSpanish: entry.exampleTargetText ?? "",
-        exampleEnglish: entry.exampleSourceText ?? "",
+        exampleTargetText: entry.exampleTargetText ?? "",
+        exampleSourceText: entry.exampleSourceText ?? "",
         difficulty: entry.difficulty,
         learningStatus,
       }));
@@ -242,6 +243,11 @@ export async function initializeVocabularyDashboard(
 }
 
 if (typeof chrome !== "undefined" && chrome.storage) {
-  void initializeVocabularyDashboard(document, chrome.storage.local);
-  void initializeFlashcards(document, chrome.storage.local);
+  void readSettings(chrome.storage.local).then((settings) => {
+    const pair = getLanguagePair(settings.languagePairId) ?? englishToSpanishPair;
+    return Promise.all([
+      initializeVocabularyDashboard(document, chrome.storage.local, Date.now, pair),
+      initializeFlashcards(document, chrome.storage.local, Date.now, pair),
+    ]);
+  });
 }

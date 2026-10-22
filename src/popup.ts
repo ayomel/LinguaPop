@@ -1,6 +1,6 @@
 import { isDifficulty, normalizeHostname, readSettings, type SettingsStorage } from "./settings.ts";
 import { initializeReviewCard } from "./learning/review-card.ts";
-import { englishToSpanishPair, type LanguagePair } from "./data/language-pairs.ts";
+import { englishToSpanishPair, getLanguagePair, type LanguagePair } from "./data/language-pairs.ts";
 import type { VocabularyDifficulty } from "./data/dictionary.ts";
 
 interface ActiveTabProvider {
@@ -22,6 +22,7 @@ export async function initializePopup(
   const siteHostnameLabel = root.querySelector<HTMLElement>("#site-hostname");
   const siteStatus = root.querySelector<HTMLElement>("#site-enabled-status");
   const difficulty = root.querySelector<HTMLSelectElement>("#vocabulary-difficulty");
+  const languagePairSelect = root.querySelector<HTMLSelectElement>("#language-pair");
   const percentage = root.querySelector<HTMLInputElement>("#replacement-percentage");
   const percentageValue = root.querySelector<HTMLOutputElement>("#replacement-percentage-value");
   const status = root.querySelector<HTMLElement>("#enabled-status");
@@ -33,6 +34,7 @@ export async function initializePopup(
     !siteHostnameLabel ||
     !siteStatus ||
     !difficulty ||
+    !languagePairSelect ||
     !percentage ||
     !percentageValue ||
     !status ||
@@ -41,21 +43,14 @@ export async function initializePopup(
     throw new Error("LinguaPop popup controls are missing.");
   }
 
-  if (intro) intro.textContent = `${pair.targetLanguage.name} vocabulary for your everyday browsing.`;
-  if (enabledDescription) {
-    enabledDescription.textContent = `Replace some ${pair.sourceLanguage.name} words and phrases with ${pair.targetLanguage.name} as you browse.`;
-  }
-  if (percentageDescription) {
-    percentageDescription.textContent = `Choose how many eligible ${pair.sourceLanguage.name} words and phrases to replace.`;
-  }
-  if (reviewReveal) reviewReveal.textContent = `Reveal ${pair.targetLanguage.name}`;
-
   let currentEnabled = true;
   let savedPercentage = 5;
   let savedDifficulty: VocabularyDifficulty = "beginner";
   let currentSiteEnabled = true;
   let hostname: string | undefined;
   let siteAvailable = false;
+  let activePair = pair;
+  let disposeReview = (): void => undefined;
   const renderPercentage = (): void => {
     percentageValue.value = `${percentage.value}%`;
     percentageValue.textContent = `${percentage.value}%`;
@@ -74,6 +69,7 @@ export async function initializePopup(
   toggle.disabled = true;
   siteToggle.disabled = true;
   difficulty.disabled = true;
+  languagePairSelect.disabled = true;
   percentage.disabled = true;
   status.textContent = "Loading setting…";
   siteStatus.textContent = "Loading site setting…";
@@ -84,6 +80,16 @@ export async function initializePopup(
     currentEnabled = settings.enabled;
     savedPercentage = settings.replacementPercentage;
     savedDifficulty = settings.difficulty;
+    activePair = getLanguagePair(settings.languagePairId) ?? pair;
+    languagePairSelect.value = activePair.id;
+    if (intro) intro.textContent = `${activePair.targetLanguage.name} vocabulary for your everyday browsing.`;
+    if (enabledDescription) {
+      enabledDescription.textContent = `Replace some ${activePair.sourceLanguage.name} words and phrases with ${activePair.targetLanguage.name} as you browse.`;
+    }
+    if (percentageDescription) {
+      percentageDescription.textContent = `Choose how many eligible ${activePair.sourceLanguage.name} words and phrases to replace.`;
+    }
+    if (reviewReveal) reviewReveal.textContent = `Reveal ${activePair.targetLanguage.name}`;
     toggle.checked = currentEnabled;
     percentage.value = String(savedPercentage);
     difficulty.value = savedDifficulty;
@@ -91,6 +97,8 @@ export async function initializePopup(
     toggle.disabled = false;
     percentage.disabled = false;
     difficulty.disabled = false;
+    languagePairSelect.disabled = false;
+    disposeReview = (await initializeReviewCard(root, storage, Date.now, activePair)).dispose;
     updateStatus();
 
     try {
@@ -216,9 +224,39 @@ export async function initializePopup(
         difficulty.disabled = false;
       });
   });
+
+  languagePairSelect.addEventListener("change", () => {
+    const nextPair = getLanguagePair(languagePairSelect.value);
+    if (!nextPair) {
+      languagePairSelect.value = activePair.id;
+      return;
+    }
+    languagePairSelect.disabled = true;
+    error.hidden = true;
+    void storage.set({ languagePairId: nextPair.id }).then(() => {
+      activePair = nextPair;
+      if (intro) intro.textContent = `${activePair.targetLanguage.name} vocabulary for your everyday browsing.`;
+      if (enabledDescription) {
+        enabledDescription.textContent = `Replace some ${activePair.sourceLanguage.name} words and phrases with ${activePair.targetLanguage.name} as you browse.`;
+      }
+      if (percentageDescription) {
+        percentageDescription.textContent = `Choose how many eligible ${activePair.sourceLanguage.name} words and phrases to replace.`;
+      }
+      if (reviewReveal) reviewReveal.textContent = `Reveal ${activePair.targetLanguage.name}`;
+      disposeReview();
+      void initializeReviewCard(root, storage, Date.now, activePair).then((controller) => {
+        disposeReview = controller.dispose;
+      });
+    }).catch(() => {
+      languagePairSelect.value = activePair.id;
+      error.textContent = "Could not save the setting. Try again.";
+      error.hidden = false;
+    }).finally(() => {
+      languagePairSelect.disabled = false;
+    });
+  });
 }
 
 if (typeof chrome !== "undefined" && chrome.storage && chrome.tabs) {
   void initializePopup(document, chrome.storage.local, chrome.tabs, englishToSpanishPair);
-  void initializeReviewCard(document, chrome.storage.local, Date.now, englishToSpanishPair);
 }

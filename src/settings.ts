@@ -1,9 +1,11 @@
 import type { VocabularyDifficulty } from "./data/dictionary.ts";
+import { englishToSpanishPair, getLanguagePair } from "./data/language-pairs.ts";
 
 export const DEFAULT_SETTINGS = {
   enabled: true,
   replacementPercentage: 5,
   difficulty: "beginner" as VocabularyDifficulty,
+  languagePairId: englishToSpanishPair.id,
   siteOverrides: {},
 } as const;
 
@@ -11,6 +13,7 @@ export interface LinguaPopSettings {
   enabled: boolean;
   replacementPercentage: number;
   difficulty: VocabularyDifficulty;
+  languagePairId: string;
   siteOverrides: Record<string, boolean>;
 }
 
@@ -20,6 +23,7 @@ interface StoredSettings {
   enabled?: unknown;
   replacementPercentage?: unknown;
   difficulty?: unknown;
+  languagePairId?: unknown;
   siteOverrides?: unknown;
 }
 
@@ -79,6 +83,7 @@ export async function readSettings(
         ? Math.min(30, Math.max(0, percentage))
         : DEFAULT_SETTINGS.replacementPercentage,
     difficulty: isDifficulty(stored.difficulty) ? stored.difficulty : DEFAULT_SETTINGS.difficulty,
+    languagePairId: getLanguagePair(stored.languagePairId)?.id ?? DEFAULT_SETTINGS.languagePairId,
     siteOverrides: readSiteOverrides(stored.siteOverrides),
   };
 }

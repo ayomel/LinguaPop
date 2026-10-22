@@ -1,0 +1,1508 @@
+[
+  {
+    "id": "en-fr-the",
+    "english": "the",
+    "french": "le",
+    "partOfSpeech": "determiner",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-a",
+    "english": "a",
+    "french": "un",
+    "partOfSpeech": "determiner",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-one",
+    "english": "one",
+    "french": "un",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-two",
+    "english": "two",
+    "french": "deux",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-three",
+    "english": "three",
+    "french": "trois",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-i",
+    "english": "I",
+    "french": "je",
+    "partOfSpeech": "pronoun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-you",
+    "english": "you",
+    "french": "tu",
+    "partOfSpeech": "pronoun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-he",
+    "english": "he",
+    "french": "il",
+    "partOfSpeech": "pronoun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-she",
+    "english": "she",
+    "french": "elle",
+    "partOfSpeech": "pronoun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-we",
+    "english": "we",
+    "french": "nous",
+    "partOfSpeech": "pronoun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-they",
+    "english": "they",
+    "french": "ils",
+    "partOfSpeech": "pronoun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-this",
+    "english": "this",
+    "french": "ce",
+    "partOfSpeech": "determiner",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-that",
+    "english": "that",
+    "french": "ça",
+    "partOfSpeech": "pronoun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-my",
+    "english": "my",
+    "french": "mon",
+    "partOfSpeech": "determiner",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-your",
+    "english": "your",
+    "french": "ton",
+    "partOfSpeech": "determiner",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-our",
+    "english": "our",
+    "french": "notre",
+    "partOfSpeech": "determiner",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-be",
+    "english": "be",
+    "french": "être",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-have",
+    "english": "have",
+    "french": "avoir",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-do",
+    "english": "do",
+    "french": "faire",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-go",
+    "english": "go",
+    "french": "aller",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-come",
+    "english": "come",
+    "french": "venir",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-see",
+    "english": "see",
+    "french": "voir",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-know",
+    "english": "know",
+    "french": "savoir",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-want",
+    "english": "want",
+    "french": "vouloir",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-need",
+    "english": "need",
+    "french": "avoir besoin",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-like",
+    "english": "like",
+    "french": "aimer",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-love",
+    "english": "love",
+    "french": "adorer",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-eat",
+    "english": "eat",
+    "french": "manger",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-drink",
+    "english": "drink",
+    "french": "boire",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-speak",
+    "english": "speak",
+    "french": "parler",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-read",
+    "english": "read",
+    "french": "lire",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-write",
+    "english": "write",
+    "french": "écrire",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-work",
+    "english": "work",
+    "french": "travailler",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-live",
+    "english": "live",
+    "french": "habiter",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-buy",
+    "english": "buy",
+    "french": "acheter",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-pay",
+    "english": "pay",
+    "french": "payer",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-open",
+    "english": "open",
+    "french": "ouvrir",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-close",
+    "english": "close",
+    "french": "fermer",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-walk",
+    "english": "walk",
+    "french": "marcher",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-run",
+    "english": "run",
+    "french": "courir",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-sleep",
+    "english": "sleep",
+    "french": "dormir",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-learn",
+    "english": "learn",
+    "french": "apprendre",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-understand",
+    "english": "understand",
+    "french": "comprendre",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-help",
+    "english": "help",
+    "french": "aider",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-find",
+    "english": "find",
+    "french": "trouver",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-think",
+    "english": "think",
+    "french": "penser",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-give",
+    "english": "give",
+    "french": "donner",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-take",
+    "english": "take",
+    "french": "prendre",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-make",
+    "english": "make",
+    "french": "faire",
+    "partOfSpeech": "verb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-good",
+    "english": "good",
+    "french": "bon",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-bad",
+    "english": "bad",
+    "french": "mauvais",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-big",
+    "english": "big",
+    "french": "grand",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-small",
+    "english": "small",
+    "french": "petit",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-new",
+    "english": "new",
+    "french": "nouveau",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-old",
+    "english": "old",
+    "french": "vieux",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-young",
+    "english": "young",
+    "french": "jeune",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-happy",
+    "english": "happy",
+    "french": "heureux",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-sad",
+    "english": "sad",
+    "french": "triste",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-hot",
+    "english": "hot",
+    "french": "chaud",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-cold",
+    "english": "cold",
+    "french": "froid",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-beautiful",
+    "english": "beautiful",
+    "french": "beau",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-easy",
+    "english": "easy",
+    "french": "facile",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-difficult",
+    "english": "difficult",
+    "french": "difficile",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-important",
+    "english": "important",
+    "french": "important",
+    "partOfSpeech": "adjective",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-time",
+    "english": "time",
+    "french": "temps",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-day",
+    "english": "day",
+    "french": "jour",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-night",
+    "english": "night",
+    "french": "nuit",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-year",
+    "english": "year",
+    "french": "année",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-week",
+    "english": "week",
+    "french": "semaine",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-morning",
+    "english": "morning",
+    "french": "matin",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-evening",
+    "english": "evening",
+    "french": "soir",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-person",
+    "english": "person",
+    "french": "personne",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-family",
+    "english": "family",
+    "french": "famille",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-friend",
+    "english": "friend",
+    "french": "ami",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-child",
+    "english": "child",
+    "french": "enfant",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-man",
+    "english": "man",
+    "french": "homme",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-woman",
+    "english": "woman",
+    "french": "femme",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-name",
+    "english": "name",
+    "french": "nom",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-house",
+    "english": "house",
+    "french": "maison",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-home",
+    "english": "home",
+    "french": "chez soi",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-room",
+    "english": "room",
+    "french": "chambre",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-door",
+    "english": "door",
+    "french": "porte",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-window",
+    "english": "window",
+    "french": "fenêtre",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-city",
+    "english": "city",
+    "french": "ville",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-country",
+    "english": "country",
+    "french": "pays",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-street",
+    "english": "street",
+    "french": "rue",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-school",
+    "english": "school",
+    "french": "école",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-book",
+    "english": "book",
+    "french": "livre",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-word",
+    "english": "word",
+    "french": "mot",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-language",
+    "english": "language",
+    "french": "langue",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-water",
+    "english": "water",
+    "french": "eau",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-food",
+    "english": "food",
+    "french": "nourriture",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-bread",
+    "english": "bread",
+    "french": "pain",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-coffee",
+    "english": "coffee",
+    "french": "café",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-tea",
+    "english": "tea",
+    "french": "thé",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-milk",
+    "english": "milk",
+    "french": "lait",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-apple",
+    "english": "apple",
+    "french": "pomme",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-cheese",
+    "english": "cheese",
+    "french": "fromage",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-meal",
+    "english": "meal",
+    "french": "repas",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-car",
+    "english": "car",
+    "french": "voiture",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-train",
+    "english": "train",
+    "french": "train",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-bus",
+    "english": "bus",
+    "french": "bus",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-bicycle",
+    "english": "bicycle",
+    "french": "vélo",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-money",
+    "english": "money",
+    "french": "argent",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-shop",
+    "english": "shop",
+    "french": "magasin",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-market",
+    "english": "market",
+    "french": "marché",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-job",
+    "english": "job",
+    "french": "emploi",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-phone",
+    "english": "phone",
+    "french": "téléphone",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-computer",
+    "english": "computer",
+    "french": "ordinateur",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-table",
+    "english": "table",
+    "french": "table",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-chair",
+    "english": "chair",
+    "french": "chaise",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-bed",
+    "english": "bed",
+    "french": "lit",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-clothes",
+    "english": "clothes",
+    "french": "vêtements",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-shirt",
+    "english": "shirt",
+    "french": "chemise",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-shoe",
+    "english": "shoe",
+    "french": "chaussure",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-hand",
+    "english": "hand",
+    "french": "main",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-head",
+    "english": "head",
+    "french": "tête",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-eye",
+    "english": "eye",
+    "french": "œil",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-heart",
+    "english": "heart",
+    "french": "cœur",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-body",
+    "english": "body",
+    "french": "corps",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-health",
+    "english": "health",
+    "french": "santé",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-doctor",
+    "english": "doctor",
+    "french": "médecin",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-hospital",
+    "english": "hospital",
+    "french": "hôpital",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-music",
+    "english": "music",
+    "french": "musique",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-film",
+    "english": "film",
+    "french": "film",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-game",
+    "english": "game",
+    "french": "jeu",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-weather",
+    "english": "weather",
+    "french": "temps",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-sun",
+    "english": "sun",
+    "french": "soleil",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-rain",
+    "english": "rain",
+    "french": "pluie",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-snow",
+    "english": "snow",
+    "french": "neige",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-tree",
+    "english": "tree",
+    "french": "arbre",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-flower",
+    "english": "flower",
+    "french": "fleur",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-animal",
+    "english": "animal",
+    "french": "animal",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-dog",
+    "english": "dog",
+    "french": "chien",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-cat",
+    "english": "cat",
+    "french": "chat",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-bird",
+    "english": "bird",
+    "french": "oiseau",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-question",
+    "english": "question",
+    "french": "question",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-answer",
+    "english": "answer",
+    "french": "réponse",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-problem",
+    "english": "problem",
+    "french": "problème",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-idea",
+    "english": "idea",
+    "french": "idée",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-life",
+    "english": "life",
+    "french": "vie",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-world",
+    "english": "world",
+    "french": "monde",
+    "partOfSpeech": "noun",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-much",
+    "english": "much",
+    "french": "beaucoup",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-more",
+    "english": "more",
+    "french": "plus",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-less",
+    "english": "less",
+    "french": "moins",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-always",
+    "english": "always",
+    "french": "toujours",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-never",
+    "english": "never",
+    "french": "jamais",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-here",
+    "english": "here",
+    "french": "ici",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-there",
+    "english": "there",
+    "french": "là",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-now",
+    "english": "now",
+    "french": "maintenant",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-today",
+    "english": "today",
+    "french": "aujourd’hui",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-tomorrow",
+    "english": "tomorrow",
+    "french": "demain",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-yesterday",
+    "english": "yesterday",
+    "french": "hier",
+    "partOfSpeech": "adverb",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-and",
+    "english": "and",
+    "french": "et",
+    "partOfSpeech": "conjunction",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-but",
+    "english": "but",
+    "french": "mais",
+    "partOfSpeech": "conjunction",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-or",
+    "english": "or",
+    "french": "ou",
+    "partOfSpeech": "conjunction",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-with",
+    "english": "with",
+    "french": "avec",
+    "partOfSpeech": "preposition",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-without",
+    "english": "without",
+    "french": "sans",
+    "partOfSpeech": "preposition",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-in",
+    "english": "in",
+    "french": "dans",
+    "partOfSpeech": "preposition",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-on",
+    "english": "on",
+    "french": "sur",
+    "partOfSpeech": "preposition",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-for",
+    "english": "for",
+    "french": "pour",
+    "partOfSpeech": "preposition",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-from",
+    "english": "from",
+    "french": "de",
+    "partOfSpeech": "preposition",
+    "difficulty": "beginner"
+  },
+  {
+    "id": "en-fr-to",
+    "english": "to",
+    "french": "à",
+    "partOfSpeech": "preposition",
+    "difficulty": "beginner"
+  }
+,
+    {
+      "id": "en-fr-about",
+      "english": "about",
+      "french": "environ",
+      "partOfSpeech": "adverb",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-above",
+      "english": "above",
+      "french": "au-dessus de",
+      "partOfSpeech": "preposition",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-after",
+      "english": "after",
+      "french": "après",
+      "partOfSpeech": "preposition",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-before",
+      "english": "before",
+      "french": "avant",
+      "partOfSpeech": "preposition",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-between",
+      "english": "between",
+      "french": "entre",
+      "partOfSpeech": "preposition",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-because",
+      "english": "because",
+      "french": "parce que",
+      "partOfSpeech": "conjunction",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-if",
+      "english": "if",
+      "french": "si",
+      "partOfSpeech": "conjunction",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-not",
+      "english": "not",
+      "french": "ne pas",
+      "partOfSpeech": "adverb",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-very",
+      "english": "very",
+      "french": "très",
+      "partOfSpeech": "adverb",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-also",
+      "english": "also",
+      "french": "aussi",
+      "partOfSpeech": "adverb",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-again",
+      "english": "again",
+      "french": "encore",
+      "partOfSpeech": "adverb",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-early",
+      "english": "early",
+      "french": "tôt",
+      "partOfSpeech": "adverb",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-late",
+      "english": "late",
+      "french": "tard",
+      "partOfSpeech": "adverb",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-quickly",
+      "english": "quickly",
+      "french": "rapidement",
+      "partOfSpeech": "adverb",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-long",
+      "english": "long",
+      "french": "long",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-short",
+      "english": "short",
+      "french": "court",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-strong",
+      "english": "strong",
+      "french": "fort",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-weak",
+      "english": "weak",
+      "french": "faible",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-clean",
+      "english": "clean",
+      "french": "propre",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-dirty",
+      "english": "dirty",
+      "french": "sale",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-cheap",
+      "english": "cheap",
+      "french": "bon marché",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-expensive",
+      "english": "expensive",
+      "french": "cher",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-ready",
+      "english": "ready",
+      "french": "prêt",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-tired",
+      "english": "tired",
+      "french": "fatigué",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-hungry",
+      "english": "hungry",
+      "french": "affamé",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-thirsty",
+      "english": "thirsty",
+      "french": "assoiffé",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-busy",
+      "english": "busy",
+      "french": "occupé",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-free",
+      "english": "free",
+      "french": "libre",
+      "partOfSpeech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-restaurant",
+      "english": "restaurant",
+      "french": "restaurant",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-hotel",
+      "english": "hotel",
+      "french": "hôtel",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-airport",
+      "english": "airport",
+      "french": "aéroport",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-station",
+      "english": "station",
+      "french": "gare",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-ticket",
+      "english": "ticket",
+      "french": "billet",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-map",
+      "english": "map",
+      "french": "carte",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-key",
+      "english": "key",
+      "french": "clé",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-bag",
+      "english": "bag",
+      "french": "sac",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-egg",
+      "english": "egg",
+      "french": "œuf",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-fish",
+      "english": "fish",
+      "french": "poisson",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-meat",
+      "english": "meat",
+      "french": "viande",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-rice",
+      "english": "rice",
+      "french": "riz",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-fruit",
+      "english": "fruit",
+      "french": "fruit",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-vegetable",
+      "english": "vegetable",
+      "french": "légume",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-breakfast",
+      "english": "breakfast",
+      "french": "petit-déjeuner",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-lunch",
+      "english": "lunch",
+      "french": "déjeuner",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-dinner",
+      "english": "dinner",
+      "french": "dîner",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-monday",
+      "english": "Monday",
+      "french": "lundi",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-tuesday",
+      "english": "Tuesday",
+      "french": "mardi",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-wednesday",
+      "english": "Wednesday",
+      "french": "mercredi",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-thursday",
+      "english": "Thursday",
+      "french": "jeudi",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-friday",
+      "english": "Friday",
+      "french": "vendredi",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-saturday",
+      "english": "Saturday",
+      "french": "samedi",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "id": "en-fr-sunday",
+      "english": "Sunday",
+      "french": "dimanche",
+      "partOfSpeech": "noun",
+      "difficulty": "beginner"
+    }
+]

@@ -15,12 +15,14 @@ test("a fresh install defaults to enabled with a five percent replacement rate",
     enabled: true,
     replacementPercentage: 5,
     difficulty: "beginner",
+    languagePairId: "en-es",
     siteOverrides: {},
   });
   assert.deepEqual(requestedDefaults, {
     enabled: true,
     replacementPercentage: 5,
     difficulty: "beginner",
+    languagePairId: "en-es",
     siteOverrides: {},
   });
 });
@@ -36,6 +38,7 @@ test("settings use safe defaults when stored values have invalid types", async (
     enabled: true,
     replacementPercentage: 5,
     difficulty: "beginner",
+    languagePairId: "en-es",
     siteOverrides: {},
   });
 });
@@ -89,4 +92,11 @@ test("difficulty settings accept all supported choices and default invalid value
   assert.equal(supported.difficulty, "advanced");
   assert.equal(all.difficulty, "all");
   assert.equal(invalid.difficulty, "beginner");
+});
+
+test("language pair selection is validated and defaults to English to Spanish", async () => {
+  const french = await readSettings({ async get() { return { languagePairId: "en-fr" }; } });
+  const invalid = await readSettings({ async get() { return { languagePairId: "fr-ja" }; } });
+  assert.equal(french.languagePairId, "en-fr");
+  assert.equal(invalid.languagePairId, "en-es");
 });

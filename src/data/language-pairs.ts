@@ -5,6 +5,8 @@ import {
   type PartOfSpeech,
 } from "./dictionary.ts";
 import { phraseEntries, type PhraseEntry } from "./phrases.ts";
+import frenchDictionaryData from "./french-dictionary.json";
+import frenchPhraseData from "./french-phrase-dictionary.json";
 
 export interface LanguageMetadata {
   name: string;
@@ -31,6 +33,32 @@ export interface LanguagePair {
   targetLanguage: LanguageMetadata;
   entries: readonly LanguagePairEntry[];
 }
+
+export interface FrenchDictionaryEntry {
+  id: string;
+  english: string;
+  french: string;
+  pronunciation?: string;
+  exampleFrench?: string;
+  exampleEnglish?: string;
+  grammarNote?: string;
+  partOfSpeech: PartOfSpeech;
+  difficulty: Difficulty;
+}
+
+export interface FrenchPhraseEntry {
+  id: string;
+  english: string;
+  french: string;
+  pronunciation?: string;
+  exampleFrench?: string;
+  exampleEnglish?: string;
+  grammarNote?: string;
+  difficulty: Difficulty;
+}
+
+const frenchWords = frenchDictionaryData as FrenchDictionaryEntry[];
+const frenchPhrases = frenchPhraseData as FrenchPhraseEntry[];
 
 /** Adapts the shipped English/Spanish source files to the language-neutral runtime model. */
 export function createEnglishToSpanishPair(
@@ -69,4 +97,46 @@ export function createEnglishToSpanishPair(
   };
 }
 
+export function createEnglishToFrenchPair(
+  words: readonly FrenchDictionaryEntry[] = frenchWords,
+  phrases: readonly FrenchPhraseEntry[] = frenchPhrases,
+): LanguagePair {
+  const wordEntries: LanguagePairEntry[] = words.map((entry) => ({
+    id: entry.id,
+    kind: "word",
+    sourceText: entry.english,
+    targetText: entry.french,
+    pronunciation: entry.pronunciation,
+    exampleSourceText: entry.exampleEnglish,
+    exampleTargetText: entry.exampleFrench,
+    grammarNote: entry.grammarNote,
+    partOfSpeech: entry.partOfSpeech,
+    difficulty: entry.difficulty,
+  }));
+  const phraseLanguageEntries: LanguagePairEntry[] = phrases.map((entry) => ({
+    id: entry.id,
+    kind: "phrase",
+    sourceText: entry.english,
+    targetText: entry.french,
+    pronunciation: entry.pronunciation,
+    exampleSourceText: entry.exampleEnglish,
+    exampleTargetText: entry.exampleFrench,
+    grammarNote: entry.grammarNote,
+    difficulty: entry.difficulty,
+  }));
+
+  return {
+    id: "en-fr",
+    sourceLanguage: { name: "English", locale: "en" },
+    targetLanguage: { name: "French", locale: "fr", speechLocale: "fr-FR" },
+    entries: [...wordEntries, ...phraseLanguageEntries],
+  };
+}
+
 export const englishToSpanishPair = createEnglishToSpanishPair();
+export const englishToFrenchPair = createEnglishToFrenchPair();
+export const languagePairs: readonly LanguagePair[] = [englishToSpanishPair, englishToFrenchPair];
+
+export function getLanguagePair(pairId: unknown): LanguagePair | undefined {
+  return languagePairs.find((pair) => pair.id === pairId);
+}

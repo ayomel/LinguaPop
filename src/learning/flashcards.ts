@@ -76,7 +76,7 @@ export async function initializeFlashcards(
     try {
       const timestamp = now();
       const [settings, dueReviews] = await Promise.all([
-        getDailyGoalSettings(storage, timestamp),
+        getDailyGoalSettings(storage, timestamp, pair.id),
         getDueReviews(storage, timestamp, pair),
       ]);
       if (disposed) return;
@@ -135,7 +135,7 @@ export async function initializeFlashcards(
     disableActions(true);
     status.textContent = "Saving your review…";
     try {
-      const schedule = await recordRecall(entryId, outcome, storage, now());
+      const schedule = await recordRecall(entryId, outcome, storage, now(), pair);
       const graduatedEntry = pair.entries.find((entry) => entry.id === entryId);
       const savedMessage =
         outcome === "remembered" && schedule.intervalDays >= MAX_REVIEW_INTERVAL_DAYS

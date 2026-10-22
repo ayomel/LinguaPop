@@ -5,6 +5,8 @@ import { validateDictionary, validatePhraseDictionary } from "./validate-diction
 
 const dictionaryPath = new URL("../src/data/dictionary.json", import.meta.url);
 const phraseDictionaryPath = new URL("../src/data/phrase-dictionary.json", import.meta.url);
+const frenchDictionaryPath = new URL("../src/data/french-dictionary.json", import.meta.url);
+const frenchPhraseDictionaryPath = new URL("../src/data/french-phrase-dictionary.json", import.meta.url);
 const validEntry = {
   id: "en-book",
   english: "book",
@@ -25,6 +27,15 @@ test("dictionary has 1,000 valid offline entries including common question and a
       .map(({ english, spanish }) => [english, spanish]),
     [["I", "yo"], ["you", "tú"], ["he", "él"], ["she", "ella"], ["we", "nosotros"], ["they", "ellos"]],
   );
+});
+
+test("French starter dictionaries use the same validated word and phrase schema", async () => {
+  const words = JSON.parse(await readFile(frenchDictionaryPath, "utf8"));
+  const phrases = JSON.parse(await readFile(frenchPhraseDictionaryPath, "utf8"));
+  assert.ok(words.length >= 150);
+  assert.ok(phrases.length >= 15);
+  assert.deepEqual(validateDictionary(words, "english", "french", "exampleFrench"), []);
+  assert.deepEqual(validatePhraseDictionary(phrases, "english", "french"), []);
 });
 
 test("phrase dictionary stays separate and contains valid, unique phrase entries", async () => {

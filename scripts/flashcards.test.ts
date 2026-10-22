@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
+import { englishToFrenchPair } from "../src/data/language-pairs.ts";
 import { initializeFlashcards } from "../src/learning/flashcards.ts";
 import type { ReviewStorage } from "../src/learning/reviews.ts";
 
@@ -151,6 +152,26 @@ test("flashcards announce when a remembered word graduates", async () => {
 
   assert.deepEqual(storage.values.graduatedWords, { "en-apple": true });
   assert.match(window.document.querySelector("#flashcard-status")?.textContent ?? "", /graduated/i);
+  controller.dispose();
+  window.close();
+});
+
+test("flashcards review and speak an encountered French entry", async () => {
+  const window = createFlashcardPage();
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-fr-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  const controller = await initializeFlashcards(
+    window.document,
+    storage as unknown as ReviewStorage,
+    () => 1_000,
+    englishToFrenchPair,
+  );
+
+  assert.match(window.document.querySelector("#flashcard-prompt")?.textContent ?? "", /apple/i);
+  window.document.querySelector<HTMLButtonElement>("#flashcard-reveal")!.click();
+  assert.equal(window.document.querySelector("#flashcard-answer")?.textContent, "pomme");
   controller.dispose();
   window.close();
 });
