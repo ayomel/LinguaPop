@@ -25,6 +25,8 @@ function createDashboardPage() {
       <strong id="count-practicing"></strong>
       <strong id="count-learned"></strong>
       <strong id="count-due"></strong>
+      <button id="export-vocabulary" type="button" disabled>Export for Anki (.tsv)</button>
+      <p id="export-status" role="status"></p>
       <p id="dashboard-status" role="status"></p>
       <p id="dashboard-empty" hidden></p>
       <ul id="vocabulary-list" hidden></ul>
@@ -141,6 +143,45 @@ test("dashboard reports storage read failures without showing false zero counts"
   assert.equal(window.document.querySelector("#dashboard-empty")?.hidden, true);
   assert.match(window.document.querySelector("#dashboard-status")?.textContent ?? "", /could not be loaded/i);
   assert.equal(window.document.querySelector("#dashboard-error")?.hidden, false);
+  controller.dispose();
+  window.close();
+});
+
+test("dashboard exports encountered vocabulary to a local Anki TSV", async () => {
+  const window = createDashboardPage();
+  const storage = createProgressStorage();
+  let exportedFile: Blob | undefined;
+  let downloadName = "";
+  Object.defineProperty(window.URL, "createObjectURL", {
+    configurable: true,
+    value: (file: Blob) => {
+      exportedFile = file;
+      return "blob:linguapop-vocabulary";
+    },
+  });
+  Object.defineProperty(window.URL, "revokeObjectURL", {
+    configurable: true,
+    value: () => undefined,
+  });
+  const originalClick = window.HTMLAnchorElement.prototype.click;
+  window.HTMLAnchorElement.prototype.click = function () {
+    downloadName = this.download;
+  };
+  const controller = await initializeVocabularyDashboard(
+    window.document,
+    reviewStorageFor(storage),
+    () => 1_000,
+  );
+
+  window.document.querySelector<HTMLButtonElement>("#export-vocabulary")?.click();
+
+  assert.equal(downloadName, "linguapop-vocabulary.tsv");
+  assert.ok(exportedFile);
+  assert.match(await exportedFile.text(), /^#separator:Tab\r\n#columns:Spanish\tEnglish\tPart of speech/);
+  assert.match(await exportedFile.text(), /libro\tbook/);
+  assert.match(window.document.querySelector("#export-status")?.textContent ?? "", /3 vocabulary items/);
+
+  window.HTMLAnchorElement.prototype.click = originalClick;
   controller.dispose();
   window.close();
 });

@@ -56,7 +56,11 @@
       </section>
 
       <section class="word-section" aria-labelledby="words-title">
-        <h2 id="words-title">Encountered words</h2>
+        <div class="word-section-heading">
+          <h2 id="words-title">Encountered vocabulary</h2>
+          <button id="export-vocabulary" class="export-button" type="button" disabled>Export for Anki (.tsv)</button>
+        </div>
+        <p id="export-status" class="export-status" role="status" aria-live="polite"></p>
         <p id="dashboard-status" class="dashboard-status" role="status" aria-live="polite">Loading vocabulary progress…</p>
         <p id="dashboard-empty" class="empty-state" hidden>
           No vocabulary yet. Browse a page with LinguaPop enabled to encounter your first words.

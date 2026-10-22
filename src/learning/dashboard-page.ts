@@ -1,6 +1,7 @@
 import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
 import { initializeTranslationTooltip } from "../content/tooltip.ts";
 import { getVocabularyDashboardSnapshot } from "./dashboard.ts";
+import { serializeAnkiExport, type AnkiExportRow } from "./ankiExport.ts";
 import { initializeFlashcards } from "./flashcards.ts";
 import type { ReviewStorage } from "./reviews.ts";
 
@@ -21,6 +22,8 @@ export async function initializeVocabularyDashboard(
     due: root.querySelector<HTMLElement>("#count-due"),
   };
   const list = root.querySelector<HTMLUListElement>("#vocabulary-list");
+  const exportButton = root.querySelector<HTMLButtonElement>("#export-vocabulary");
+  const exportStatus = root.querySelector<HTMLElement>("#export-status");
   const empty = root.querySelector<HTMLElement>("#dashboard-empty");
   const status = root.querySelector<HTMLElement>("#dashboard-status");
   const error = root.querySelector<HTMLElement>("#dashboard-error");
@@ -31,6 +34,8 @@ export async function initializeVocabularyDashboard(
     !summary.learned ||
     !summary.due ||
     !list ||
+    !exportButton ||
+    !exportStatus ||
     !empty ||
     !status ||
     !error
@@ -39,11 +44,49 @@ export async function initializeVocabularyDashboard(
   }
 
   const tooltip = initializeTranslationTooltip(root, pair, {}, { storage });
+  let exportRows: AnkiExportRow[] = [];
+  const onExport = (): void => {
+    if (exportRows.length === 0) return;
+
+    try {
+      const view = root.defaultView;
+      if (!view || typeof view.URL.createObjectURL !== "function") {
+        throw new Error("Local file downloads are not available.");
+      }
+
+      const file = new Blob([serializeAnkiExport(exportRows)], {
+        type: "text/tab-separated-values;charset=utf-8",
+      });
+      const fileUrl = view.URL.createObjectURL(file);
+      const link = root.createElement("a");
+      link.href = fileUrl;
+      link.download = "linguapop-vocabulary.tsv";
+      link.hidden = true;
+      root.body.append(link);
+      link.click();
+      link.remove();
+      view.setTimeout(() => view.URL.revokeObjectURL(fileUrl), 1_000);
+      exportStatus.textContent = `Exported ${exportRows.length} vocabulary items to ${link.download}.`;
+    } catch {
+      exportStatus.textContent = "Your vocabulary could not be exported. Try again.";
+    }
+  };
+  exportButton.addEventListener("click", onExport);
   status.textContent = "Loading vocabulary progress…";
   error.hidden = true;
 
   try {
     const snapshot = await getVocabularyDashboardSnapshot(storage, now(), pair);
+    exportRows = snapshot.words.map(({ entry, status: learningStatus }) => ({
+      spanish: entry.targetText,
+      english: entry.sourceText,
+      partOfSpeech: entry.partOfSpeech ?? "",
+      exampleSpanish: entry.exampleTargetText ?? "",
+      exampleEnglish: entry.exampleSourceText ?? "",
+      difficulty: entry.difficulty,
+      learningStatus,
+    }));
+    exportButton.disabled = exportRows.length === 0;
     summary.encountered.textContent = String(snapshot.encounteredCount);
     summary.practicing.textContent = String(snapshot.practicingCount);
     summary.learned.textContent = String(snapshot.learnedCount);
@@ -114,6 +157,7 @@ export async function initializeVocabularyDashboard(
 
   return {
     dispose() {
+      exportButton.removeEventListener("click", onExport);
       tooltip.dispose();
     },
   };
