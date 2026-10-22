@@ -17,12 +17,12 @@ Settings, encountered words, and review progress are saved in `chrome.storage.lo
 
 The `storage` permission saves your settings, site overrides, encountered words, and review progress on this device. The `activeTab` permission lets the popup read the current tab’s URL and show its per-site toggle. LinguaPop works with page text on HTTP and HTTPS sites. It does not send page text or learning data to a remote service.
 
-## How it fits together
+## How it works
 
 ```mermaid
 flowchart LR
     Page[Web page text] --> Content[Content script]
-    Content --> Match[Safe text and phrase matching]
+    Content --> Match[Eligible text and phrase matching]
     Data[Bundled English and Spanish data] --> Match
     Match --> PageResult[Spanish text and translation tooltip]
     Match --> Encounters[Encountered vocabulary]
@@ -44,13 +44,13 @@ pnpm build
 
 In Chrome, open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the generated `dist` directory.
 
-To try the extension on the sample reading page, start the Vite server in a second terminal and open `http://localhost:5173/demo.html` in Chrome:
+To try the sample reading page, run `pnpm dev` in another terminal and open `http://localhost:5173/demo.html` in Chrome:
 
 ```sh
 pnpm dev
 ```
 
-Open the LinguaPop popup, raise the replacement percentage to make the sample easier to see, then refresh the page. Select a Spanish replacement to open its translation. The editable field and code sample show page content that LinguaPop skips.
+Open the LinguaPop popup, raise the replacement percentage, and refresh the page. Select a Spanish replacement to see its translation. The editable field and code sample show content LinguaPop skips.
 
 ## Checks
 
@@ -61,7 +61,7 @@ pnpm dictionary:check
 pnpm manifest:check
 ```
 
-`pnpm build` runs the TypeScript check before bundling the extension. Run `pnpm manifest:check` after the build to verify its permissions and page match scope. The dictionary check validates both word and phrase data.
+`pnpm build` checks TypeScript and bundles the extension. After the build, run `pnpm manifest:check` to check permissions and page match scope. `pnpm dictionary:check` validates the word and phrase data.
 
 ## Code map
 
@@ -70,7 +70,3 @@ pnpm manifest:check
 - `src/data/` contains the language-pair adapter and bundled vocabulary.
 - `src/learning/` contains encounters, review scheduling, flashcards, and the dashboard.
 - `src/popup.ts` and `src/settings.ts` implement extension controls and saved preferences.
-
-## Current scope
-
-LinguaPop currently ships one pair: English to Spanish. The language-pair model gives the runtime a shared contract for a future pair, but additional languages are not included yet.
