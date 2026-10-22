@@ -249,6 +249,7 @@ function replaceNodeMatches(
     appendText(document, fragment, node.data.slice(cursor, match.start));
 
     const replacement = document.createElement("span");
+    replacement.style.setProperty("background-color", "rgba(255, 230, 0, 0.5)", "important");
     replacement.setAttribute("data-linguapop-replacement", "true");
     replacement.setAttribute("data-linguapop-pair-id", pair.id);
     replacement.setAttribute("data-linguapop-kind", match.entry.kind);

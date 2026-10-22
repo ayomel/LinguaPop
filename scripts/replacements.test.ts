@@ -37,6 +37,11 @@ test("replaces a deterministic percentage of whole dictionary matches", () => {
 
   assert.equal(replaced, 6);
   assert.equal(wrappers.length, 6);
+  assert.ok(
+    Array.from(wrappers).every(
+      (wrapper) => wrapper.style.getPropertyValue("background-color") === "rgba(255, 230, 0, 0.5)",
+    ),
+  );
   assert.match(document.body.textContent ?? "", /pineapple, unApple, and unknown\./);
   assert.equal(document.querySelector("button")?.textContent, "Apple");
   assert.equal(document.querySelector("textarea")?.textContent, "Apple");
