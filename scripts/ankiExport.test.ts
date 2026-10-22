@@ -1,0 +1,41 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { serializeAnkiExport } from "../src/learning/ankiExport.ts";
+
+const vocabulary = {
+  spanish: "buenos días",
+  english: "good morning",
+  partOfSpeech: "",
+  exampleSpanish: "Buenos días.",
+  exampleEnglish: "Good morning.",
+  difficulty: "beginner",
+  learningStatus: "new",
+} as const;
+
+test("exports vocabulary fields in Anki import order", () => {
+  assert.equal(
+    serializeAnkiExport([vocabulary]),
+    [
+      "#separator:Tab",
+      "#columns:Spanish\tEnglish\tPart of speech\tExample (Spanish)\tExample (English)\tDifficulty\tLearning status",
+      "buenos días\tgood morning\t\tBuenos días.\tGood morning.\tbeginner\tNew",
+    ].join("\r\n"),
+  );
+});
+
+test("quotes tabs, newlines, and quotes in example fields", () => {
+  assert.equal(
+    serializeAnkiExport([
+      {
+        ...vocabulary,
+        exampleSpanish: "Buenos\tdías.\n¿Todo bien?",
+        exampleEnglish: 'She said "hello".\nGood morning.',
+      },
+    ]),
+    [
+      "#separator:Tab",
+      "#columns:Spanish\tEnglish\tPart of speech\tExample (Spanish)\tExample (English)\tDifficulty\tLearning status",
+      'buenos días\tgood morning\t\t"Buenos\tdías.\n¿Todo bien?"\t"She said ""hello"".\nGood morning."\tbeginner\tNew',
+    ].join("\r\n"),
+  );
+});
