@@ -5,7 +5,7 @@ import {
   applyWordReplacements,
   restoreWordReplacements,
 } from "../src/content/replacements.ts";
-import { createEnglishToSpanishPair } from "../src/data/language-pairs.ts";
+import { createEnglishToSpanishPair, englishToSpanishPair } from "../src/data/language-pairs.ts";
 
 function createPage(markup: string) {
   const window = new Window({ url: "https://example.test/article?section=1" });
@@ -51,6 +51,33 @@ test("replaces a deterministic percentage of whole dictionary matches", () => {
 
   assert.equal(restoreWordReplacements(document.body), 6);
   assert.equal(document.body.innerHTML, serializedOriginal);
+  window.close();
+});
+
+test("reports the containing sentence from the same text node for each replaced word", () => {
+  const window = createPage(`<p>${Array.from({ length: 20 }, () => "Apple. Book. City. Cat.").join(" ")}</p>`);
+  const contexts: Array<[string, string]> = [];
+  const pair = {
+    ...englishToSpanishPair,
+    entries: englishToSpanishPair.entries.filter((entry) =>
+      ["en-apple", "en-book", "en-city", "en-cat"].includes(entry.id),
+    ),
+  };
+
+  applyWordReplacements(window.document.body, {
+    percentage: 30,
+    pair,
+    onReplacement: (entryId, contextSentence) => contexts.push([entryId, contextSentence]),
+  });
+
+  const sourceTextById = new Map(pair.entries.map((entry) => [entry.id, entry.sourceText]));
+  assert.ok(contexts.length > 0);
+  assert.ok(
+    contexts.every(
+      ([entryId, sentence]) => sentence.toLocaleLowerCase("en") === `${sourceTextById.get(entryId)}.`,
+    ),
+    JSON.stringify(contexts),
+  );
   window.close();
 });
 

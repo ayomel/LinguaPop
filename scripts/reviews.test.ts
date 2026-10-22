@@ -36,6 +36,22 @@ test("encountered words without a review schedule are due for their first recall
   assert.equal(storage.writes.length, 0, "viewing due words must not create a recall result");
 });
 
+test("due reviews include the latest saved encounter sentence when available", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": {
+      firstSeenAt: 100,
+      lastSeenAt: 100,
+      encounterCount: 1,
+      contextSentence: "I picked an apple.",
+    },
+  };
+
+  const due = await getNextDueReview(storageFor(storage), 1_000);
+
+  assert.equal(due?.contextSentence, "I picked an apple.");
+});
+
 test("remembered answers lengthen the interval and a miss schedules sooner", async () => {
   const storage = new FakeStorage();
   storage.values.encounteredWords = {

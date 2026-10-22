@@ -23,6 +23,7 @@ function createFlashcardPage() {
     <p id="daily-goal-progress"></p>
     <p id="daily-goal-status"></p>
     <p id="flashcard-prompt"></p>
+    <p id="flashcard-context" hidden></p>
     <button id="flashcard-reveal" type="button" hidden>Reveal Spanish</button>
     <p id="flashcard-answer" hidden></p>
     <div id="flashcard-actions" hidden>
@@ -39,7 +40,12 @@ test("flashcard reveals on request and records explicit recall toward the daily 
   const storage = new FakeStorage();
   storage.values.dailyGoal = 1;
   storage.values.encounteredWords = {
-    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+    "en-apple": {
+      firstSeenAt: 100,
+      lastSeenAt: 100,
+      encounterCount: 1,
+      contextSentence: "I picked an Apple from the tree.",
+    },
   };
   const controller = await initializeFlashcards(
     window.document,
@@ -49,7 +55,11 @@ test("flashcard reveals on request and records explicit recall toward the daily 
 
   const reveal = window.document.querySelector<HTMLButtonElement>("#flashcard-reveal")!;
   const answer = window.document.querySelector<HTMLElement>("#flashcard-answer")!;
+  const context = window.document.querySelector<HTMLElement>("#flashcard-context")!;
   assert.match(window.document.querySelector("#flashcard-prompt")?.textContent ?? "", /apple/i);
+  assert.equal(context.hidden, false);
+  assert.equal(context.textContent, "I picked an Apple from the tree.");
+  assert.equal(context.querySelector("mark")?.textContent, "Apple");
   assert.equal(answer.hidden, true);
   assert.equal(storage.values.reviewSchedules, undefined);
 
@@ -92,6 +102,25 @@ test("flashcards show a first-use state and let the user change the goal", async
   assert.equal(storage.values.dailyGoal, 3);
   assert.match(window.document.querySelector("#daily-goal-status")?.textContent ?? "", /set to 3/);
 
+  controller.dispose();
+  window.close();
+});
+
+test("flashcards review legacy encounters that do not have a context sentence", async () => {
+  const window = createFlashcardPage();
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+  const controller = await initializeFlashcards(
+    window.document,
+    storage as unknown as ReviewStorage,
+    () => 1_000,
+  );
+
+  assert.match(window.document.querySelector("#flashcard-prompt")?.textContent ?? "", /apple/i);
+  assert.equal(window.document.querySelector("#flashcard-context")?.hidden, true);
+  assert.equal(window.document.querySelector("#flashcard-answer")?.hidden, true);
   controller.dispose();
   window.close();
 });

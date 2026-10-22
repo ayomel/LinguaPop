@@ -1,7 +1,7 @@
 import { applyWordReplacements, restoreWordReplacements } from "./replacements.ts";
 import { isWithinLinguaPopOwnedElement } from "./dom.ts";
 import { englishToSpanishPair, type LanguagePair } from "../data/language-pairs.ts";
-import { recordWordEncounters } from "../learning/encounters.ts";
+import { recordWordEncounters, type WordEncounterInput } from "../learning/encounters.ts";
 import {
   didSiteOverrideChange,
   isSiteEnabled,
@@ -31,8 +31,8 @@ export function startContentSettings(
   const MutationObserverConstructor = ownerDocument?.defaultView?.MutationObserver;
   let observer: MutationObserver | undefined;
 
-  const trackReplacements = (entryIds: string[]): void => {
-    if (entryIds.length > 0) void recordWordEncounters(entryIds, storage).catch(() => undefined);
+  const trackReplacements = (entries: WordEncounterInput[]): void => {
+    if (entries.length > 0) void recordWordEncounters(entries, storage).catch(() => undefined);
   };
 
   const observe = (): void => {
@@ -67,7 +67,7 @@ export function startContentSettings(
     if (!isSiteEnabled(settings, hostname)) return;
 
     pauseObserver(() => {
-      const encounteredIds: string[] = [];
+      const encounteredEntries: WordEncounterInput[] = [];
       for (const node of topLevelNodes) {
         if (node.nodeType !== 1 && node.nodeType !== 3) continue;
         if (!root.contains(node) || isWithinLinguaPopOwnedElement(node)) continue;
@@ -75,10 +75,12 @@ export function startContentSettings(
           pair,
           percentage: settings.replacementPercentage,
           difficulty: settings.difficulty,
-          onReplacement: (entryId) => encounteredIds.push(entryId),
+          onReplacement: (entryId, contextSentence) => {
+            encounteredEntries.push({ entryId, contextSentence });
+          },
         });
       }
-      trackReplacements(encounteredIds);
+      trackReplacements(encounteredEntries);
     });
   };
 
@@ -115,14 +117,16 @@ export function startContentSettings(
       pendingNodes.clear();
       pauseObserver(() => {
         if (isSiteEnabled(settings, hostname)) {
-          const encounteredIds: string[] = [];
+          const encounteredEntries: WordEncounterInput[] = [];
           applyWordReplacements(root, {
             pair,
             percentage: settings.replacementPercentage,
             difficulty: settings.difficulty,
-            onReplacement: (entryId) => encounteredIds.push(entryId),
+            onReplacement: (entryId, contextSentence) => {
+              encounteredEntries.push({ entryId, contextSentence });
+            },
           });
-          trackReplacements(encounteredIds);
+          trackReplacements(encounteredEntries);
         } else {
           restoreWordReplacements(root);
         }

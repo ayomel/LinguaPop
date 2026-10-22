@@ -5,6 +5,7 @@ import {
   recordWordEncounters,
   type EncounterStorage,
 } from "../src/learning/encounters.ts";
+import { MAX_CONTEXT_SENTENCE_LENGTH } from "../src/learning/context-sentence.ts";
 
 class FakeStorage {
   values: Record<string, unknown> = {};
@@ -36,6 +37,48 @@ test("encounters create stable-ID records and increment counts without changing 
     "en-book": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
   });
   assert.equal(storage.writes.length, 2);
+});
+
+test("keeps only the most recently encountered sentence for each word", async () => {
+  const storage = new FakeStorage();
+  const encounterStorage = storage as unknown as EncounterStorage;
+
+  await recordWordEncounters([
+    { entryId: "en-apple", contextSentence: "I picked an apple." },
+    { entryId: "en-apple", contextSentence: "The apple was ripe." },
+  ], encounterStorage, () => 100);
+
+  assert.deepEqual(await getEncounteredWords(encounterStorage), {
+    "en-apple": {
+      firstSeenAt: 100,
+      lastSeenAt: 100,
+      encounterCount: 2,
+      contextSentence: "The apple was ripe.",
+    },
+  });
+});
+
+test("continues to read legacy encounter records without context", async () => {
+  const storage = new FakeStorage();
+  storage.values.encounteredWords = {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  };
+
+  assert.deepEqual(await getEncounteredWords(storage as unknown as EncounterStorage), {
+    "en-apple": { firstSeenAt: 100, lastSeenAt: 100, encounterCount: 1 },
+  });
+});
+
+test("caps saved encounter sentences even when a caller supplies oversized text", async () => {
+  const storage = new FakeStorage();
+  const encounterStorage = storage as unknown as EncounterStorage;
+  await recordWordEncounters([
+    { entryId: "en-apple", contextSentence: "apple ".repeat(200) },
+  ], encounterStorage, () => 100);
+
+  const sentence = (await getEncounteredWords(encounterStorage))["en-apple"]?.contextSentence;
+  assert.equal(sentence?.length, MAX_CONTEXT_SENTENCE_LENGTH);
+  assert.ok(sentence?.endsWith("…"));
 });
 
 test("malformed and older progress records are ignored safely", async () => {
