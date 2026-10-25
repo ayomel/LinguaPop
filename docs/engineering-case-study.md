@@ -1,6 +1,6 @@
 # LinguaPop engineering case study
 
-LinguaPop is a Manifest V3 Chrome extension for practicing Spanish while reading ordinary web pages. Readers choose a replacement percentage and vocabulary level. Replaced words can open a translation, and encountered vocabulary can be reviewed later.
+LinguaPop is a Manifest V3 Chrome extension for practicing Spanish or French while reading ordinary web pages. Readers choose a replacement percentage and vocabulary level. Replaced words can open a translation, and encountered vocabulary can be reviewed later.
 
 ## The engineering problem
 
@@ -24,4 +24,4 @@ The [replacement benchmark](performance.md) uses a synthetic Happy DOM page. It 
 
 ## Current scope and limits
 
-The shipped vocabulary pair is English to Spanish. Phrase matches stay within one text node, so a phrase split by nested markup is not matched as one phrase. This project has automated DOM and storage coverage, but its hiring-manager demo still benefits from a recorded Chrome walkthrough showing the built extension, popup controls, replacements, translation tooltip, and skipped fields.
+The current source supports English-to-Spanish and English-to-French vocabulary pairs, with separate encounters, review schedules, and daily progress for each pair. Phrase matches stay within one text node, so a phrase split by nested markup is not matched as one phrase. Automated DOM and storage checks do not establish compatibility with every website. Use the sample reading page for a manual Chrome walkthrough of replacements, popup controls, translation tooltips, and skipped fields.
