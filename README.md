@@ -1,19 +1,30 @@
 # LinguaPop
 
-**Practice a language while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces some eligible English words and phrases on web pages with Spanish or French. It saves encountered vocabulary for review later.
+**Practice a language while you browse.** LinguaPop is a Manifest V3 Chrome extension that replaces selected English words and phrases on web pages with Spanish or French. Encountered vocabulary is saved for review.
 
 ![A sample reading page with LinguaPop replacements highlighted in yellow.](.github/pr-screenshots/changed-word-highlight-after.png)
 
-See the [engineering case study](docs/engineering-case-study.md) for the problem, implementation choices, and verification boundaries.
+[Try the v0.1.0 release](https://github.com/ayomel/LinguaPop/releases/download/v0.1.0/linguapop-v0.1.0.zip) · [Build the current source](#run-from-source) · [Engineering case study](docs/engineering-case-study.md) · [Privacy policy](https://ayomel.github.io/LinguaPop/privacy-policy.html)
 
 ## What it does
 
-- Choose how much page text changes and which vocabulary level to use. You can also pause LinguaPop everywhere or on a specific site.
-- Replace complete phrases before individual words. LinguaPop skips editable fields, code, and interactive controls.
-- Select a replacement to see its translation, then review encountered words with flashcards.
-- Track review progress with a daily goal and a schedule based on explicit "Remembered" or "Need practice" answers.
+- Replaces eligible page text at a percentage you choose. Complete phrases are checked before individual words; editable fields, code, and interactive controls are skipped.
+- Lets you select a replacement to see its translation, then review encountered vocabulary with flashcards.
+- Tracks review progress with a daily goal and a schedule based on your "Remembered" or "Need practice" answers.
+- Lets you pause replacements globally or for a specific site.
 
-Settings, encountered words, and review progress are saved in `chrome.storage.local`. Choose English-to-Spanish or English-to-French in the popup. Each pair has its own word encounters, review schedule, and daily review progress.
+The main engineering challenge is changing page text without breaking the page. LinguaPop uses reversible replacements and batches dynamic page updates while avoiding observer loops. Stable candidate selection keeps the chosen replacements predictable as settings change. The [case study](docs/engineering-case-study.md) describes these decisions and the checks that cover them.
+
+## Defaults
+
+| Setting | New-install default |
+| --- | --- |
+| LinguaPop | On |
+| Replacement percentage | 5% |
+| Vocabulary level | Beginner |
+| Practice language | English to Spanish |
+
+Change these settings in the extension popup. The French starter set includes 215 beginner words and 20 phrases. Spanish and French vocabulary are bundled separately, and each language pair has its own encounters, review schedule, and daily review progress.
 
 ## Before and after
 
@@ -25,7 +36,9 @@ The same reading sample before and after LinguaPop replaces eligible words and p
 
 ## Permissions and data
 
-The `storage` permission saves your settings, site overrides, encountered words, and review progress on this device. The `activeTab` permission lets the popup read the current tab’s URL and show its per-site toggle. LinguaPop works with page text on HTTP and HTTPS sites. It does not send page text or learning data to a remote service.
+LinguaPop processes eligible page text in your browser on HTTP and HTTPS sites. For each encountered word, it saves the most recently encountered containing sentence, up to 500 characters, so flashcard reviews can show context. Settings, encountered words, these sentence snippets, and review progress are stored in `chrome.storage.local` on your device. LinguaPop does not send page text or learning data to a remote service.
+
+The `storage` permission is used for local settings and learning data. The `activeTab` permission lets the popup read the current tab's URL to show its per-site toggle.
 
 ## How it works
 
@@ -35,38 +48,38 @@ flowchart LR
     Content --> Match[Eligible text and phrase matching]
     Data[Bundled Spanish and French data] --> Match
     Match --> PageResult[Selected language and translation tooltip]
-    Match --> Encounters[Encountered vocabulary]
+    Match --> Encounters[Encountered vocabulary and sentence context]
     Encounters --> Local[(Chrome local storage)]
     Local --> Review[Popup, flashcards, and dashboard]
     Review --> Local
 ```
 
-The runtime uses a language-neutral `LanguagePair` model. Spanish and French words and phrases are stored in separate JSON files; the French starter set includes 215 beginner words and 20 phrases. Within an eligible text node, longer phrases take priority over individual words.
+The runtime uses a language-neutral `LanguagePair` model backed by the bundled word and phrase dictionaries.
 
-## Try it without building
+## Try the release
 
-Download the [LinguaPop v0.1.0 release](https://github.com/ayomel/LinguaPop/releases/tag/v0.1.0) and unzip it. In Chrome, open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the extracted folder that contains `manifest.json`.
+Download the [LinguaPop v0.1.0 ZIP](https://github.com/ayomel/LinguaPop/releases/download/v0.1.0/linguapop-v0.1.0.zip) and extract it. In Chrome, open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the extracted folder containing `manifest.json`.
 
-## Run it locally
+## Run from source
 
-You’ll need Node.js 20.19 or newer in the 20.x line, or Node.js 22.12 or newer, along with pnpm and Google Chrome.
+Requirements: Node.js 20.19.x or Node.js 22.12 or newer, pnpm 10.22.0, and Google Chrome.
 
 ```sh
+git clone https://github.com/ayomel/LinguaPop.git
+cd LinguaPop
 pnpm install
 pnpm build
 ```
 
-In Chrome, open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the generated `dist` directory.
-
-Read the [privacy policy](https://ayomel.github.io/LinguaPop/privacy-policy.html).
-
-To try the sample reading page, run `pnpm dev` in another terminal and open `http://localhost:5173/demo.html` in Chrome:
+In Chrome, open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the generated `dist` directory. To open the sample reading page, start the development server in the project directory:
 
 ```sh
 pnpm dev
 ```
 
-Open the LinguaPop popup, choose English to Spanish or English to French, raise the replacement percentage, and refresh the page. Select a replacement to see its translation. The editable field and code sample show content LinguaPop skips.
+Then open `http://localhost:5173/demo.html` in Chrome. Use the popup to choose Spanish or French and adjust the replacement percentage, then refresh the page. Select a replacement to see its translation. Pause LinguaPop to restore the original text, and check that the sample editable field and code remain unchanged.
+
+Choose **Open vocabulary dashboard** from the popup to review progress, set a daily goal, or use its flashcards. The dashboard lists words in progress and graduated words. Choose **Export for Anki (.tsv)** to download encountered vocabulary with translations and learning details. Reviews are also available from the popup.
 
 ## Checks
 
@@ -77,7 +90,7 @@ pnpm dictionary:check
 pnpm manifest:check
 ```
 
-`pnpm build` checks TypeScript and bundles the extension. After the build, run `pnpm manifest:check` to check permissions and page match scope. `pnpm dictionary:check` validates the word and phrase data.
+`pnpm build` checks TypeScript and bundles the extension. `pnpm test` runs the automated suite, `pnpm dictionary:check` validates bundled vocabulary, and `pnpm manifest:check` checks permissions and page match scope.
 
 ## Code map
 
